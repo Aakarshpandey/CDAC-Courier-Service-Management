@@ -12,8 +12,10 @@ export default function Login() {
     console.log("Login submitted:", { email, password, rememberMe });
     if (email.length == 0) {
       toast.warning("Please Enter Email");
+      return
     } else if (password.length == 0) {
       toast.warning("please enter password");
+      return
     } else {
       toast.success("Login successful");
     }
