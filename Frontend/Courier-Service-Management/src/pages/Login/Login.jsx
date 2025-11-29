@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 export default function Login() {
   const [activeTab, setActiveTab] = useState("user");
   const [email, setEmail] = useState("");
@@ -9,12 +10,19 @@ export default function Login() {
 
   const handleSubmit = () => {
     console.log("Login submitted:", { email, password, rememberMe });
-    
+    if (email.length == 0) {
+      toast.warning("Please Enter Email");
+      return
+    } else if (password.length == 0) {
+      toast.warning("please enter password");
+      return
+    } else {
+      toast.success("Login successful");
+    }
   };
 
   const handleGoogleLogin = () => {
     console.log("Google login clicked");
-   
   };
 
   return (
@@ -237,7 +245,10 @@ export default function Login() {
           {/* Sign Up Link */}
           <p className="text-center text-sm text-gray-600">
             Don't have an account?{" "}
-            <Link to="/register" className="text-blue-600 hover:text-blue-700 font-medium" >
+            <Link
+              to="/register"
+              className="text-blue-600 hover:text-blue-700 font-medium"
+            >
               Sign up for free
             </Link>
           </p>
