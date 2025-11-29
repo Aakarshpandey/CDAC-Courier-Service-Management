@@ -185,7 +185,7 @@ export default function Registration() {
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
-                  placeholder="+1 (555) 123-4567"
+                  placeholder="+91 1234-5678"
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                 />
               </div>
@@ -314,7 +314,7 @@ export default function Registration() {
             {/* Sign In Link */}
             <div className="text-center text-sm text-gray-600">
               Already have an account?{' '}
-              <a href="#" className="text-blue-600 hover:underline font-medium">Sign in</a>
+              <a href="/login" className="text-blue-600 hover:underline font-medium">Sign in</a>
             </div>
           </div>
         </div>
