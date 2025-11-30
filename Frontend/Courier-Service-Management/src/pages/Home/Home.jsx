@@ -19,7 +19,8 @@ export default function Home() {
             <div className="hidden md:flex space-x-8">
               <a href="#" className="text-gray-700 hover:text-blue-600">Price Calculator</a>
               <a href="#" className="text-gray-700 hover:text-blue-600">Track Package</a>
-              <a href="#" className="text-gray-700 hover:text-blue-600">Become Partner</a>
+              <a href="#" className="text-gray-700 hover:text-blue-600"><Link to='/becomepartner'>Become Partner</Link></a>
+
             </div>
             
             {/* Auth Buttons */}
