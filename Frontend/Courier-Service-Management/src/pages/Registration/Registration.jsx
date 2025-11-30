@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Eye, EyeOff, Package, User, Briefcase } from "lucide-react";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 
 export default function Registration() {
   const [accountType, setAccountType] = useState("personal");
@@ -36,40 +36,63 @@ export default function Registration() {
 
   const handleSubmit = () => {
     if (formData.firstName.length == 0) {
-      toast.warning("Please Enter First Name!");
+      toast("Please Enter First Name!", {
+        icon: "❗️",
+      });
       return;
     } else if (formData.lastName.length == 0) {
-      toast.warning("Please Enter Last Name!");
+      toast("Please Enter Last Name!", {
+        icon: "❗️",
+      });
       return;
     } else if (formData.email.length == 0) {
-      toast.warning("Please Enter Email !");
+      toast("Please Enter Email !", {
+        icon: "❗️",
+      });
       return;
     } else if (formData.phone.length == 0) {
-      toast.warning("Please Enter Phone Number !");
+      toast("Please Enter Phone Number !", {
+        icon: "❗️",
+      });
+      return;
     } else if (formData.password.length == 0) {
-      toast.warning("Please Enter Password !");
+      toast("Please Enter Password !", {
+        icon: "❗️",
+      });
       return;
     } else if (formData.password !== formData.confirmPassword) {
-      toast.warning("Passwords do not match");
+      toast("Passwords do not match", {
+        icon: "❗️",
+      });
       return;
     }
 
     if (!passwordRequirements.minLength) {
-      toast.warning("Password must be minimum 8 character long");
+      toast("Password must be minimum 8 character long", {
+        icon: "❗️",
+      });
       return;
     } else if (!passwordRequirements.hasUppercase) {
-      toast.warning("Password Must Include UpperCase !");
+      toast("Password Must Include UpperCase !", {
+        icon: "❗️",
+      });
       return;
     } else if (!passwordRequirements.hasNumber) {
-      toast.warning("Password must contain a Number ");
+      toast("Password must contain a Number ", {
+        icon: "❗️",
+      });
       return;
     } else if (!passwordRequirements.hasSpecial) {
-      toast.warning("Password must Include Special Character");
+      toast("Password must Include Special Character", {
+        icon: "❗️",
+      });
       return;
     }
 
     if (!agreedToTerms) {
-      toast.warning("Please agree to the Terms of Service and Privacy Policy");
+      toast("Please agree to the Terms of Service and Privacy Policy", {
+        icon: "🙏🏼",
+      });
       return;
     }
 

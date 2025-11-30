@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 export default function Login() {
   const [activeTab, setActiveTab] = useState("user");
   const [email, setEmail] = useState("");
@@ -11,11 +11,15 @@ export default function Login() {
   const handleSubmit = () => {
     console.log("Login submitted:", { email, password, rememberMe });
     if (email.length == 0) {
-      toast.warning("Please Enter Email");
-      return
+      toast("Please Enter Email", {
+        icon: "❗️",
+      });
+      return;
     } else if (password.length == 0) {
-      toast.warning("please enter password");
-      return
+      toast("please enter password", {
+        icon: "❗️",
+      });
+      return;
     } else {
       toast.success("Login successful");
     }
