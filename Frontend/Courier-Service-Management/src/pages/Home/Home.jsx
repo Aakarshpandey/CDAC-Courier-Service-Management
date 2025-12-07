@@ -3,12 +3,15 @@ import { Package, Clock, Shield, MapPin, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Logo from '../../components/Logo/Logo';
 import Navbar from '../../components/NavBar/Navbar';
+import Navbar from '../../components/Navbar/Navbar';
+import { useNavigate } from 'react-router-dom';
 
 export default function Home() {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation Bar */}
-      <Navbar page="home"/>
+      <Navbar />
 
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-blue-50 to-indigo-50 py-20">
@@ -32,7 +35,9 @@ export default function Home() {
               </p>
               
               <div className="flex space-x-4">
-                <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-medium">
+                <button 
+                onClick={() => navigate("/register")}
+                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-medium" href="/register.jsx">
                   Get Started Today
                 </button>
                 <button className="border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 font-medium">
@@ -180,7 +185,9 @@ export default function Home() {
                 </div>
               </div>
               
-              <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-medium">
+              <button 
+              onClick={() => navigate("/register")}
+              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-medium">
                 Start Shipping Now
               </button>
             </div>
@@ -199,7 +206,9 @@ export default function Home() {
           </p>
           
           <div className="flex justify-center space-x-4">
-            <button className="bg-white text-blue-600 px-6 py-3 rounded-lg hover:bg-gray-100 font-medium">
+            <button 
+            onClick={() => navigate("/register")}
+            className="bg-white text-blue-600 px-6 py-3 rounded-lg hover:bg-gray-100 font-medium">
               Sign Up Free
             </button>
             <button className="border-2 border-white text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-medium">
