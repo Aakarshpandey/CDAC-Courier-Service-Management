@@ -8,7 +8,7 @@ export default function AdminDashboard() {
   // Sample data
 
   // admin
-  const adminUser = { name: "K2 Sharma" };
+  const adminUser = { name: "Rohan Sharma" };
 
   const stats = {
     totalOrders: 2847,

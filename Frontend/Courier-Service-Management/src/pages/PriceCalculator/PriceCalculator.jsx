@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Calculator, MapPin, Package, Truck, Car, Bike, Clock, Shield, CheckCircle, AlertCircle } from 'lucide-react';
-import Navbar from '../../components/Navbar/Navbar';
+import Navbar from '../../components/NavBar/Navbar';
 export default function PriceCalculator() {
   const [formData, setFormData] = useState({
     pickupAddress: '',
@@ -109,7 +109,7 @@ export default function PriceCalculator() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
+      <Navbar/>
       {/* Main Content */}
       <div className="py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">

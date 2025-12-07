@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import Navbar from "../../components/NavbarPartner/Navbar";
 import StatsCard from "../../components/StatsCard/StatsCard";
 import TabNavigation from "../../components/TabNavigation/TabNavigation";
 import Earning from "../../components/Earning/Earning";
+import Navbar from "../../components/NavBar/Navbar";
 
 export default function PageDashboard() {
   const [activeTab, setActiveTab] = useState("available");
@@ -14,9 +14,12 @@ export default function PageDashboard() {
     { id: "profile", label: "Profile" },
   ];
 
+   // admin
+  const adminUser = { name: "Rohan Sharma" };
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
+      <Navbar user={adminUser} />
 
       <div className="max-w-7xl mx-auto px-6 py-6">
         {/* Welcome Section */}
