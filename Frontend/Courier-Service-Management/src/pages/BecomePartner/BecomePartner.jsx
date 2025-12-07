@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, User, Car, FileText, Briefcase, IndianRupee, Clock, Star, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import Logo from '../../components/Logo/Logo';
 
 
 const BecomePartner = () => {
@@ -51,12 +52,12 @@ const BecomePartner = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white shadow-sm">
+       
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <div className="w-4 h-4 border-2 border-white rounded"></div>
-            </div>
-            <span className="font-semibold text-xl text-gray-900">courierKaro</span>
+             <a href='/home'><ArrowLeft className="w-5 h-5" /></a>
+            <Logo/>            
           </div>
           
           <nav className="hidden md:flex items-center gap-8">

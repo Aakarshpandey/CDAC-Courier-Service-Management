@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { Eye, EyeOff, Package, User, Briefcase } from "lucide-react";
+import { Eye, EyeOff, Package, User, Briefcase, ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
+import Logo from "../../components/Logo/Logo";
 
 export default function Registration() {
   const [accountType, setAccountType] = useState("personal");
@@ -113,17 +114,14 @@ export default function Registration() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-6">
-            <Package className="w-8 h-8 text-blue-600" />
-            <span className="text-2xl font-semibold text-gray-800">
-              courierKaro
-            </span>
+         <div className="flex items-center justify-center mb-3">
+          
+            <Logo/>
           </div>
-        </div>
 
         {/* Main Form Card */}
         <div className="bg-white rounded-lg shadow-sm p-4 sm:p-8">
+          <a href='/home'><ArrowLeft className="w-5 h-5" /></a>
           <div className="text-center mb-6">
             <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">
               Create Your Account

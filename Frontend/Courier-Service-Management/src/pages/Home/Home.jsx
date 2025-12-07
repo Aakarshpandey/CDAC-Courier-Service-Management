@@ -1,6 +1,7 @@
 import React from 'react';
 import { Package, Clock, Shield, MapPin, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import Logo from '../../components/Logo/Logo';
 
 export default function Home() {
   return (
@@ -10,10 +11,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
-            <div className="flex items-center space-x-2">
-              <Package className="w-8 h-8 text-blue-600" />
-              <span className="text-xl font-bold text-gray-900">courierKaro</span>
-            </div>
+            <Logo/>
             
             {/* Navigation Links */}
             <div className="hidden md:flex space-x-8">
