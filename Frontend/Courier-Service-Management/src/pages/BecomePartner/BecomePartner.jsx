@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ArrowLeft, User, Car, FileText, Briefcase, IndianRupee, Clock, Star, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Logo from '../../components/Logo/Logo';
+import Navbar from '../../components/NavBar/Navbar';
 
 
 const BecomePartner = () => {
@@ -51,39 +52,7 @@ const BecomePartner = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm">
-       
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          
-          <div className="flex items-center gap-2">
-             <a href='/'><ArrowLeft className="w-5 h-5" /></a>
-            <Logo/>            
-          </div>
-          
-          <nav className="hidden md:flex items-center gap-8">
-            <a href="#" className="text-gray-700 hover:text-blue-600 transition">
-              Price Calculator
-            </a>
-            <a href="#" className="text-gray-700 hover:text-blue-600 transition">
-              Track Package
-            </a>
-            <a href="#" className="text-blue-600 font-medium">
-              Become Partner
-            </a>
-          </nav>
-
-          <div className="flex items-center space-x-4">
-              <Link
-              className="hover:bg-blue-600 rounded-sm px-4 py-2 text-gray-700 hover:text-sky-50"
-                  to='/login'
-              >Login</Link>
-              <Link
-              className="hover:bg-blue-600 rounded-sm px-4 py-2 text-gray-700 hover:text-sky-50"
-                  to='/register'
-              >Register</Link>
-          </div>
-        </div>
-      </header>
+     <Navbar />
 
       {/* Hero Section */}
       <div className="bg-gradient-to-br from-blue-50 to-indigo-50 py-12">

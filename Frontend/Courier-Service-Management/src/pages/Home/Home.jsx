@@ -2,39 +2,13 @@ import React from 'react';
 import { Package, Clock, Shield, MapPin, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Logo from '../../components/Logo/Logo';
+import Navbar from '../../components/NavBar/Navbar';
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation Bar */}
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo */}
-            <Logo/>
-            
-            {/* Navigation Links */}
-            <div className="hidden md:flex space-x-8">
-              <a href="#" className="text-gray-700 hover:text-blue-600">Price Calculator</a>
-              <a href="#" className="text-gray-700 hover:text-blue-600">Track Package</a>
-              <a href="#" className="text-gray-700 hover:text-blue-600"><Link to='/becomepartner'>Become Partner</Link></a>
-
-            </div>
-            
-            {/* Auth Buttons */}
-            <div className="flex items-center space-x-4">
-                <Link
-                className="hover:bg-blue-600 rounded-sm px-4 py-2 text-gray-700 hover:text-sky-50"
-                    to='/login'
-                >Login</Link>
-                <Link
-                className="hover:bg-blue-600 rounded-sm px-4 py-2 text-gray-700 hover:text-sky-50"
-                    to='/register'
-                >Register</Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Navbar page="home"/>
 
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-blue-50 to-indigo-50 py-20">

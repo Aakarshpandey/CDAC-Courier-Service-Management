@@ -5,6 +5,8 @@ import Registration from "./pages/Registration/Registration";
 import Login from "./pages/Login/Login";
 import Home from "./pages/Home/Home";
 import BecomePartner from "./pages/BecomePartner/BecomePartner";
+import TrackPackage from "./pages/TrackPackage/TrackPackage";
+import AdminDashboard from "./pages/AdminDashboard/AdminDashboard";
 
 function App() {
   return (
@@ -12,8 +14,10 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Registration />}></Route>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={ <Home />} />
         <Route path="/becomepartner" element={<BecomePartner />}></Route>
+        <Route path="/trackpackage" element={<TrackPackage/>}></Route>
+        <Route path="/admin-dashboard" element={<AdminDashboard/>}></Route>
       </Routes>
       {/* <Router>
         <Routes>
