@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import {ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
+import Logo from "../../components/Logo/Logo";
 export default function Login() {
   const [activeTab, setActiveTab] = useState("user");
   const [email, setEmail] = useState("");
@@ -33,31 +35,15 @@ export default function Login() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2">
-            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-              <svg
-                className="w-6 h-6 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                />
-              </svg>
-            </div>
-            <span className="text-2xl font-semibold text-gray-800">
-              courierKaro
-            </span>
+          <div className="flex items-center justify-center mb-3">
+            
+            <Logo/>
           </div>
-        </div>
+       
 
         {/* Main Card */}
         <div className="bg-white rounded-lg shadow-sm p-8">
+          <a href='/home'><ArrowLeft className="w-5 h-5" /></a>
           {/* Welcome Header */}
           <div className="text-center mb-6">
             <h1 className="text-2xl font-bold text-gray-800 mb-2">
