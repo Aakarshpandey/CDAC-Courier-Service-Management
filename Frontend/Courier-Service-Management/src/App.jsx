@@ -13,14 +13,13 @@ import PageDashboard from "./pages/PartnerDashboard/PartnerDashboard";
 function App() {
   return (
     <BrowserRouter>
-
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Registration />} />
         <Route path="/price-calculator" element={<PriceCalculator />} />
-        <Route path="/becomepartner" element={<BecomePartner />}></Route>
-        <Route path="/partner/dashboard" element={<PageDashboard />} />
+        <Route path="/become-partner" element={<BecomePartner />}></Route>
+        <Route path="/partner-dashboard" element={<PageDashboard />} />
       </Routes>
 
       <Toaster position="top-right" />
