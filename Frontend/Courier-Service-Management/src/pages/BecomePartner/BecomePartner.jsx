@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { ArrowLeft, User, Car, FileText, Briefcase, IndianRupee, Clock, Star, Check } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import Logo from '../../components/Logo/Logo';
 import Navbar from '../../components/NavBar/Navbar';
 
 

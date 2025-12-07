@@ -121,7 +121,7 @@ export default function Registration() {
 
         {/* Main Form Card */}
         <div className="bg-white rounded-lg shadow-sm p-4 sm:p-8">
-          <a href='/'><ArrowLeft className="w-5 h-5" /></a>
+          <button onClick={() => window.history.back()} ><ArrowLeft className="w-5 h-5" /></button>
           <div className="text-center mb-6">
             <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">
               Create Your Account

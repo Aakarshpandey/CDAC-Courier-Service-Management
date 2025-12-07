@@ -9,7 +9,6 @@ import BecomePartner from "./pages/BecomePartner/BecomePartner";
 import TrackPackage from "./pages/TrackPackage/TrackPackage";
 import AdminDashboard from "./pages/AdminDashboard/AdminDashboard";
 import PriceCalculator from "./pages/PriceCalculator/PriceCalculator";
-import Navbar from "./components/Navbar/Navbar";
 import PageDashboard from "./pages/PartnerDashboard/PartnerDashboard";
 
 function App() {
@@ -19,7 +18,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Registration />}></Route>
         <Route path="/" element={ <Home />} />
-        <Route path="/trackpackage" element={<TrackPackage/>}></Route>
+        <Route path="/track-package" element={<TrackPackage/>}></Route>
         <Route path="/admin-dashboard" element={<AdminDashboard/>}></Route>
         <Route path="/price-calculator" element={<PriceCalculator />} />
         <Route path="/become-partner" element={<BecomePartner />}></Route>
