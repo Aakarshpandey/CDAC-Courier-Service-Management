@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { Plus, Search, Navigation, Phone, MessageCircle, Clock, MapPin, Package } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const UserDashboard = () => {
   const [activeTracking, setActiveTracking] = useState(true);
+
+  const navigate = useNavigate();
 
   // Mock data
   const deliveryData = {
@@ -78,7 +81,7 @@ const UserDashboard = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
               </button>
-              <button className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition font-medium">
+              <button onClick={() => navigate("/")}className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition font-medium">
                 Logout
               </button>
               <div className="flex items-center gap-2">
@@ -104,11 +107,11 @@ const UserDashboard = () => {
 
         {/* Action Buttons */}
         <div className="grid md:grid-cols-2 gap-4 mb-8">
-          <button className="bg-blue-600 text-white py-4 px-6 rounded-xl font-semibold hover:bg-blue-700 transition flex items-center justify-center gap-2 shadow-lg shadow-blue-200">
+          <button  onClick={() => navigate("/booking-details")} className="bg-blue-600 text-white py-4 px-6 rounded-xl font-semibold hover:bg-blue-700 transition flex items-center justify-center gap-2 shadow-lg shadow-blue-200">
             <Plus size={20} />
             Send New Package
           </button>
-          <button className="bg-white text-gray-700 py-4 px-6 rounded-xl font-semibold hover:bg-gray-50 transition flex items-center justify-center gap-2 border-2 border-gray-200">
+          <button onClick={() => navigate("/trackpackage")} className="bg-white text-gray-700 py-4 px-6 rounded-xl font-semibold hover:bg-gray-50 transition flex items-center justify-center gap-2 border-2 border-gray-200">
             <Search size={20} />
             Track Package
           </button>
@@ -275,10 +278,6 @@ const UserDashboard = () => {
                 <button className="w-full flex items-center justify-center gap-2 py-2.5 border-2 border-gray-200 rounded-lg hover:bg-gray-50 transition text-gray-700 font-medium">
                   <Phone size={18} />
                   Call Partner
-                </button>
-                <button className="w-full flex items-center justify-center gap-2 py-2.5 border-2 border-gray-200 rounded-lg hover:bg-gray-50 transition text-gray-700 font-medium">
-                  <MessageCircle size={18} />
-                  Message
                 </button>
               </div>
             </div>
