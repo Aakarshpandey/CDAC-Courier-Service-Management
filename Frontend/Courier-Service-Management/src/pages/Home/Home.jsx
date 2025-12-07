@@ -3,7 +3,6 @@ import { Package, Clock, Shield, MapPin, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Logo from '../../components/Logo/Logo';
 import Navbar from '../../components/NavBar/Navbar';
-import Navbar from '../../components/Navbar/Navbar';
 import { useNavigate } from 'react-router-dom';
 
 export default function Home() {
