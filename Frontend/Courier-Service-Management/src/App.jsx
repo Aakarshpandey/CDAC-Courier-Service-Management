@@ -1,29 +1,28 @@
 import React from "react";
 import { Toaster } from "react-hot-toast";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+
 import Registration from "./pages/Registration/Registration";
 import Login from "./pages/Login/Login";
 import Home from "./pages/Home/Home";
 import BecomePartner from "./pages/BecomePartner/BecomePartner";
+import PriceCalculator from "./pages/PriceCalculator/PriceCalculator";
+import Navbar from "./components/Navbar/Navbar";
 
 function App() {
   return (
-    <div>
+    <BrowserRouter>
+
       <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Registration />}></Route>
         <Route path="/" element={<Home />} />
-        <Route path="/becomepartner" element={<BecomePartner />}></Route>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Registration />} />
+        <Route path="/price-calculator" element={<PriceCalculator />} />
+        <Route path="/become-partner" element={<BecomePartner />} />
       </Routes>
-      {/* <Router>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Registration />}></Route>
-          <Route path="/home" element={<Home />} />
-        </Routes>
-      </Router> */}
+
       <Toaster position="top-right" />
-    </div>
+    </BrowserRouter>
   );
 }
 
