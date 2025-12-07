@@ -56,7 +56,7 @@ const BecomePartner = () => {
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           
           <div className="flex items-center gap-2">
-             <a href='/home'><ArrowLeft className="w-5 h-5" /></a>
+             <a href='/'><ArrowLeft className="w-5 h-5" /></a>
             <Logo/>            
           </div>
           
