@@ -43,7 +43,7 @@ export default function Login() {
 
         {/* Main Card */}
         <div className="bg-white rounded-lg shadow-sm p-8">
-          <a href='/home'><ArrowLeft className="w-5 h-5" /></a>
+          <a href='/'><ArrowLeft className="w-5 h-5" /></a>
           {/* Welcome Header */}
           <div className="text-center mb-6">
             <h1 className="text-2xl font-bold text-gray-800 mb-2">
