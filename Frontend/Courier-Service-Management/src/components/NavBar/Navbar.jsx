@@ -19,18 +19,16 @@ function Navbar({ user }) {
                                 <ArrowLeft className="w-5 h-5" />
                             </button>
                         )}
-
-                        {/* LOGO */}
                         <Logo />
                     </div>
-                    {/* MAIN NAV IF USER LOGGED IN */}
-                    {(pathname === "/" )&& (
-                        <div className="hidden md:flex space-x-8">
-                            <Link className="hover:text-blue-600" to="/price-calculator">Price Calculator</Link>
-                            <Link className="hover:text-blue-600" to="/track-package">Track Package</Link>
-                            <Link className="hover:text-blue-600" to="/become-partner">Become Partner</Link>
-                        </div>
-                    )}
+
+                    {/* Navigation Links */}
+                    {(location.pathname == "/" || !isLoggedIn) && (<div className="hidden md:flex  space-x-8">
+                        <a href="#" className="text-gray-700 hover:text-blue-600">Price Calculator</a>
+                        <a href="/trackpackage" className="text-gray-700 hover:text-blue-600">Track Package</a>
+                        <a href="/becomepartner" className="text-gray-700 hover:text-blue-600">Become Partner</a>
+
+                    </div>)}
 
                     {/* Auth Buttons user not logged in */}
                     <div className="flex items-center space-x-4">
