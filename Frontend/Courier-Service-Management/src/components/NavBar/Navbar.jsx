@@ -1,19 +1,17 @@
-import { Link, useLocation } from "react-router-dom";
-import Logo from "../Logo/Logo";
-import { ArrowLeft } from "lucide-react";
+import { Link, useLocation } from 'react-router-dom'
+import { ArrowLeft } from 'lucide-react';
+import Logo from '../Logo/Logo';
 
-export default function Navbar({ user }) {
-    const { pathname } = useLocation();
+function Navbar({ user }) {
+    const location = useLocation();
     const isLoggedIn = Boolean(user);
-
+    console.log(location)
     return (
         <nav className="bg-white shadow-sm">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
-
-                    {/* BACK BUTTON */}
                     <div className="flex items-center space-x-3">
-                        {pathname != "/" && (
+                        {(location.pathname === "/becomepartner" || location.pathname === "/trackpackage") && (
                             <button
                                 className="mr-3 text-xl"
                                 onClick={() => window.history.back()}
@@ -34,17 +32,19 @@ export default function Navbar({ user }) {
                         </div>
                     )}
 
-                    {/* AUTH AREA */}
+                    {/* Auth Buttons user not logged in */}
                     <div className="flex items-center space-x-4">
-                        {/* If logged out show Login + Signup */}
                         {!isLoggedIn && (
                             <>
-                            <Link className="hover:bg-blue-600 rounded-sm px-4 py-2 text-gray-700 hover:text-sky-50" to='/login' >Login</Link>
-                             <Link className="hover:bg-blue-600 rounded-sm px-4 py-2 text-gray-700 hover:text-sky-50" to='/register' >Register</Link>
+                                <Link
+                                    className="hover:bg-blue-600 rounded-sm px-4 py-2 text-gray-700 hover:text-sky-50"
+                                    to='/login'>Login</Link>
+                                <Link
+                                    className="hover:bg-blue-600 rounded-sm px-4 py-2 text-gray-700 hover:text-sky-50"
+                                    to='/register'>Register</Link>
                             </>
                         )}
-
-                        {/* If logged in show logout + username */}
+                        {/* User info if logged in */}
                         {isLoggedIn && (
                             <>
                                 <button className="hover:text-red-500">Logout</button>
@@ -60,5 +60,7 @@ export default function Navbar({ user }) {
                 </div>
             </div>
         </nav>
-    );
+    )
 }
+
+export default Navbar
