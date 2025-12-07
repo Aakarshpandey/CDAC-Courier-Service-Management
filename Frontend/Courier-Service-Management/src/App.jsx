@@ -12,6 +12,7 @@ import PriceCalculator from "./pages/PriceCalculator/PriceCalculator";
 import PageDashboard from "./pages/PartnerDashboard/PartnerDashboard";
 import BookingDetails from "./pages/BookingDetails/BookingDetails"
 import UserDashboard from "./pages/UserDashboard/UserDashboard";
+import AcceptOrder from "./pages/AcceptOrder/AcceptOrder";
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
         <Route path="/partner-dashboard" element={<PageDashboard />} />
         <Route path="/booking-details" element={<BookingDetails />} />
         <Route path="/user-dashboard" element={<UserDashboard />} />
+        <Route path="/accept-order" element={<AcceptOrder />} />
       </Routes>
 
       <Toaster position="top-right" />
