@@ -3,19 +3,19 @@ import StatsCard from "../../components/StatsCard/StatsCard";
 import TabNavigation from "../../components/TabNavigation/TabNavigation";
 import Earning from "../../components/Earning/Earning";
 import Navbar from "../../components/NavBar/Navbar";
-
+import AvailableOrders from "../../components/AvailableOrder/AvailableOrder";
+import PartnerProfile from "../../components/PartnerProfile/PartnerProfile";
 export default function PageDashboard() {
   const [activeTab, setActiveTab] = useState("available");
 
   const tabs = [
     { id: "available", label: "Available Orders (2)" },
-    { id: "active", label: "Active Deliveries (1)" },
     { id: "earnings", label: "Earnings" },
     { id: "profile", label: "Profile" },
   ];
 
    // admin
-  const adminUser = { name: "Rohan Sharma" };
+  const adminUser = { name: "Amit" };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -90,22 +90,13 @@ export default function PageDashboard() {
         {/* Tab Content */}
         <div className="mt-6">
           {activeTab === "available" && (
-            <div>
-              {/* Available Orders content goes here */}
-            </div>
-          )}
-          {activeTab === "active" && (
-            <div>
-              {/* Active Deliveries content goes here */}
-            </div>
+            <AvailableOrders />
           )}
           {activeTab === "earnings" && (
             <Earning />
           )}
           {activeTab === "profile" && (
-            <div>
-              {/* Profile content goes here */}
-            </div>
+            <PartnerProfile />
           )}
         </div>
       </div>
