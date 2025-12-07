@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { ArrowLeft, User, Car, FileText, Briefcase, IndianRupee, Clock, Star, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Logo from '../../components/Logo/Logo';
-import Navbar from '../../components/Navbar/Navbar';
+import Navbar from '../../components/NavBar/Navbar';
+
 
 const BecomePartner = () => {
   const [formData, setFormData] = useState({
@@ -50,7 +51,8 @@ const BecomePartner = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
+      {/* Header */}
+     <Navbar />
 
       {/* Hero Section */}
       <div className="bg-gradient-to-br from-blue-50 to-indigo-50 py-12">
