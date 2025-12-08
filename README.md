@@ -1,158 +1,79 @@
 # CDAC-Courier-Service-Management
-🚚 Courier Service Management (In Development)
+# 🚚 Courier Service Management  
+**A full-stack courier booking and tracking system (Development Phase)**
 
-A full-stack Courier Service Management Platform aimed at simplifying courier operations through modules like User Management, Service Catalog, Booking & Scheduling, and Provider Dashboard.
-Built using Spring Boot, MySQL, and React.
+---
 
-📌 Project Status
+## ⭐ Overview  
+Courier Service Management is a full-stack application built using **Spring Boot**, **MySQL**, and **React**.  
+It allows users to book courier pickups, track delivery status, and enables providers/admins to manage operations.
 
-🚧 This project is currently in active development.
-Features, backend APIs, and frontend UI are continuously being added and refined.
+---
 
-🧩 Core Modules
-1. User Management
+## 🔧 Tech Stack  
+**Backend:** Spring Boot, Spring Security (JWT), MySQL, JPA  
+**Frontend:** React (Vite), Tailwind CSS, Axios  
+**Tools:** Maven, Postman, Git  
 
-User Registration & Login
+---
 
-JWT Authentication
-
-Role-based Access (Admin, Provider, Customer)
-
-Profile Management
-
-2. Service Catalog
-
-Courier Service Types
-
-Rate & Pricing Structure
-
-Availability Checks
-
-3. Booking & Scheduling
-
-Create Pickup Request
-
-Schedule Pickup Time
-
-Track Delivery Status
-
-Provider Assignment
-
-4. Provider Dashboard
-
-View Assigned Deliveries
-
-Update Parcel Status
-
-Manage Service Capacity
-
-🛠️ Tech Stack
-Backend
-
-Spring Boot
-
-Spring Security (JWT)
-
-Spring Data JPA
-
-MySQL
-
-Frontend
-
-React + Vite
-
-Tailwind CSS
-
-Axios
-
-React Router
-
-Other Tools
-
-Postman
-
-IntelliJ / VS Code
-
-Git & GitHub
-
-📁 Project Structure
+## 📁 Project Structure  
+```
 Courier-Service-Management/
-│
-├── Backend/
-│   ├── src/main/java/com/courier/...
-│   ├── src/main/resources/
-│   └── pom.xml
-│
-├── Frontend/
-│   ├── src/
-│   ├── public/
-│   └── package.json
-│
+│── Backend/     # Spring Boot application
+│── Frontend/    # React + Vite application
 └── README.md
+```
 
-🚀 How to Run the Project
-1. Clone the Repository
-git clone https://github.com/<your-username>/Courier-Service-Management.git
-cd Courier-Service-Management
+---
 
-2. Backend Setup
+## 🚀 How to Run
+
+### Backend
+```
 cd Backend
 mvn clean install
+mvn spring-boot:run
+```
 
-Configure MySQL
-
-Update application.properties:
-
+Update `application.properties`:
+```
 spring.datasource.url=jdbc:mysql://localhost:3306/courierdb
 spring.datasource.username=root
 spring.datasource.password=yourpassword
 spring.jpa.hibernate.ddl-auto=update
+```
 
-
-Run backend:
-
-mvn spring-boot:run
-
-3. Frontend Setup
+### Frontend
+```
 cd Frontend
 npm install
 npm run dev
+```
 
-📌 API Documentation
+---
 
-Swagger integration will be added soon.
+## 🧩 Features  
+- User login & registration (JWT Auth)  
+- Service catalog (courier types & pricing)  
+- Courier booking & scheduling  
+- Delivery status tracking  
+- Provider dashboard  
 
-🧪 Testing (Planned)
+---
 
-JUnit + Mockito
+## 🛠️ Roadmap  
+- [ ] Payment integration  
+- [ ] Email/SMS notifications  
+- [ ] Live parcel tracking  
+- [ ] Admin analytics  
 
-React Testing Library
+---
 
-🗺️ Roadmap
+## 👨‍💻 Developer  
+**Aakarsh Pandey — Vipul Bagde — Yuvraj Karekar — Rohit Rathod**
 
- Authentication Module
+---
 
- Service Catalog CRUD
+> This project is actively being built. More modules and features will be added soon.
 
- Booking & Scheduling System
-
- Provider Dashboard
-
- Email/SMS Notifications
-
- Parcel Live Tracking (Phase 2)
-
- Payment Integration (Phase 2)
-
-🤝 Contributing
-
-Contributions are welcome after the first stable release.
-
-📄 License
-
-To be added in future release.
-
-👨‍💻 Developer
-
-Jim Hopper
-Full-Stack Developer (Spring Boot + React)
