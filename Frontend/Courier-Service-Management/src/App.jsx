@@ -13,6 +13,8 @@ import PageDashboard from "./pages/PartnerDashboard/PartnerDashboard";
 import BookingDetails from "./pages/BookingDetails/BookingDetails"
 import UserDashboard from "./pages/UserDashboard/UserDashboard";
 import AcceptOrder from "./pages/AcceptOrder/AcceptOrder";
+import AppSetting from "./pages/AppSetting/AppSetting";
+import PartnerAppSetting from "./pages/PartnerAppSettings/PartnerAppSettings";
 
 function App() {
   return (
@@ -29,6 +31,8 @@ function App() {
         <Route path="/booking-details" element={<BookingDetails />} />
         <Route path="/user-dashboard" element={<UserDashboard />} />
         <Route path="/accept-order" element={<AcceptOrder />} />
+        <Route path="/app-setting" element={<AppSetting />} />
+        <Route path="/partner-app-setting" element={<PartnerAppSetting />} />
       </Routes>
 
       <Toaster position="top-right" />
