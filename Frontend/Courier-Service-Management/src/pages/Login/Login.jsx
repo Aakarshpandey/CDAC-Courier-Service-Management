@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
 import Logo from "../../components/Logo/Logo";
@@ -9,6 +9,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = () => {
     console.log("Login submitted:", { email, password, rememberMe });
@@ -24,6 +25,11 @@ export default function Login() {
       return;
     } else {
       toast.success("Login successful");
+    }
+    if(activeTab === "user"){
+      navigate("/user-dashboard");
+    }else{
+      navigate("/partner-dashboard");
     }
   };
 
