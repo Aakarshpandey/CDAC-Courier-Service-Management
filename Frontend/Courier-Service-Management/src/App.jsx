@@ -15,6 +15,8 @@ import UserDashboard from "./pages/UserDashboard/UserDashboard";
 import AcceptOrder from "./pages/AcceptOrder/AcceptOrder";
 import AppSetting from "./pages/AppSetting/AppSetting";
 import PartnerAppSetting from "./pages/PartnerAppSettings/PartnerAppSettings";
+import PartnerEditProfile from "./pages/PartnerEditProfile/PartnerEditProfile";
+import DetailedEarnings from "./pages/DetailedEarnings/DetailedEarnings";
 
 function App() {
   return (
@@ -33,6 +35,8 @@ function App() {
         <Route path="/accept-order" element={<AcceptOrder />} />
         <Route path="/app-setting" element={<AppSetting />} />
         <Route path="/partner-app-setting" element={<PartnerAppSetting />} />
+        <Route path="/partner-edit-profile" element={<PartnerEditProfile />} />
+        <Route path="/detailed-earnings" element={<DetailedEarnings />} />
       </Routes>
 
       <Toaster position="top-right" />

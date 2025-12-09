@@ -16,6 +16,7 @@ export default function Profile() {
   const handleEditProfile = () => {
     console.log("Edit Profile clicked");
     // Add your edit profile logic here
+    navigate("/partner-edit-profile");
   };
 
   const handleAppSettings = () => {
