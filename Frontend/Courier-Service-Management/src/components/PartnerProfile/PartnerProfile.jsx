@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function Profile() {
   const profileData = {
@@ -10,6 +11,7 @@ export default function Profile() {
     vehicle: "Honda Activa (DL01AB1234)",
     joined: "March 2024",
   };
+  const navigate = useNavigate();
 
   const handleEditProfile = () => {
     console.log("Edit Profile clicked");
@@ -19,6 +21,7 @@ export default function Profile() {
   const handleAppSettings = () => {
     console.log("App Settings clicked");
     // Add your app settings logic here
+    navigate("/partner-app-setting");
   };
 
   const handleNotificationSettings = () => {
