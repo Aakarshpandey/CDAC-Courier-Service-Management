@@ -1,13 +1,16 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Logo from "../Logo/Logo";
 import { ArrowLeft } from "lucide-react";
+import { useState } from "react";
 
-export default function Navbar({ user }) {
+
+export default function Navbar({ user,profileImage }) {
     const { pathname } = useLocation();
     const isLoggedIn = Boolean(user);
     const navigate = useNavigate();
-
-    const onLogout = ()=>{
+    
+  
+    const onLogout = () => {
         navigate('/');
     }
 
@@ -31,7 +34,7 @@ export default function Navbar({ user }) {
                         <Logo />
                     </div>
                     {/* MAIN NAV IF USER LOGGED IN */}
-                    {(pathname === "/" )&& (
+                    {(pathname === "/") && (
                         <div className="hidden md:flex space-x-8">
                             <Link className="hover:text-blue-600" to="/price-calculator">Price Calculator</Link>
                             <Link className="hover:text-blue-600" to="/track-package">Track Package</Link>
@@ -44,8 +47,8 @@ export default function Navbar({ user }) {
                         {/* If logged out show Login + Signup */}
                         {!isLoggedIn && (
                             <>
-                            <Link className="hover:bg-blue-600 rounded-sm px-4 py-2 text-gray-700 hover:text-sky-50" to='/login' >Login</Link>
-                             <Link className="hover:bg-blue-600 rounded-sm px-4 py-2 text-gray-700 hover:text-sky-50" to='/register' >Register</Link>
+                                <Link className="hover:bg-blue-600 rounded-sm px-4 py-2 text-gray-700 hover:text-sky-50" to='/login' >Login</Link>
+                                <Link className="hover:bg-blue-600 rounded-sm px-4 py-2 text-gray-700 hover:text-sky-50" to='/register' >Register</Link>
                             </>
                         )}
 
@@ -54,9 +57,20 @@ export default function Navbar({ user }) {
                             <>
                                 <button className="hover:text-red-500" onClick={onLogout}>Logout</button>
                                 <div className="flex items-center gap-2">
-                                    <div className="bg-blue-600 text-white w-8 h-8 rounded-full flex justify-center items-center">
-                                        {user.name[0]}
-                                    </div>
+                                    {profileImage ? (
+                                        <img
+                                            src={profileImage}
+                                            alt="Profile"
+                                            className="w-13 h-13 rounded-full object-cover border-4 border-blue-100"
+                                        />
+                                    ) : (
+                                        <div className="w-13 h-13 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center border-4 border-blue-100">
+                                            <span className="text-white text-3xl font-semibold mb-1">
+                                                {user.name[0]}
+                                                {/* {user.lastName[0]} */}
+                                            </span>
+                                        </div>
+                                    )}
                                     <span>{user.name}</span>
                                 </div>
                             </>
