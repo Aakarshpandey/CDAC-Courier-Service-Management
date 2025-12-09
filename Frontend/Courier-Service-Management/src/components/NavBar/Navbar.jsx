@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Logo from "../Logo/Logo";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Settings, Bell } from "lucide-react";
 
 export default function Navbar({ user }) {
     const { pathname } = useLocation();
@@ -49,15 +49,31 @@ export default function Navbar({ user }) {
                             </>
                         )}
 
-                        {/* If logged in show logout + username */}
+                        {/* If logged in show notifications, settings, logout + username */}
                         {isLoggedIn && (
                             <>
-                                <button className="hover:text-red-500" onClick={onLogout}>Logout</button>
+                                <button 
+                                    className="text-gray-600 hover:text-gray-900 transition-colors"
+                                    title="Notifications"
+                                >
+                                    <Bell className="w-5 h-5" />
+                                </button>
+                                
+                                <Link 
+                                    to="/user-edit-profile" 
+                                    className="text-gray-600 hover:text-gray-900 transition-colors"
+                                    title="Settings"
+                                >
+                                    <Settings className="w-5 h-5" />
+                                </Link>
+                                
+                                <button className="text-red-600 hover:text-red-700 font-medium" onClick={onLogout}>Logout</button>
+                                
                                 <div className="flex items-center gap-2">
-                                    <div className="bg-blue-600 text-white w-8 h-8 rounded-full flex justify-center items-center">
+                                    <div className="bg-blue-600 text-white w-8 h-8 rounded-full flex justify-center items-center font-semibold">
                                         {user.name[0]}
                                     </div>
-                                    <span>{user.name}</span>
+                                    <span className="font-medium text-gray-700">{user.name}</span>
                                 </div>
                             </>
                         )}

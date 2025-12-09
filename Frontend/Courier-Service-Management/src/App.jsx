@@ -17,6 +17,7 @@ import AppSetting from "./pages/AppSetting/AppSetting";
 import PartnerAppSetting from "./pages/PartnerAppSettings/PartnerAppSettings";
 import PartnerEditProfile from "./pages/PartnerEditProfile/PartnerEditProfile";
 import DetailedEarnings from "./pages/DetailedEarnings/DetailedEarnings";
+import UserEditProfile from "./pages/UserEditProfile/UserEditProfile";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
         <Route path="/partner-dashboard" element={<PageDashboard />} />
         <Route path="/booking-details" element={<BookingDetails />} />
         <Route path="/user-dashboard" element={<UserDashboard />} />
+        <Route path="/user-edit-profile" element={<UserEditProfile />}/>
         <Route path="/accept-order" element={<AcceptOrder />} />
         <Route path="/app-setting" element={<AppSetting />} />
         <Route path="/partner-app-setting" element={<PartnerAppSetting />} />
