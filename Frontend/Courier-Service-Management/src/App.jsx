@@ -18,7 +18,7 @@ import PartnerAppSetting from "./pages/PartnerAppSettings/PartnerAppSettings";
 import PartnerEditProfile from "./pages/PartnerEditProfile/PartnerEditProfile";
 import DetailedEarnings from "./pages/DetailedEarnings/DetailedEarnings";
 import UserEditProfile from "./pages/UserEditProfile/UserEditProfile";
-
+import MessagePartner from "./pages/InAppMessage/MessagePartner";
 function App() {
   return (
     <BrowserRouter>
@@ -34,6 +34,7 @@ function App() {
         <Route path="/booking-details" element={<BookingDetails />} />
         <Route path="/user-dashboard" element={<UserDashboard />} />
         <Route path="/user-edit-profile" element={<UserEditProfile />}/>
+        <Route path="/message-partner" element={<MessagePartner/>}/>
         <Route path="/accept-order" element={<AcceptOrder />} />
         <Route path="/app-setting" element={<AppSetting />} />
         <Route path="/partner-app-setting" element={<PartnerAppSetting />} />

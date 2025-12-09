@@ -230,6 +230,12 @@ const UserDashboard = () => {
                   <Phone size={18} />
                   Call Partner
                 </button>
+                <button onClick={() => navigate("/message-partner")} 
+                className="w-full flex items-center justify-center gap-2 py-2.5 border-2 border-gray-200 rounded-lg hover:bg-gray-50 transition text-gray-700 font-medium">
+                  <MessageCircle size={18} />
+
+                  Message Partner
+                </button>
               </div>
             </div>
 
