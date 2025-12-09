@@ -66,7 +66,7 @@ export default function PartnerEditProfile() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar user={adminUser} />
+      <Navbar user={adminUser} profileImage={profileImage} />
 
       <div className="max-w-5xl mx-auto px-6 py-6">
         {/* Header */}
