@@ -1,7 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Logo from "../Logo/Logo";
-import { ArrowLeft } from "lucide-react";
-import { useState } from "react";
+import { ArrowLeft, Settings, Bell } from "lucide-react";
 
 
 export default function Navbar({ user,profileImage }) {
@@ -52,10 +51,26 @@ export default function Navbar({ user,profileImage }) {
                             </>
                         )}
 
-                        {/* If logged in show logout + username */}
+                        {/* If logged in show notifications, settings, logout + username */}
                         {isLoggedIn && (
                             <>
-                                <button className="hover:text-red-500" onClick={onLogout}>Logout</button>
+                                <button 
+                                    className="text-gray-600 hover:text-gray-900 transition-colors"
+                                    title="Notifications"
+                                >
+                                    <Bell className="w-5 h-5" />
+                                </button>
+                                
+                                <Link 
+                                    to="/user-edit-profile" 
+                                    className="text-gray-600 hover:text-gray-900 transition-colors"
+                                    title="Settings"
+                                >
+                                    <Settings className="w-5 h-5" />
+                                </Link>
+                                
+                                <button className="text-red-600 hover:text-red-700 font-medium" onClick={onLogout}>Logout</button>
+                                
                                 <div className="flex items-center gap-2">
                                     {profileImage ? (
                                         <img
