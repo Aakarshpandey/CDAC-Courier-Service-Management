@@ -1,17 +1,35 @@
 import React, { useState } from 'react';
 import { Calculator, MapPin, Package, Truck, Car, Bike, Clock, Shield, CheckCircle, AlertCircle } from 'lucide-react';
 import Navbar from '../../components/NavBar/Navbar';
+import { useJsApiLoader, GoogleMap, Marker, Autocomplete, DirectionsRenderer } from '@react-google-maps/api'; 
+
+const center = {
+  lat: -34.397,
+  lng: 150.644
+};
+
 export default function PriceCalculator() {
+
+  const [map, setMap] = useState(null);
+  const [directionsResponse, setDirectionsResponse] = useState(null);
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: 'YOUR_API_KEY',
+    libraries: ['places']
+  });
+
+  // const originRef = useRef();
+  // const destinationRef = useRef();
+
   const [formData, setFormData] = useState({
     pickupAddress: '',
     deliveryAddress: '',
     weight: '',
     packageType: '',
-    vehicleType: '',
-    deliverySpeed: 'standard'
+    vehicleType: ''
   });
 
   const [calculatedPrice, setCalculatedPrice] = useState(null);
+  const [weightError, setWeightError] = useState('');
 
   const vehicleTypes = [
     {
@@ -19,10 +37,11 @@ export default function PriceCalculator() {
       name: 'Bike/Scooter',
       icon: Bike,
       iconSize: 'w-8 h-8',
-      description: 'For small packages up to 10kg',
-      maxWeight: '10kg',
-      basePrice: 30,
-      pricePerKm: 5
+      description: 'For small packages up to 5kg',
+      maxWeight: 5,
+      maxWeightLabel: '5kg',
+      basePrice: 50,
+      pricePerKm: 10
     },
     {
       id: 'car',
@@ -30,9 +49,10 @@ export default function PriceCalculator() {
       icon: Car,
       iconSize: 'w-8 h-8',
       description: 'For medium packages up to 50kg',
-      maxWeight: '50kg',
-      basePrice: 50,
-      pricePerKm: 8
+      maxWeight: 50,
+      maxWeightLabel: '50kg',
+      basePrice: 150,
+      pricePerKm: 15
     },
     {
       id: 'small-truck',
@@ -40,9 +60,10 @@ export default function PriceCalculator() {
       icon: Truck,
       iconSize: 'w-7 h-7',
       description: 'For large packages up to 500kg',
-      maxWeight: '500kg',
-      basePrice: 100,
-      pricePerKm: 12
+      maxWeight: 500,
+      maxWeightLabel: '500kg',
+      basePrice: 300,
+      pricePerKm: 20
     },
     {
       id: 'large-truck',
@@ -50,16 +71,11 @@ export default function PriceCalculator() {
       icon: Truck,
       iconSize: 'w-9 h-9',
       description: 'For bulk deliveries up to 2000kg',
-      maxWeight: '2000kg',
-      basePrice: 200,
-      pricePerKm: 18
+      maxWeight: 2000,
+      maxWeightLabel: '2000kg',
+      basePrice: 600,
+      pricePerKm: 25
     }
-  ];
-
-  const deliveryOptions = [
-    { id: 'express', label: 'Express (2-4 hours)', multiplier: 2, discount: 0 },
-    { id: 'standard', label: 'Standard (Same day)', multiplier: 1, discount: 0 },
-    { id: 'economy', label: 'Economy (Next day)', multiplier: 1, discount: 20 }
   ];
 
   const handleInputChange = (e) => {
@@ -68,6 +84,11 @@ export default function PriceCalculator() {
       ...prev,
       [name]: value
     }));
+    
+    // Clear weight error when user types
+    if (name === 'weight') {
+      setWeightError('');
+    }
   };
 
   const handleVehicleSelect = (vehicleId) => {
@@ -75,40 +96,97 @@ export default function PriceCalculator() {
       ...prev,
       vehicleType: vehicleId
     }));
-  };
-
-  const handleDeliverySpeedSelect = (speedId) => {
-    setFormData(prev => ({
-      ...prev,
-      deliverySpeed: speedId
-    }));
-  };
-
-  const calculatePrice = () => {
-    const vehicle = vehicleTypes.find(v => v.id === formData.vehicleType);
-    const speed = deliveryOptions.find(s => s.id === formData.deliverySpeed);
     
-    if (!vehicle || !speed) {
+    // Validate weight when vehicle is selected
+    if (formData.weight) {
+      validateWeight(formData.weight, vehicleId);
+    }
+  };
+  
+  const validateWeight = (weight, vehicleId) => {
+    const weightNum = parseFloat(weight);
+    const vehicle = vehicleTypes.find(v => v.id === vehicleId);
+    
+    if (!vehicle) return true;
+    
+    if (isNaN(weightNum) || weightNum <= 0) {
+      setWeightError('Please enter a valid weight');
+      return false;
+    }
+    
+    if (weightNum > vehicle.maxWeight) {
+      setWeightError(`Weight exceeds ${vehicle.maxWeightLabel} limit for ${vehicle.name}`);
+      return false;
+    }
+    
+    setWeightError('');
+    return true;
+  };
+
+  const calculatePrice = async() => {
+    const vehicle = vehicleTypes.find(v => v.id === formData.vehicleType);
+    
+    if (!vehicle) {
       alert('Please select a vehicle type');
       return;
     }
+    
+    // Validate weight
+    if (!formData.weight) {
+      alert('Please enter package weight');
+      return;
+    }
+    
+    if (!validateWeight(formData.weight, formData.vehicleType)) {
+      return;
+    }
 
-    const estimatedDistance = 15;
+    // if(originRef.current.value === '' || destinationRef.current.value === '') {
+    //   alert('Please enter both pickup and delivery addresses');
+    //   return;
+    // }
+
+    // const directionService = new google.maps.DirectionsService();
+    // const results = await directionService.route({
+    //   origin: originRef.current.value,
+    //   destination: destinationRef.current.value,
+    //   travelMode: 'DRIVING'
+    // });
+    // setDirectionsResponse(results);
+    // setDistance(results.routes[0].legs[0].distance.text);
+    // setDuration(results.routes[0].legs[0].duration.text);
+    const estimatedDistance = 15;// to be replaced
     const basePrice = vehicle.basePrice + (vehicle.pricePerKm * estimatedDistance);
-    const priceWithSpeed = basePrice * speed.multiplier;
-    const finalPrice = priceWithSpeed - (priceWithSpeed * speed.discount / 100);
+    const finalPrice = basePrice;
 
     setCalculatedPrice({
-      subtotal: basePrice,
-      speedCharge: priceWithSpeed - basePrice,
-      discount: priceWithSpeed * speed.discount / 100,
+      basePrice: vehicle.basePrice,
+      distanceCharge: vehicle.pricePerKm * estimatedDistance,
       total: finalPrice,
-      distance: estimatedDistance
+      distance: estimatedDistance,
+      vehicleName: vehicle.name
     });
   };
 
+  // Show page even if Google Maps fails to load
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar/>
+        <div className="flex items-center justify-center h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading Google Maps...</p>
+            <p className="text-sm text-gray-500 mt-2">If this takes too long, check your API key</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
+      
       <Navbar/>
       {/* Main Content */}
       <div className="py-8 px-4 sm:px-6 lg:px-8">
@@ -140,28 +218,38 @@ export default function PriceCalculator() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Pickup Address</label>
+                      <Autocomplete>
+
                       <input
                         type="text"
                         name="pickupAddress"
                         value={formData.pickupAddress}
+                        // ref={originRef}
                         onChange={handleInputChange}
                         placeholder="Enter pickup location"
                         className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                       />
+                      </Autocomplete>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Delivery Address</label>
-                      <input
-                        type="text"
-                        name="deliveryAddress"
-                        value={formData.deliveryAddress}
-                        onChange={handleInputChange}
-                        placeholder="Enter delivery location"
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                      />
+                      <Autocomplete>
+                        <input
+                          type="text"
+                          name="deliveryAddress"
+                          value={formData.deliveryAddress}
+                          // ref={destinationRef}
+                          onChange={handleInputChange}
+                          placeholder="Enter delivery location"
+                          className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                        />
+                      </Autocomplete>
                     </div>
                   </div>
-
+                  <GoogleMap center={center} zoom={15} mapContainerStyle={{ width: '100%', height: '400px' }} onLoad={map => setMap(map)}>
+                    <Marker position={center} />
+                    {/* {directrionsResponse && <DirectionsRenderer directions={directionsResponse}/>} */}
+                  </GoogleMap>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Package Weight (kg)</label>
@@ -171,8 +259,16 @@ export default function PriceCalculator() {
                         value={formData.weight}
                         onChange={handleInputChange}
                         placeholder="Enter weight in kg"
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                        className={`w-full px-4 py-3 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+                          weightError ? 'border-red-500' : 'border-gray-200'
+                        }`}
                       />
+                      {weightError && (
+                        <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                          <AlertCircle className="w-4 h-4" />
+                          {weightError}
+                        </p>
+                      )}
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Package Type</label>
@@ -217,44 +313,12 @@ export default function PriceCalculator() {
                           <h3 className="font-semibold text-gray-900 mb-1">{vehicle.name}</h3>
                           <p className="text-sm text-gray-600 mb-2">{vehicle.description}</p>
                           <div className="flex items-center justify-between text-sm">
-                            <span className="text-gray-500">Max: {vehicle.maxWeight}</span>
+                            <span className="text-gray-500">Max: {vehicle.maxWeightLabel}</span>
                             <span className="font-semibold text-blue-600">₹{vehicle.basePrice} + ₹{vehicle.pricePerKm}/km</span>
                           </div>
                         </button>
                       );
                     })}
-                  </div>
-                </div>
-
-                {/* Delivery Speed */}
-                <div className="mb-6">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-6">Delivery Speed</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    {deliveryOptions.map((option) => (
-                      <button
-                        key={option.id}
-                        onClick={() => handleDeliverySpeedSelect(option.id)}
-                        className={`p-5 rounded-xl border-2 transition-all ${
-                          formData.deliverySpeed === option.id
-                            ? 'border-blue-600 bg-blue-50 shadow-md'
-                            : 'border-gray-200 hover:border-blue-300 bg-white'
-                        }`}
-                      >
-                        <div className="flex items-center justify-center mb-3">
-                          {option.id === 'express' && <AlertCircle className="w-6 h-6 text-red-500" />}
-                          {option.id === 'standard' && <CheckCircle className="w-6 h-6 text-green-500" />}
-                          {option.id === 'economy' && <Clock className="w-6 h-6 text-blue-500" />}
-                        </div>
-                        <div className="text-center">
-                          <p className="font-semibold text-gray-900 text-sm mb-1">{option.label}</p>
-                          <p className="text-xs text-gray-600">
-                            {option.id === 'express' && '+100%'}
-                            {option.id === 'standard' && 'Standard'}
-                            {option.id === 'economy' && '-20%'}
-                          </p>
-                        </div>
-                      </button>
-                    ))}
                   </div>
                 </div>
 
@@ -273,21 +337,13 @@ export default function PriceCalculator() {
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">Price Breakdown</h3>
                     <div className="space-y-2 mb-4">
                       <div className="flex justify-between text-gray-700">
-                        <span>Base Price ({calculatedPrice.distance}km)</span>
-                        <span>₹{calculatedPrice.subtotal.toFixed(2)}</span>
+                        <span>Vehicle: {calculatedPrice.vehicleName}</span>
+                        <span>₹{calculatedPrice.basePrice.toFixed(2)}</span>
                       </div>
-                      {calculatedPrice.speedCharge > 0 && (
-                        <div className="flex justify-between text-gray-700">
-                          <span>Speed Charge</span>
-                          <span>₹{calculatedPrice.speedCharge.toFixed(2)}</span>
-                        </div>
-                      )}
-                      {calculatedPrice.discount > 0 && (
-                        <div className="flex justify-between text-green-600">
-                          <span>Discount</span>
-                          <span>-₹{calculatedPrice.discount.toFixed(2)}</span>
-                        </div>
-                      )}
+                      <div className="flex justify-between text-gray-700">
+                        <span>Distance ({calculatedPrice.distance}km)</span>
+                        <span>₹{calculatedPrice.distanceCharge.toFixed(2)}</span>
+                      </div>
                     </div>
                     <div className="pt-4 border-t border-blue-300 flex justify-between items-center">
                       <span className="text-xl font-bold text-gray-900">Total Price</span>
