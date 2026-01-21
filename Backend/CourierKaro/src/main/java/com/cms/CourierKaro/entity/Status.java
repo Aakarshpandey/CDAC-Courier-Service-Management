@@ -1,5 +1,5 @@
 package com.cms.CourierKaro.entity;
 
 public enum Status {
-	ACTIVE, INACTIVE, SUSPENDED, DELETED;
+	PENDING,ASSIGNED,IN_TRANSIT,DELIVERED,CANCELLED
 }
