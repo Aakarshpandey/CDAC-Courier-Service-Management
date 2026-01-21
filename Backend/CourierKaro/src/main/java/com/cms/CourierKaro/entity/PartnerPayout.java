@@ -8,6 +8,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,9 +30,11 @@ public class PartnerPayout {
 	@Column(name="payout_id")
 	private Long payoutId;
 	
+	@OneToOne
 	@JoinColumn(name = "partner_id")
 	private Partner partner;
 	
+	@OneToOne
 	@JoinColumn(name="shipment_id")
 	private Shipment shipment;
 	

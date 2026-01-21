@@ -24,13 +24,13 @@ public class VehicleType {
 	@Column(name="type_name", length=100)
 	private String typeName;
 	
-	@Column(name ="base_fare",precision = 10, scale = 2)
+	@Column(name ="base_fare")
 	private Double baseFare;
 	
 	
-	@Column(name ="base_fare",precision = 10, scale = 2)
+	@Column(name ="base_fare")
 	private Double perKmRate;
 	
-	@Column(name ="max_weight_kg",precision = 10, scale = 2)
+	@Column(name ="max_weight_kg")
 	private Double maxWeigthKg;
 }
