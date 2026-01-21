@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Eye, EyeOff, Package, User, Briefcase, ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
 import Logo from "../../components/Logo/Logo";
+import { registerPartner } from "../../services/users";
 
 export default function Registration() {
   const [accountType, setAccountType] = useState("personal");
@@ -35,7 +36,7 @@ export default function Registration() {
     }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (formData.firstName.length == 0) {
       toast("Please Enter First Name!", {
         icon: "❗️",
@@ -96,12 +97,19 @@ export default function Registration() {
       });
       return;
     }
-
+    const response = await registerPartner(formData);
+    if(response.status == 200){
+      toast.success("Account created successfully!");
+      navigate("/login");
+    } else {
+      toast.error("Account creation failed!");
+    }
     console.log("Registration submitted:", {
       ...formData,
       accountType,
       wantsUpdates,
     });
+    
     toast.success("Account created successfully!");
   };
 
