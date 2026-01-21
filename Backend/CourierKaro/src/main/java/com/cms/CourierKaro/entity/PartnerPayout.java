@@ -1,5 +1,43 @@
 package com.cms.CourierKaro.entity;
 
-public class PartnerPayout {
+import java.sql.Timestamp;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Entity
+@Table(name="PARTNER_PAYOUTS")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class PartnerPayout {
+	
+	@Id	
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name="payout_id")
+	private Long payoutId;
+	
+	@JoinColumn(name = "partner_id")
+	private Partner partner;
+	
+	@JoinColumn(name="shipment_id")
+	private Shipment shipment;
+	
+	private Double amount;
+	
+	@Column(name="status")
+	private PaymentStatus paymentStatus;
+	
+	@Column(name="paid_at")
+	private Timestamp paidAt;
 }
