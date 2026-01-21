@@ -1,5 +1,6 @@
 package com.cms.CourierKaro.entity;
 
-public class Shipment {
 
+public class Shipment {
+	
 }

@@ -30,9 +30,8 @@ public class Location {
 	@Column(length=6)
 	private String pincode;
 	
-	@Column(precision = 11, scale = 8)
 	private Double lat;
-	@Column(precision = 11, scale = 8)
+
 	private Double lng;
 	
 	
