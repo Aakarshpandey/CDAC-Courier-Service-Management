@@ -4,6 +4,8 @@ import java.sql.Timestamp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -30,7 +32,7 @@ public class PartnerPayout {
 	@Column(name="payout_id")
 	private Long payoutId;
 	
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(name = "partner_id")
 	private Partner partner;
 	
@@ -40,6 +42,7 @@ public class PartnerPayout {
 	
 	private Double amount;
 	
+	@Enumerated(EnumType.STRING)
 	@Column(name="status")
 	private PaymentStatus paymentStatus;
 	

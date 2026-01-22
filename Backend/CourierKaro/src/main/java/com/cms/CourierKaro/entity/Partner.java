@@ -11,6 +11,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,7 +32,7 @@ import lombok.Setter;
 		@JoinColumn(name = "user_id", nullable = false)
 		private User userId;
 		
-		@OneToOne
+		@ManyToOne
 		@JoinColumn(name="vehicle_type_id", nullable=false)
 		private VehicleType vehicleTypeId;
 		
