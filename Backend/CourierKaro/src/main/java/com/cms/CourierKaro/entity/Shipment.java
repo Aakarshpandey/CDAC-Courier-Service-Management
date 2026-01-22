@@ -12,6 +12,9 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 
@@ -24,23 +27,28 @@ public class Shipment {
 	@Column(name = "shipment_id")
 	private Long shipmentId;
 	
-	@Transient
-	private Long cust_id;
+	@ManyToOne
+	@JoinColumn(name = "customer_id")
+	private User custormerId;
 	
-	@Transient
-	private Long partener_id;
+	@ManyToOne
+	@JoinColumn(name = "partner_id")
+	private Partner partnerId;
 	
-	@Transient
-	private Long vehical_type_id;
+	@ManyToOne
+	@JoinColumn(name = "vehicle_type_id")
+	private VehicleType vehicleTypeId;
 	
 	@Column(length = 100, name = "vehicle_model")
 	private String vehicleModel;
 	
-	@Transient
-	private Long pickup_loc_id;
+	@OneToOne
+	@JoinColumn(name = "pickup_location_id")
+	private Location pickupLocationId;
 	
-	@Transient
-	private Long delivery_loc_id;
+	@OneToOne
+	@JoinColumn(name = "delivery_location_id")
+	private Location deliveryLocationId;
 	
 	@Enumerated(EnumType.STRING)
 	private PackageType packageType;
@@ -48,8 +56,8 @@ public class Shipment {
 	@Column(name = "package_description", columnDefinition = "TEXT")
 	private String packageDescription;
 	
-	@Column(name = "weight_KG",precision = 10, scale = 2)
-	private BigDecimal weightKG;
+	@Column(name = "weight_Kg",precision = 10, scale = 2)
+	private BigDecimal weightKg	;
 	@Column(name = "declared_value",precision = 10, scale = 2)
 	private BigDecimal declaredValue;
 	
@@ -98,11 +106,11 @@ public class Shipment {
 	@Column(name = "created_at")
 	private LocalDateTime createdAt;
 	
-	@Column(name = "pick_up_at")
-	private LocalDateTime pickupAt;
+	@Column(name = "picked_up_at")
+	private LocalDateTime pickedUpAt;
 	
-	@Column(name = "delivery_at")
-	private LocalDateTime deliveryAt;
+	@Column(name = "delivered_at")
+	private LocalDateTime deliveredAt;
 	
 }
 
