@@ -102,7 +102,7 @@ export default function Registration() {
       toast.success("Account created successfully!");
       navigate("/login");
     } else {
-      toast.error("Account creation failed!");
+      toast.error(response.data.message);
     }
     console.log("Registration submitted:", {
       ...formData,
