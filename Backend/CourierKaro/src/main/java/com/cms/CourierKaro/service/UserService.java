@@ -7,5 +7,5 @@ import com.cms.CourierKaro.response.UserResp;
 
 public interface UserService {
 	UserResp registerUser(UserRegisterDTO dto);
-	LoginResponse login(UserLoginDTO dto);
+//	LoginResponse login(UserLoginDTO dto);
 }
