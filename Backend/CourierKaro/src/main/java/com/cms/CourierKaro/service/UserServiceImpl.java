@@ -29,6 +29,8 @@ public class UserServiceImpl implements UserService{
 			return new UserResp("Password does not match", "FAILED");
 		}
 		//email check
+		System.out.println(dto.getEmail());
+		System.out.println(userRepository.existsByEmail(dto.getEmail()));
 		if(userRepository.existsByEmail(dto.getEmail())) {
 			return new UserResp("Email already exists", "Email_Exist");
 		}
