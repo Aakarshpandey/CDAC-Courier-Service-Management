@@ -3,8 +3,10 @@ import { Eye, EyeOff, Package, User, Briefcase, ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
 import Logo from "../../components/Logo/Logo";
 import { registerPartner } from "../../services/users";
+import { useNavigate } from "react-router-dom";
 
 export default function Registration() {
+  const navigate = useNavigate();
   const [accountType, setAccountType] = useState("personal");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -98,10 +100,12 @@ export default function Registration() {
       return;
     }
     const response = await registerPartner(formData);
+    console.log(response);
     if(response.status == 200){
-      toast.success("Account created successfully!");
+      toast.success(response.data.message);
       navigate("/login");
     } else {
+      console.log(response);
       toast.error(response.data.message);
     }
     console.log("Registration submitted:", {
@@ -110,7 +114,7 @@ export default function Registration() {
       wantsUpdates,
     });
     
-    toast.success("Account created successfully!");
+    // toast.success("Account created successfully!");
   };
 
   const handleSocialLogin = (provider) => {
