@@ -1,17 +1,20 @@
 	package com.cms.CourierKaro.entity;
 	
 	import jakarta.persistence.Column;
-	import jakarta.persistence.Entity;
-	import jakarta.persistence.GeneratedValue;
-	import jakarta.persistence.GenerationType;
-	import jakarta.persistence.Id;
-	import jakarta.persistence.JoinColumn;
-	import jakarta.persistence.OneToOne;
-	import jakarta.persistence.Table;
-	import lombok.AllArgsConstructor;
-	import lombok.Getter;
-	import lombok.NoArgsConstructor;
-	import lombok.Setter;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 	
 	@Entity
 	@Table(name = "partners")
@@ -28,8 +31,9 @@
 		@JoinColumn(name = "user_id", nullable = false)
 		private User userId;
 		
-		@Column(name="vehicle_type_id")
-		private Long vehicleTypeId;
+		@OneToOne
+		@JoinColumn(name="vehicle_type_id", nullable=false)
+		private VehicleType vehicleTypeId;
 		
 		@Column(name = "vehicle_reg_number")
 		private String vehicleRegNumber;
@@ -69,5 +73,6 @@
 		@Column(name="avg_rating")
 		private double avgRating;
 		
-		private Status status;
+		@Enumerated(EnumType.STRING)
+		private PartnerStatus status;
 	}

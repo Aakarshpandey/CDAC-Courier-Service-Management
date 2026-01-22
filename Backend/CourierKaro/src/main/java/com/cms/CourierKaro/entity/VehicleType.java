@@ -2,6 +2,8 @@ package com.cms.CourierKaro.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -18,6 +20,7 @@ import lombok.ToString;
 public class VehicleType {
 	
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name="vehicle_type_id")
 	private Long id;
 	
@@ -28,7 +31,7 @@ public class VehicleType {
 	private Double baseFare;
 	
 	
-	@Column(name ="base_fare")
+	@Column(name ="per_km_rate")
 	private Double perKmRate;
 	
 	@Column(name ="max_weight_kg")

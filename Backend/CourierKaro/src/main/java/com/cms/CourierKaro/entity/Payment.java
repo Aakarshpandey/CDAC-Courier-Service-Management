@@ -40,5 +40,5 @@ public class Payment {
     private PaymentStatus status;
 
     @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt;
 }
