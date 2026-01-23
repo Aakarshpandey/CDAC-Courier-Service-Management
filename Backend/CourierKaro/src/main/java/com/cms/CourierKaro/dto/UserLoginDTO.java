@@ -12,4 +12,6 @@ import lombok.Setter;
 public class UserLoginDTO {
 	private String email;
 	private String password;
+	private String loginType;
+	private boolean rememberMe;
 }

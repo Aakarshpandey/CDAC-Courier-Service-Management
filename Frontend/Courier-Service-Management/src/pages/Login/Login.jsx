@@ -1,55 +1,107 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
 import Logo from "../../components/Logo/Logo";
+import axios from "axios";
+
 export default function Login() {
   const [activeTab, setActiveTab] = useState("user");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = () => {
-    console.log("Login submitted:", { email, password, rememberMe });
-    if (email.length == 0) {
-      toast("Please Enter Email", {
-        icon: "❗️",
-      });
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Client-side validation
+    if (email.length === 0) {
+      toast.error("Please enter email");
       return;
-    } else if (password.length == 0) {
-      toast("please enter password", {
-        icon: "❗️",
-      });
-      return;
-    } else {
-      toast.success("Login successful");
     }
-    if(activeTab === "user"){
-      navigate("/user-dashboard");
-    }else{
-      navigate("/partner-dashboard");
+    
+    if (password.length === 0) {
+      toast.error("Please enter password");
+      return;
+    }
+
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await axios.post("http://localhost:8080/login", {
+        email: email,
+        password: password,
+        loginType: `ROLE_${activeTab.toUpperCase()}`, // "ROLE_USER" or "ROLE_PARTNER"
+        rememberMe: rememberMe
+      });
+
+      console.log("Login response:", response.data);
+
+      // Check if login was successful
+      if (response.data.status === "SUCCESS") {
+        // Store the JWT token
+        localStorage.setItem("authToken", response.data.token);
+        localStorage.setItem("userEmail", response.data.email);
+        localStorage.setItem("userRole", response.data.role);
+        localStorage.setItem("userName", `${response.data.firstName} ${response.data.lastName}`);
+
+        toast.success(response.data.message || "Login successful");
+
+        // Navigate based on role
+        if (activeTab === "user") {
+          navigate("/user-dashboard");
+        } else {
+          navigate("/partner-dashboard");
+        }
+      } else {
+        toast.error(response.data.message || "Login failed");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      
+      if (error.response) {
+        // Server responded with error
+        toast.error(error.response.data.message || "Invalid credentials");
+      } else if (error.request) {
+        // Request made but no response
+        toast.error("Cannot connect to server. Please check if backend is running.");
+      } else {
+        // Other errors
+        toast.error("An error occurred. Please try again.");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleGoogleLogin = () => {
-    console.log("Google login clicked");
+    toast("Google login coming soon!", { icon: "🔜" });
   };
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo */}
-          <div className="flex items-center justify-center mb-3">
-            
-            <Logo/>
-          </div>
-       
+        <div className="flex items-center justify-center mb-3">
+          <Logo />
+        </div>
 
         {/* Main Card */}
         <div className="bg-white rounded-lg shadow-sm p-8">
-          <button onClick={() => window.history.back()} ><ArrowLeft className="w-5 h-5" /></button>
+          <button onClick={() => window.history.back()}>
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+
           {/* Welcome Header */}
           <div className="text-center mb-6">
             <h1 className="text-2xl font-bold text-gray-800 mb-2">
@@ -59,6 +111,7 @@ export default function Login() {
               Sign in to your account to manage your deliveries
             </p>
           </div>
+
           {/* Tabs */}
           <div className="flex gap-2 mb-6">
             <button
@@ -83,8 +136,8 @@ export default function Login() {
             </button>
           </div>
 
-          {/* Login Fields */}
-          <div>
+          {/* Login Form */}
+          <form onSubmit={handleSubmit}>
             {/* Email Field */}
             <div className="mb-4">
               <label
@@ -99,7 +152,8 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-sm"
+                disabled={loading}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
               />
             </div>
 
@@ -126,12 +180,14 @@ export default function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-sm pr-10"
+                  disabled={loading}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-sm pr-10 disabled:bg-gray-100 disabled:cursor-not-allowed"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  disabled={loading}
                 >
                   {showPassword ? (
                     <svg
@@ -179,7 +235,8 @@ export default function Login() {
                 id="remember"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                disabled={loading}
+                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 disabled:cursor-not-allowed"
               />
               <label htmlFor="remember" className="ml-2 text-sm text-gray-600">
                 Remember me
@@ -188,12 +245,39 @@ export default function Login() {
 
             {/* Sign In Button */}
             <button
-              onClick={handleSubmit}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors mb-4"
+              type="submit"
+              disabled={loading}
+              className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors mb-4 disabled:bg-blue-400 disabled:cursor-not-allowed flex items-center justify-center"
             >
-              Sign In
+              {loading ? (
+                <>
+                  <svg
+                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Signing in...
+                </>
+              ) : (
+                "Sign In"
+              )}
             </button>
-          </div>
+          </form>
 
           {/* Divider */}
           <div className="relative mb-4">
@@ -212,7 +296,8 @@ export default function Login() {
             <button
               type="button"
               onClick={handleGoogleLogin}
-              className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              disabled={loading}
+              className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path

@@ -12,4 +12,5 @@ import com.cms.CourierKaro.entity.Role;
 public interface UserRepository extends JpaRepository<User, Long>{
 	boolean existsByEmail(String email);
 	Optional<User> findByEmailAndRole(String email, Role role);
+	boolean existsByEmailAndRole(String email, Role role);
 }
