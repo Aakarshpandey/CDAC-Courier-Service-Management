@@ -1,24 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Calculator, MapPin, Package, Truck, Car, Bike, Clock, Shield, CheckCircle, AlertCircle } from 'lucide-react';
 import Navbar from '../../components/NavBar/Navbar';
 import { useJsApiLoader, GoogleMap, Marker, Autocomplete, DirectionsRenderer } from '@react-google-maps/api'; 
 
 const center = {
-  lat: -34.397,
-  lng: 150.644
+  lat: 18.52043,
+  lng: 73.85674
 };
+
+const libraries = ['places'];
 
 export default function PriceCalculator() {
 
   const [map, setMap] = useState(null);
   const [directionsResponse, setDirectionsResponse] = useState(null);
+  const [distance, setDistance] = useState('');
+  const [duration, setDuration] = useState('');
+
+  const originRef = useRef();
+  const destinationRef = useRef();
+
   const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: 'YOUR_API_KEY',
-    libraries: ['places']
+    googleMapsApiKey: 'AIzaSyBaKwXTqp_FqjrXUcUMrCJCvfS2xIR4MVk',
+    libraries: libraries,
+    region: "IN"
   });
 
-  // const originRef = useRef();
-  // const destinationRef = useRef();
+  
 
   const [formData, setFormData] = useState({
     pickupAddress: '',
@@ -124,8 +132,9 @@ export default function PriceCalculator() {
   };
 
   const calculatePrice = async() => {
+    setDirectionsResponse(null);
     const vehicle = vehicleTypes.find(v => v.id === formData.vehicleType);
-    
+    setDirectionsResponse(null);
     if (!vehicle) {
       alert('Please select a vehicle type');
       return;
@@ -141,21 +150,21 @@ export default function PriceCalculator() {
       return;
     }
 
-    // if(originRef.current.value === '' || destinationRef.current.value === '') {
-    //   alert('Please enter both pickup and delivery addresses');
-    //   return;
-    // }
+    if(originRef.current.value === '' || destinationRef.current.value === '') {
+      alert('Please enter both pickup and delivery addresses');
+      return;
+    }
 
-    // const directionService = new google.maps.DirectionsService();
-    // const results = await directionService.route({
-    //   origin: originRef.current.value,
-    //   destination: destinationRef.current.value,
-    //   travelMode: 'DRIVING'
-    // });
-    // setDirectionsResponse(results);
-    // setDistance(results.routes[0].legs[0].distance.text);
-    // setDuration(results.routes[0].legs[0].duration.text);
-    const estimatedDistance = 15;// to be replaced
+    const directionService = new google.maps.DirectionsService();
+    const results = await directionService.route({
+      origin: originRef.current.value,
+      destination: destinationRef.current.value,
+      travelMode: google.maps.TravelMode.DRIVING 
+    });
+    setDirectionsResponse(results);
+    setDistance(results.routes[0].legs[0].distance.text);
+    setDuration(results.routes[0].legs[0].duration.text);
+    const estimatedDistance = results.routes[0].legs[0].distance.value/1000;
     const basePrice = vehicle.basePrice + (vehicle.pricePerKm * estimatedDistance);
     const finalPrice = basePrice;
 
@@ -166,6 +175,7 @@ export default function PriceCalculator() {
       distance: estimatedDistance,
       vehicleName: vehicle.name
     });
+    window.scrollTo(0, 300);
   };
 
   // Show page even if Google Maps fails to load
@@ -218,13 +228,13 @@ export default function PriceCalculator() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Pickup Address</label>
-                      <Autocomplete>
+                      <Autocomplete restrictions={{ country: "in"}}>
 
                       <input
                         type="text"
                         name="pickupAddress"
-                        value={formData.pickupAddress}
-                        // ref={originRef}
+                        value={originRef.current?.value || ''}
+                        ref={originRef}
                         onChange={handleInputChange}
                         placeholder="Enter pickup location"
                         className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
@@ -233,12 +243,12 @@ export default function PriceCalculator() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Delivery Address</label>
-                      <Autocomplete>
+                      <Autocomplete restrictions={{ country: "in"}}>
                         <input
                           type="text"
                           name="deliveryAddress"
-                          value={formData.deliveryAddress}
-                          // ref={destinationRef}
+                          value={destinationRef.current?.value || ''}
+                          ref={destinationRef}
                           onChange={handleInputChange}
                           placeholder="Enter delivery location"
                           className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
@@ -247,8 +257,8 @@ export default function PriceCalculator() {
                     </div>
                   </div>
                   <GoogleMap center={center} zoom={15} mapContainerStyle={{ width: '100%', height: '400px' }} onLoad={map => setMap(map)}>
-                    <Marker position={center} />
-                    {/* {directrionsResponse && <DirectionsRenderer directions={directionsResponse}/>} */}
+                   <Marker position={center} />
+                    {directionsResponse && <DirectionsRenderer directions={directionsResponse} options={{suppressMarkers: false, preserveViewport: false}}/>} 
                   </GoogleMap>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
@@ -332,25 +342,7 @@ export default function PriceCalculator() {
                 </button>
 
                 {/* Price Result */}
-                {calculatedPrice && (
-                  <div className="mt-6 p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Price Breakdown</h3>
-                    <div className="space-y-2 mb-4">
-                      <div className="flex justify-between text-gray-700">
-                        <span>Vehicle: {calculatedPrice.vehicleName}</span>
-                        <span>₹{calculatedPrice.basePrice.toFixed(2)}</span>
-                      </div>
-                      <div className="flex justify-between text-gray-700">
-                        <span>Distance ({calculatedPrice.distance}km)</span>
-                        <span>₹{calculatedPrice.distanceCharge.toFixed(2)}</span>
-                      </div>
-                    </div>
-                    <div className="pt-4 border-t border-blue-300 flex justify-between items-center">
-                      <span className="text-xl font-bold text-gray-900">Total Price</span>
-                      <span className="text-2xl font-bold text-blue-600">₹{calculatedPrice.total.toFixed(2)}</span>
-                    </div>
-                  </div>
-                )}
+                
               </div>
             </div>
 
@@ -386,7 +378,25 @@ export default function PriceCalculator() {
                   </div>
                 </div>
               </div>
-
+              {calculatedPrice && (
+                  <div className="mt-6 p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Price Breakdown</h3>
+                    <div className="space-y-2 mb-4">
+                      <div className="flex justify-between text-gray-700">
+                        <span>Vehicle: {calculatedPrice.vehicleName}</span>
+                        <span>₹{calculatedPrice.basePrice.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between text-gray-700">
+                        <span>Distance ({calculatedPrice.distance}km)</span>
+                        <span>₹{calculatedPrice.distanceCharge.toFixed(2)}</span>
+                      </div>
+                    </div>
+                    <div className="pt-4 border-t border-blue-300 flex justify-between items-center">
+                      <span className="text-xl font-bold text-gray-900">Total Price</span>
+                      <span className="text-2xl font-bold text-blue-600">₹{calculatedPrice.total.toFixed(2)}</span>
+                    </div>
+                  </div>
+                )}
               {/* Image Card */}
               <div className="bg-white rounded-xl shadow-sm overflow-hidden">
                 <img 
