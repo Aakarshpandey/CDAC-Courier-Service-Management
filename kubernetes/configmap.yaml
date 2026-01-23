@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+data:
+  # Replace 'rds-endpoint' with your actual AWS RDS endpoint
+  SPRING_DATASOURCE_URL: "jdbc:mysql://rds-endpoint:3306/courier_service2?createDatabaseIfNotExist=true"
