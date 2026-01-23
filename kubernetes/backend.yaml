@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: courier-backend
+  labels:
+    app: courier-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: courier-backend
+  template:
+    metadata:
+      labels:
+        app: courier-backend
+    spec:
+      containers:
+      - name: courier-backend
+        image: courier-backend:latest # Make sure to build this image: docker build -t courier-backend:latest ./Backend/CourierKaro
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        env:
+        - name: SPRING_DATASOURCE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: SPRING_DATASOURCE_URL
+        - name: SPRING_DATASOURCE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: SPRING_DATASOURCE_USERNAME
+        - name: SPRING_DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: SPRING_DATASOURCE_PASSWORD
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: courier-backend-service
+spec:
+  selector:
+    app: courier-backend
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: LoadBalancer
