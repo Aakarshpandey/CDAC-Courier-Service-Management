@@ -11,3 +11,21 @@ export async function registerPartner(params) {
         throw error;
     }
 }
+
+
+export async function login(email, password, activeTab, rememberMe) {
+    try {
+        const response = await axios.post("http://localhost:8080/login", {
+            email: email,
+            password: password,
+            loginType: `ROLE_${activeTab.toUpperCase()}`, // "ROLE_USER" or "ROLE_PARTNER"
+            rememberMe: rememberMe
+        });
+
+        console.log("Login response:", response.data);
+        return response;
+    } catch (error) {
+        console.error("Error logging in:", error);
+        throw error;
+    }
+}

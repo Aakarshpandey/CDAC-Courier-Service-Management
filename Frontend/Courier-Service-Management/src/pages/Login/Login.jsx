@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
 import Logo from "../../components/Logo/Logo";
 import axios from "axios";
+import { login } from "../../services/users";
 
 export default function Login() {
   const [activeTab, setActiveTab] = useState("user");
@@ -38,12 +39,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const response = await axios.post("http://localhost:8080/login", {
-        email: email,
-        password: password,
-        loginType: `ROLE_${activeTab.toUpperCase()}`, // "ROLE_USER" or "ROLE_PARTNER"
-        rememberMe: rememberMe
-      });
+      const response = await login(email, password, activeTab, rememberMe);
 
       console.log("Login response:", response.data);
 
