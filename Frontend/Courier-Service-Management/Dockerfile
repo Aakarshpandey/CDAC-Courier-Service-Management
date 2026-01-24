@@ -4,6 +4,9 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
+# Accept build argument for API URL
+ARG VITE_API_URL=http://192.168.49.2:31966
+ENV VITE_API_URL=${VITE_API_URL}
 RUN npm run build
 
 # Run Stage

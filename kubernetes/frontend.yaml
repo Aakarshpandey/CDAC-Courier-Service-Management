@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: courier-frontend
-        image: courier-frontend:latest # Make sure to build this image: docker build -t courier-frontend:latest ./Frontend/Courier-Service-Management
+        image: yuvrajkarekar/courier-frontend:latest # Make sure to build this image: docker build -t courier-frontend:latest ./Frontend/Courier-Service-Management
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 80

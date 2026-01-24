@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: courier-backend
-        image: courier-backend:latest # Make sure to build this image: docker build -t courier-backend:latest ./Backend/CourierKaro
+        image: yuvrajkarekar/courier-backend:latest # Make sure to build this image: docker build -t courier-backend:latest ./Backend/CourierKaro
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080

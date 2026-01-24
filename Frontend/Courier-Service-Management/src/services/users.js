@@ -15,7 +15,9 @@ export async function registerPartner(params) {
 
 export async function login(email, password, activeTab, rememberMe) {
     try {
-        const response = await axios.post("http://localhost:8080/login", {
+        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+
+        const response = await axios.post(`${API_URL}/login`, {
             email: email,
             password: password,
             loginType: `ROLE_${activeTab.toUpperCase()}`, // "ROLE_USER" or "ROLE_PARTNER"
