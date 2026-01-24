@@ -81,7 +81,7 @@ export default function Login() {
   };
 
   const handleGoogleLogin = () => {
-    toast("Google login coming soon!", { icon: "🔜" });
+    window.location.href = "http://localhost:8080/oauth2/authorization/google";
   };
 
   return (

@@ -18,6 +18,7 @@ import PartnerAppSetting from "./pages/PartnerAppSettings/PartnerAppSettings";
 import PartnerEditProfile from "./pages/PartnerEditProfile/PartnerEditProfile";
 import DetailedEarnings from "./pages/DetailedEarnings/DetailedEarnings";
 import UserEditProfile from "./pages/UserEditProfile/UserEditProfile";
+import AuthCallback from './components/AuthCallback/AuthCallback';
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
         <Route path="/partner-app-setting" element={<PartnerAppSetting />} />
         <Route path="/partner-edit-profile" element={<PartnerEditProfile />} />
         <Route path="/detailed-earnings" element={<DetailedEarnings />} />
+        <Route path="/auth-callback" element={<AuthCallback />} />
       </Routes>
 
       <Toaster position="top-right" />

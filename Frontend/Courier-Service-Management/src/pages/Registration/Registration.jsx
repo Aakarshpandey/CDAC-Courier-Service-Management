@@ -117,9 +117,8 @@ export default function Registration() {
     // toast.success("Account created successfully!");
   };
 
-  const handleSocialLogin = (provider) => {
-    console.log(`Login with ${provider}`);
-    alert(`${provider} login integration coming soon!`);
+ const handleGoogleLogin = () => {
+     window.location.href = "http://localhost:8080/oauth2/authorization/google";
   };
 
   return (
@@ -430,7 +429,7 @@ export default function Registration() {
 
             <div className="mb-6">
               <button
-                onClick={() => handleSocialLogin("Google")}
+                onClick={() => handleGoogleLogin()}
                 className="w-full flex items-center justify-center gap-2 py-2.5 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
