@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { Package, TrendingUp, Users, DollarSign, MapPin, Eye, Edit, Search, Filter, Download, Plus, Bike, Car, Truck, Star } from 'lucide-react';
 import Navbar from '../../components/NavBar/Navbar';
-
+import { getShipments } from '../../services/shipments';  
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -13,6 +13,18 @@ export default function AdminDashboard() {
     analytics: []
   });
 
+   const recentOrders = [
+    { id: 'CK001234', customer: 'Priya Singh', status: 'IN TRANSIT', amount: 450, time: '2 hours ago' },
+    { id: 'CK001235', customer: 'Arjun Mehta', status: 'DELIVERED', amount: 250, time: '4 hours ago' },
+    { id: 'CK001236', customer: 'Sneha Reddy', status: 'PENDING', amount: 380, time: '1 hour ago' }
+  ];
+
+  useEffect(() => {
+    const response = getShipments();
+    setTabData.recentOrders = response.data;
+    console.log(response);
+    
+  }, []);
   
 
   // Sample data
@@ -30,11 +42,7 @@ export default function AdminDashboard() {
     revenueChange: '+8.2%'
   };
 
-  const recentOrders = [
-    { id: 'CK001234', customer: 'Priya Singh', status: 'IN TRANSIT', amount: 450, time: '2 hours ago' },
-    { id: 'CK001235', customer: 'Arjun Mehta', status: 'DELIVERED', amount: 250, time: '4 hours ago' },
-    { id: 'CK001236', customer: 'Sneha Reddy', status: 'PENDING', amount: 380, time: '1 hour ago' }
-  ];
+ 
 
   const allOrders = [
     { id: 'CK001234', customer: 'Priya Singh', route: 'Connaught Place, Delhi → Sector 62, Noida', partner: 'Rajesh Kumar', status: 'IN TRANSIT', amount: 450 },
