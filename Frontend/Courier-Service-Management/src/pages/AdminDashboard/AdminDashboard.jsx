@@ -5,6 +5,16 @@ import Navbar from '../../components/NavBar/Navbar';
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
 
+  const [tabData, setTabData] = useState({
+    recentOrders: [],
+    allOrders: [],
+    partners: [],
+    customers: [],
+    analytics: []
+  });
+
+  
+
   // Sample data
 
   // admin

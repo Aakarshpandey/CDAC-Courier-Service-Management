@@ -1,14 +1,17 @@
 package com.cms.CourierKaro.controller;
 
 import java.security.Principal;
+import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cms.CourierKaro.dto.RecentOrdersDTO;
 import com.cms.CourierKaro.dto.ShipmentRequestDTO;
 import com.cms.CourierKaro.dto.ShipmentResponseDTO;
 import com.cms.CourierKaro.service.ShipmentService;
@@ -50,5 +53,12 @@ public class ShipmentController {
                             .build()
             );
         }
+    }
+
+    @GetMapping("/recentOrders")
+    public ResponseEntity<?> getRecentOrders(Principal principal) {
+        String userEmail = principal.getName();
+        List<RecentOrdersDTO> shipments = shipmentService.getShipments(userEmail);
+        return ResponseEntity.ok(shipments);
     }
 }
