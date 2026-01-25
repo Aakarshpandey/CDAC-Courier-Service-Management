@@ -2,9 +2,11 @@ package com.cms.CourierKaro.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.cms.CourierKaro.dto.RecentOrdersDTO;
 import com.cms.CourierKaro.dto.ShipmentRequestDTO;
 import com.cms.CourierKaro.dto.ShipmentResponseDTO;
 import com.cms.CourierKaro.entity.Location;
@@ -191,4 +193,22 @@ public class ShipmentServiceImpl implements ShipmentService {
             return PackageType.OTHER;
         }
     }
+
+	@Override
+	public List<RecentOrdersDTO> getShipments(String userEmail) {
+		// Fetch ALL shipments sorted by createdAt descending (not filtered by customer)
+		List<Shipment> shipments = shipmentRepository.findAllByOrderByCreatedAtDesc();
+		
+		// Map to DTO
+		return shipments.stream()
+				.map(shipment -> new RecentOrdersDTO(
+						shipment.getShipmentId(),
+						shipment.getCustormerId().getFirstName(),
+						shipment.getCustormerId().getLastName(),
+						shipment.getStatus(),
+						shipment.getCalculatedPrice(),
+						shipment.getCreatedAt()
+				))
+				.toList();
+	}
 }
