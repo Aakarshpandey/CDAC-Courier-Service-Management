@@ -726,7 +726,7 @@ const ConfirmationStep = ({ onBack }) => {
       // Build the request payload matching backend ShipmentRequestDTO
       const shipmentRequest = {
         // TODO: Replace hardcoded email with actual user email from authentication/context
-        userEmail: "vipulthelastairbender@gmail.com", // HARDCODED FOR DEVELOPMENT
+        userEmail: "yuvrajkarekar34@gmail.com", // HARDCODED FOR DEVELOPMENT
         pickupLocation: {
           fullAddress: bookingData.pickupAddress,
           contactName: bookingData.pickupContactName,
@@ -746,7 +746,7 @@ const ConfirmationStep = ({ onBack }) => {
 
       console.log('Sending shipment request:', shipmentRequest);
 
-      const response = await axios.post(`${API_URL}/shipments/send`, shipmentRequest);
+      const response = await axios.post(`${API_URL}/api/shipments/send`, shipmentRequest);
 
       console.log('Shipment response:', response.data);
 
