@@ -1,9 +1,12 @@
 package com.cms.CourierKaro.service;
 
+import java.util.Optional;
+
 import org.modelmapper.ModelMapper;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import com.cms.CourierKaro.dto.UserLoginDTO;
+import com.cms.CourierKaro.dto.UserProfileResponseDTO;
 import com.cms.CourierKaro.dto.UserRegisterDTO;
 import com.cms.CourierKaro.entity.Role;
 import com.cms.CourierKaro.entity.User;
@@ -11,6 +14,7 @@ import com.cms.CourierKaro.repository.UserRepository;
 import com.cms.CourierKaro.response.LoginResponse;
 import com.cms.CourierKaro.response.UserResp;
 import com.cms.CourierKaro.security.JwtTokenProvider;
+
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -95,5 +99,23 @@ public class UserServiceImpl implements UserService {
 			"Login successful",
 			"SUCCESS"
 		);
+	}
+
+	@Override
+	public UserProfileResponseDTO getUserProfile(String userEmail) {
+		try {
+			User user = userRepository.findByEmail(userEmail).orElse(null);
+			if(user == null) {
+				return UserProfileResponseDTO.builder().message("User Loading Failed").status("FAILED").build();
+			}
+			
+			UserProfileResponseDTO response = modelMapper.map(user,UserProfileResponseDTO.class);
+			response.setMessage("User Loaded Succesfully");
+			response.setStatus("SUCCESS");
+			return response;
+		} catch (Exception e) {
+			return UserProfileResponseDTO.builder().message(e.getMessage()).status("FAILED").build();
+		}
+
 	}
 }
