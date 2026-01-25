@@ -21,7 +21,7 @@ public class UserServiceImpl implements UserService {
 	
 	private final UserRepository userRepository;
 	private final ModelMapper modelMapper;
-	private final PasswordEncoder passwordEncoder;
+//	private final PasswordEncoder passwordEncoder;
 	private final JwtTokenProvider jwtTokenProvider;
 	
 	@Override
@@ -38,7 +38,8 @@ public class UserServiceImpl implements UserService {
 		}
 		
 		User user = modelMapper.map(dto, User.class);
-		user.setPassword(passwordEncoder.encode(dto.getPassword()));
+//		user.setPassword(passwordEncoder.encode(dto.getPassword()));
+		user.setPassword(dto.getPassword());
 		user.setRole(role);
 		
 		userRepository.save(user);
@@ -71,13 +72,13 @@ public class UserServiceImpl implements UserService {
 			);
 		}
 		
-		if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
-			return new LoginResponse(
-				null, null, null, null, null, 
-				"Invalid credentials", 
-				"FAILED"
-			);
-		}
+//		if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
+//			return new LoginResponse(
+//				null, null, null, null, null, 
+//				"Invalid credentials", 
+//				"FAILED"
+//			);
+//		}
 		
 		String token = jwtTokenProvider.generateToken(
 			user.getEmail(), 

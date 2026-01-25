@@ -19,18 +19,20 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+
 import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-
-    private final CustomOAuth2UserService customOAuth2UserService;
-    
-    private final OAuth2SuccessHandler oAuthSuccessHandler;
-    @Autowired
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
+//
+//    private final CustomOAuth2UserService customOAuth2UserService;
+//    
+//    private final OAuth2SuccessHandler oAuthSuccessHandler;
+//    @Autowired
+//    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
    
     @Bean
@@ -40,28 +42,38 @@ public class SecurityConfig {
     
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(csrf -> csrf.disable())
-            .sessionManagement(session -> 
-                session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
-            .authorizeHttpRequests(requests -> requests
-					.requestMatchers("/login", "/register","/oauth2/**","/login/oauth2/**").permitAll()
-					.anyRequest().authenticated())
-            .oauth2Login(oauth->oauth
-            		.userInfoEndpoint(userInfo->userInfo
-            		        .oidcUserService(customOAuth2UserService) )
-            		.successHandler(oAuthSuccessHandler))//redirects after successful login
-            .httpBasic(httpBasic -> httpBasic.disable())
-            .formLogin(formLogin -> formLogin.disable())
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-        return http.build();
+//        http
+//            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+//            .csrf(csrf -> csrf.disable())
+//            .sessionManagement(session -> 
+//                session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+//            .authorizeHttpRequests(requests -> requests
+//					.requestMatchers("/login", "/register","/oauth2/**","/login/oauth2/**").permitAll()
+//					.anyRequest().authenticated())
+//            .oauth2Login(oauth->oauth
+//            		.userInfoEndpoint(userInfo->userInfo
+//            		        .oidcUserService(customOAuth2UserService) )
+//            		.successHandler(oAuthSuccessHandler))//redirects after successful login
+//            .httpBasic(httpBasic -> httpBasic.disable())
+//            .formLogin(formLogin -> formLogin.disable())
+//            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+//        return http.build();
+    	  http
+          .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+          .csrf(csrf -> csrf.disable())
+          .authorizeHttpRequests(requests -> requests
+					.anyRequest().permitAll())
+          
+          .httpBasic(httpBasic -> httpBasic.disable())
+          .formLogin(formLogin -> formLogin.disable());
+        
+      return http.build();
     }
     
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("*")); // Use patterns instead of origins to allow credentials
+        configuration.setAllowedOriginPatterns(Arrays.asList("*")); // Use patterns instead of origins to allow credentials
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
