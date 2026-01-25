@@ -14,7 +14,7 @@ export default function Registration() {
     firstName: "",
     lastName: "",
     email: "",
-    phone: "",
+    phoneNumber: "",
     password: "",
     confirmPassword: "",
     companyName: "",
@@ -54,8 +54,8 @@ export default function Registration() {
         icon: "❗️",
       });
       return;
-    } else if (formData.phone.length == 0) {
-      toast("Please Enter Phone Number !", {
+    } else if (formData.phoneNumber.length == 0) {
+      toast("Please Enter phoneNumber Number !", {
         icon: "❗️",
       });
       return;
@@ -250,7 +250,7 @@ export default function Registration() {
               </div>
             )}
 
-            {/* Email and Phone */}
+            {/* Email and phoneNumber */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -267,12 +267,12 @@ export default function Registration() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Phone Number
+                  phoneNumber Number
                 </label>
                 <input
                   type="tel"
-                  name="phone"
-                  value={formData.phone}
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
                   onChange={handleInputChange}
                   placeholder="+91 1234-5678"
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
