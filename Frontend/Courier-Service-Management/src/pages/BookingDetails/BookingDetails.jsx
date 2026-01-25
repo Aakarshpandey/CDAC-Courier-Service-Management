@@ -1,4 +1,6 @@
 import React, { useState, createContext, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { MapPin, Package, CheckCircle, Clock, IndianRupee, ArrowLeft, ChevronRight } from 'lucide-react';
 import Navbar from '../../components/NavBar/Navbar';
 
@@ -712,10 +714,54 @@ const PackageVehicleStep = ({ onNext, onBack }) => {
 const ConfirmationStep = ({ onBack }) => {
   const { bookingData, updateBookingData } = useBooking();
   const [couponCode, setCouponCode] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const handleConfirm = () => {
-    console.log('Final Booking Data:', bookingData);
-    alert('🎉 Booking Confirmed Successfully!\n\nTracking ID: CK' + Math.random().toString(36).substr(2, 9).toUpperCase());
+  const handleConfirm = async () => {
+    setIsLoading(true);
+
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+
+      // Build the request payload matching backend ShipmentRequestDTO
+      const shipmentRequest = {
+        // TODO: Replace hardcoded email with actual user email from authentication/context
+        userEmail: "vipulthelastairbender@gmail.com", // HARDCODED FOR DEVELOPMENT
+        pickupLocation: {
+          fullAddress: bookingData.pickupAddress,
+          contactName: bookingData.pickupContactName,
+          phoneNo: bookingData.pickupPhone,
+          pincode: bookingData.pickupPincode
+        },
+        deliveryLocation: {
+          fullAddress: bookingData.deliveryAddress,
+          contactName: bookingData.deliveryContactName,
+          phoneNo: bookingData.deliveryPhone,
+          pincode: bookingData.deliveryPincode
+        },
+        packageType: bookingData.packageType,
+        weight: parseFloat(bookingData.weight) || 0,
+        vehicleType: bookingData.vehicleType
+      };
+
+      console.log('Sending shipment request:', shipmentRequest);
+
+      const response = await axios.post(`${API_URL}/shipments/send`, shipmentRequest);
+
+      console.log('Shipment response:', response.data);
+
+      if (response.data.status === 'SUCCESS') {
+        alert(`🎉 Booking Confirmed Successfully!\n\nShipment ID: ${response.data.shipmentId}\nTotal Price: ₹${response.data.calculatedPrice}`);
+        navigate('/user-dashboard');
+      } else {
+        alert(`Error: ${response.data.message}`);
+      }
+    } catch (error) {
+      console.error('Error creating shipment:', error);
+      alert(`Failed to create shipment: ${error.response?.data?.message || error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -847,9 +893,14 @@ const ConfirmationStep = ({ onBack }) => {
 
         <button
           onClick={handleConfirm}
-          className="w-full bg-blue-600 text-white py-3.5 rounded-lg font-semibold hover:bg-blue-700 transition text-lg"
+          disabled={isLoading}
+          className={`w-full py-3.5 rounded-lg font-semibold transition text-lg ${
+            isLoading
+              ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+              : 'bg-blue-600 text-white hover:bg-blue-700'
+          }`}
         >
-          Confirm Booking
+          {isLoading ? 'Processing...' : 'Confirm Booking'}
         </button>
 
         <button
