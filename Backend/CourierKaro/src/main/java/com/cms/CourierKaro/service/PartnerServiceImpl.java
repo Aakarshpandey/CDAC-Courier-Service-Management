@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import com.cms.CourierKaro.dto.DailyEarningDTO;
 import com.cms.CourierKaro.dto.AvailableOrderDTO;
 import com.cms.CourierKaro.dto.PartnerDashboardStatsDTO;
+import com.cms.CourierKaro.dto.AcceptedOrderDTO;
 import com.cms.CourierKaro.dto.PartnerEarningsBreakdownDTO;
 import com.cms.CourierKaro.dto.PartnerEarningsDTO;
 import com.cms.CourierKaro.dto.PartnerEarningsShipmentDTO;
@@ -944,6 +945,86 @@ public class PartnerServiceImpl implements PartnerService {
 			return PartnerEarningsDTO.builder()
 					.message("Failed to load earnings: " + e.getMessage())
 					.status("FAILED")
+					.build();
+		}
+	}
+
+	@Override
+	public AcceptedOrderDTO acceptOrder(String userEmail, Long shipmentId) {
+		try {
+			User user = userRepository.findByEmail(userEmail).orElse(null);
+			if (user == null) {
+				return AcceptedOrderDTO.builder()
+						.message("User not found")
+						.build();
+			}
+
+			Partner partner = partnerRepository.findByUserId(user).orElse(null);
+			if (partner == null) {
+				return AcceptedOrderDTO.builder()
+						.message("Partner profile not found")
+						.build();
+			}
+
+			if (!partner.isOnline()) {
+				return AcceptedOrderDTO.builder()
+						.message("You must be online to accept orders")
+						.build();
+			}
+
+			Shipment shipment = shipmentRepository.findById(shipmentId).orElse(null);
+			if (shipment == null) {
+				return AcceptedOrderDTO.builder()
+						.message("Shipment not found")
+						.build();
+			}
+
+			if (shipment.getStatus() != Status.PENDING) {
+				return AcceptedOrderDTO.builder()
+						.message("This order is no longer available")
+						.build();
+			}
+
+			if (shipment.getPartnerId() != null) {
+				return AcceptedOrderDTO.builder()
+						.message("This order has already been assigned to another partner")
+						.build();
+			}
+
+			// Assign partner and update status
+			shipment.setPartnerId(partner);
+			shipment.setStatus(Status.ASSIGNED);
+			shipment = shipmentRepository.save(shipment);
+
+			// Build response DTO
+			User customer = shipment.getCustormerId();
+			Location pickupLoc = shipment.getPickupLocationId();
+			Location deliveryLoc = shipment.getDeliveryLocationId();
+
+			return AcceptedOrderDTO.builder()
+					.shipmentId(shipment.getShipmentId())
+					.status(shipment.getStatus() != null ? shipment.getStatus().toString() : "ASSIGNED")
+					.pickupAddress(shipment.getPickupAddress())
+					.pickupContactName(shipment.getPickupContactName())
+					.pickupPhone(shipment.getPickupPhone())
+					.pickupPincode(pickupLoc != null ? pickupLoc.getPincode() : null)
+					.deliveryAddress(shipment.getDeliveryAddress())
+					.deliveryContactName(shipment.getDeliveryContactName())
+					.deliveryPhone(shipment.getDeliveryPhone())
+					.deliveryPincode(deliveryLoc != null ? deliveryLoc.getPincode() : null)
+					.packageType(shipment.getPackageType() != null ? shipment.getPackageType().toString() : null)
+					.weightKg(shipment.getWeightKg())
+					.vehicleTypeName(shipment.getVehicleTypeId() != null ? shipment.getVehicleTypeId().getTypeName() : null)
+					.distanceKm(shipment.getDistanceKm())
+					.calculatedPrice(shipment.getCalculatedPrice())
+					.customerName(customer != null ? (customer.getFirstName() + " " + (customer.getLastName() != null ? customer.getLastName() : "")).trim() : "Unknown")
+					.customerPhone(customer != null ? customer.getPhoneNumber() : null)
+					.createdAt(shipment.getCreatedAt())
+					.message("Order accepted successfully")
+					.build();
+		} catch (Exception e) {
+			return AcceptedOrderDTO.builder()
+					.message("Failed to accept order: " + e.getMessage())
 					.build();
 		}
 	}
