@@ -221,12 +221,12 @@ public class PartnerController {
 
 	
 	/**
-	 * Get all suspended partner applications
-	 * @return List of partner applications with SUSPENDED status
+	 * Get all pending partner applications (not yet approved)
+	 * @return List of partner applications where isApproved = false
 	 */
 	@GetMapping("/applications")
 	public ResponseEntity<List<PartnerApplicationDTO>> getPartnerApplications() {
-		List<PartnerApplicationDTO> applications = partnerService.getSuspendedPartners();
+		List<PartnerApplicationDTO> applications = partnerService.getPendingPartners();
 		return ResponseEntity.ok(applications);
 	}
 	

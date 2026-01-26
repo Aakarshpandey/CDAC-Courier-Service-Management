@@ -1,7 +1,5 @@
 package com.cms.CourierKaro.service;
 
-import java.util.Optional;
-
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
@@ -9,8 +7,10 @@ import com.cms.CourierKaro.dto.UserLoginDTO;
 import com.cms.CourierKaro.dto.UserProfileResponseDTO;
 import com.cms.CourierKaro.dto.UserProfileUpdateDTO;
 import com.cms.CourierKaro.dto.UserRegisterDTO;
+import com.cms.CourierKaro.entity.Partner;
 import com.cms.CourierKaro.entity.Role;
 import com.cms.CourierKaro.entity.User;
+import com.cms.CourierKaro.repository.PartnerRepository;
 import com.cms.CourierKaro.repository.UserRepository;
 import com.cms.CourierKaro.response.LoginResponse;
 import com.cms.CourierKaro.response.UserResp;
@@ -25,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 public class UserServiceImpl implements UserService {
 
 	private final UserRepository userRepository;
+	private final PartnerRepository partnerRepository;
 	private final ModelMapper modelMapper;
 	// private final PasswordEncoder passwordEncoder;
 	private final JwtTokenProvider jwtTokenProvider;
@@ -82,6 +83,16 @@ public class UserServiceImpl implements UserService {
 		// "FAILED"
 		// );
 		// }
+		
+		if(role == role.ROLE_PARTNER) {
+			Partner p = partnerRepository.findByUserId(user).orElse(null);
+			if(p.isApproved() == false) {
+				return new LoginResponse(
+						null, null, null, null, null,
+						"Not Approved",
+						"FAILED");
+			}
+		}
 
 		String token = jwtTokenProvider.generateToken(
 				user.getEmail(),

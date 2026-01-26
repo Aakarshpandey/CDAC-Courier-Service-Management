@@ -26,6 +26,19 @@ public interface PartnerRepository extends JpaRepository<Partner, Long> {
 	       "JOIN FETCH p.vehicleTypeId " +
 	       "WHERE p.status = :status")
 	List<Partner> findByStatusWithDetails(@Param("status") PartnerStatus status);
+	
+	/**
+	 * Find all partners by approval status with eager fetching of userId and vehicleTypeId
+	 * to avoid N+1 problem. Uses JOIN FETCH to load related entities in a single query.
+	 * 
+	 * @param isApproved The approval status to filter by
+	 * @return List of partners with the specified approval status
+	 */
+	@Query("SELECT p FROM Partner p " +
+	       "JOIN FETCH p.userId " +
+	       "JOIN FETCH p.vehicleTypeId " +
+	       "WHERE p.isApproved = :isApproved")
+	List<Partner> findByIsApprovedWithDetails(@Param("isApproved") boolean isApproved);
 }
 
 
