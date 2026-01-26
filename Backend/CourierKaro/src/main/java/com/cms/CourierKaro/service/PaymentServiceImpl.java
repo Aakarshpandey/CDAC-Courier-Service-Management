@@ -1,6 +1,7 @@
 package com.cms.CourierKaro.service;
 
 import java.time.LocalDateTime;
+
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import com.cms.CourierKaro.entity.PaymentStatus;
 import com.cms.CourierKaro.entity.Shipment;
 import com.cms.CourierKaro.repository.PaymentRepository;
 import com.cms.CourierKaro.repository.ShipmentRepository;
+import com.cms.CourierKaro.dto.PaymentResponseDTO;
 
 @Service
 @Transactional
@@ -55,5 +57,26 @@ public class PaymentServiceImpl implements PaymentService {
                 savedPayment.getTransactionGatewayId(),
                 savedPayment.getStatus()
         );
+    }
+    
+    @Override
+    public PaymentResponseDTO getPaymentById(Long paymentId) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new RuntimeException("Payment not found with id: " + paymentId));
+        PaymentResponseDTO dto = new PaymentResponseDTO();
+        dto.setPaymentId(payment.getPaymentId());
+        dto.setAmount(payment.getAmount());
+        dto.setPaymentMethod(payment.getPaymentMethod().name());
+        dto.setTransactionGatewayId(payment.getTransactionGatewayId());
+        dto.setStatus(payment.getStatus().name());
+        dto.setCreatedAt(payment.getCreatedAt());
+        Shipment shipment = payment.getShipmentId();
+        PaymentResponseDTO.ShipmentSummary shipmentSummary = new PaymentResponseDTO.ShipmentSummary(
+                shipment.getShipmentId(),
+                shipment.getStatus().name(),
+                shipment.getPackageType().name()
+        );
+        dto.setShipment(shipmentSummary);
+        return dto;
     }
 }
