@@ -6,14 +6,14 @@ import Navbar from '../../components/NavBar/Navbar';
 
 const UserDashboard = () => {
   const navigate = useNavigate();
-  const user = { name: "Rohan Sharma" };
+  const user = { name: localStorage.getItem('userName') };
 
   const [shipments, setShipments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // TODO: Replace hardcoded email with actual user email from authentication/context
-  const userEmail = "vipulthelastairbender@gmail.com"; // HARDCODED FOR DEVELOPMENT
+  const userEmail = localStorage.getItem('userEmail'); // HARDCODED FOR DEVELOPMENT
 
   useEffect(() => {
     fetchUserShipments();

@@ -25,8 +25,8 @@ import lombok.RequiredArgsConstructor;
 
 @CrossOrigin
 @RestController
-@RequestMapping("/api/partners")
 @RequiredArgsConstructor
+@RequestMapping("/api/partner")
 public class PartnerController {
 
 	private final PartnerService partnerService;
@@ -108,5 +108,12 @@ public class PartnerController {
 		}
 		return jwtTokenProvider.getEmailFromToken(token);
 	}
+	
+	@GetMapping("/applications")
+	public ResponseEntity<?> getPartnerApplications(){
+		
+	}
+	
+	
 }
 
