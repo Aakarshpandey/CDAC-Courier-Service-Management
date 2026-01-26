@@ -1,13 +1,27 @@
 package com.cms.CourierKaro.service;
 
+import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
+
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.cms.CourierKaro.dto.DailyEarningDTO;
 import com.cms.CourierKaro.dto.AvailableOrderDTO;
 import com.cms.CourierKaro.dto.PartnerDashboardStatsDTO;
 import com.cms.CourierKaro.dto.PartnerEarningsBreakdownDTO;
 import com.cms.CourierKaro.dto.PartnerEarningsDTO;
 import com.cms.CourierKaro.dto.PartnerEarningsShipmentDTO;
+import com.cms.CourierKaro.dto.PartnerEarningsHistoryDTO;
 import com.cms.CourierKaro.dto.PartnerOnlineStatusResponseDTO;
 import com.cms.CourierKaro.dto.PartnerOnlineStatusUpdateDTO;
 import com.cms.CourierKaro.dto.PartnerProfileResponseDTO;
@@ -34,6 +48,7 @@ import com.cms.CourierKaro.repository.VehicleTypeRepository;
 import com.cms.CourierKaro.response.PartnerResp;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -64,7 +79,6 @@ public class PartnerServiceImpl implements PartnerService {
 	private final ShipmentRepository shipmentRepository;
 	private final PartnerPayoutRepository partnerPayoutRepository;
 	private final ModelMapper modelMapper;
-
 	@Override
 	public PartnerResp registerPartner(PartnerRegisterDTO dto) {
 		try {
@@ -165,7 +179,7 @@ public class PartnerServiceImpl implements PartnerService {
 			partner.setApproved(false);
 			partner.setOnline(false);
 			partner.setAvgRating(0.0);
-			partner.setStatus(PartnerStatus.INACTIVE);
+			partner.setStatus(PartnerStatus.SUSPENDED);
 
 			Partner savedPartner = partnerRepository.save(partner);
 
@@ -440,17 +454,18 @@ public class PartnerServiceImpl implements PartnerService {
 		}
 	}
 
-	public List<com.cms.CourierKaro.dto.PartnerApplicationDTO> getSuspendedPartners() {
+	@Override
+	public List<com.cms.CourierKaro.dto.PartnerApplicationDTO> getPendingPartners() {
 		try {
 			// Use the optimized query with JOIN FETCH to avoid N+1 problem
-			List<Partner> suspendedPartners = partnerRepository.findByStatusWithDetails(PartnerStatus.SUSPENDED);
+			List<Partner> pendingPartners = partnerRepository.findByIsApprovedWithDetails(false);
 
 			// Map Partner entities to PartnerApplicationDTO
-			return suspendedPartners.stream()
+			return pendingPartners.stream()
 					.map(this::mapToApplicationDTO)
 					.toList();
 		} catch (Exception e) {
-			throw new RuntimeException("Failed to fetch suspended partners: " + e.getMessage(), e);
+			throw new RuntimeException("Failed to fetch pending partners: " + e.getMessage(), e);
 		}
 	}
 
@@ -523,6 +538,7 @@ public class PartnerServiceImpl implements PartnerService {
 					.build();
 		}
 	}
+	@Override
 
 	public PartnerResp rejectPartner(Long partnerId) {
 		try {
@@ -588,6 +604,28 @@ public class PartnerServiceImpl implements PartnerService {
 		return dto;
 	}
 
+	// Add imports: PartnerPayoutRepository, PartnerEarningsHistoryDTO, etc.
+	// Inject PartnerPayoutRepository
+
+	@Override
+	public PartnerEarningsHistoryDTO getEarningsHistory(String userEmail, Timestamp startDate, Timestamp endDate,
+			Pageable pageable) {
+		User user = userRepository.findByEmail(userEmail).orElseThrow(() -> new RuntimeException("User not found"));
+		Partner partner = partnerRepository.findByUserId(user)
+				.orElseThrow(() -> new RuntimeException("Partner not found"));
+
+		if (partner == null) {
+			throw new RuntimeException("Partner not found");
+		}
+
+		Page<DailyEarningDTO> page = partnerPayoutRepository.findEarningsHistory(partner, startDate, endDate, pageable);
+		Double total = partnerPayoutRepository.calculateTotalEarnings(partner);
+
+		return PartnerEarningsHistoryDTO.builder()
+				.totalEarnings(BigDecimal.valueOf(total != null ? total : 0.0))
+				.earnings(page.getContent())
+				.build();
+	}
 	@Override
 	public ProfilePhotoResponseDTO removePartnerProfilePhoto(String userEmail) {
 		try {
