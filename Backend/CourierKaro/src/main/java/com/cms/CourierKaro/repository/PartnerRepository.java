@@ -39,6 +39,8 @@ public interface PartnerRepository extends JpaRepository<Partner, Long> {
 	       "JOIN FETCH p.vehicleTypeId " +
 	       "WHERE p.isApproved = :isApproved")
 	List<Partner> findByIsApprovedWithDetails(@Param("isApproved") boolean isApproved);
+	
+	long countByStatus(PartnerStatus status);
 }
 
 

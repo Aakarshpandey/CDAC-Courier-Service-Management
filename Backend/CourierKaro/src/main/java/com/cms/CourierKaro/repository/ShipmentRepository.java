@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.cms.CourierKaro.dto.ShipmentResponseDTO;
 import com.cms.CourierKaro.entity.Shipment;
+import com.cms.CourierKaro.entity.Status;
 import com.cms.CourierKaro.entity.User;
 
 public interface ShipmentRepository extends JpaRepository<Shipment, Long> {
@@ -116,4 +117,6 @@ public interface ShipmentRepository extends JpaRepository<Shipment, Long> {
             "LEFT JOIN s.vehicleTypeId v " +
             "WHERE s.shipmentId = :id")
      Optional<ShipmentResponseDTO> findShipmentDTOById(@Param("id") Long id);
+     
+     long countByStatus(Status status);
 }
