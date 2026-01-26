@@ -18,6 +18,9 @@ import org.springframework.stereotype.Service;
 import com.cms.CourierKaro.dto.DailyEarningDTO;
 import com.cms.CourierKaro.dto.AvailableOrderDTO;
 import com.cms.CourierKaro.dto.PartnerDashboardStatsDTO;
+import com.cms.CourierKaro.dto.PartnerEarningsBreakdownDTO;
+import com.cms.CourierKaro.dto.PartnerEarningsDTO;
+import com.cms.CourierKaro.dto.PartnerEarningsShipmentDTO;
 import com.cms.CourierKaro.dto.PartnerEarningsHistoryDTO;
 import com.cms.CourierKaro.dto.PartnerOnlineStatusResponseDTO;
 import com.cms.CourierKaro.dto.PartnerOnlineStatusUpdateDTO;
@@ -49,10 +52,17 @@ import java.sql.Timestamp;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Locale;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.UUID;
 
 import jakarta.transaction.Transactional;
@@ -310,9 +320,13 @@ public class PartnerServiceImpl implements PartnerService {
 			// Calculate today's orders count
 			int todayOrdersCount = todayShipments.size();
 
-			// Calculate today's earnings (only from completed deliveries)
-			double todayEarnings = todayShipments.stream()
+			// Calculate today's earnings (only from completed deliveries; earned when delivered)
+			double todayEarnings = allShipments.stream()
 					.filter(s -> s.getStatus() == Status.DELIVERED && s.getCalculatedPrice() != null)
+					.filter(s -> {
+						LocalDateTime earnedAt = s.getDeliveredAt() != null ? s.getDeliveredAt() : s.getCreatedAt();
+						return earnedAt != null && !earnedAt.isBefore(startOfDay) && !earnedAt.isAfter(endOfDay);
+					})
 					.mapToDouble(s -> s.getCalculatedPrice().doubleValue())
 					.sum();
 
@@ -811,6 +825,127 @@ public class PartnerServiceImpl implements PartnerService {
 			return PartnerPayoutDTO.builder()
 					.status("FAILED")
 					.message("Transfer failed: " + e.getMessage())
+					.build();
+		}
+	}
+
+	@Override
+	public PartnerEarningsDTO getPartnerEarnings(String userEmail, String period) {
+		try {
+			User user = userRepository.findByEmail(userEmail).orElse(null);
+			if (user == null) {
+				return PartnerEarningsDTO.builder()
+						.message("User not found")
+						.status("FAILED")
+						.build();
+			}
+
+			Partner partner = partnerRepository.findByUserId(user).orElse(null);
+			if (partner == null) {
+				return PartnerEarningsDTO.builder()
+						.message("Partner profile not found")
+						.status("FAILED")
+						.build();
+			}
+
+			final String p = period == null ? "WEEK" : period.trim().toUpperCase(Locale.ROOT);
+			final boolean isMonth = "MONTH".equals(p);
+			final String normalizedPeriod = isMonth ? "MONTH" : "WEEK";
+
+			final LocalDate today = LocalDate.now();
+			final LocalDate startDate = isMonth
+					? today.withDayOfMonth(1)
+					: today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+			final LocalDateTime start = startDate.atStartOfDay();
+			final LocalDateTime end = today.atTime(23, 59, 59);
+
+			final List<Shipment> deliveredShipments = shipmentRepository.findByPartnerId(partner).stream()
+					.filter(s -> s.getStatus() == Status.DELIVERED && s.getCalculatedPrice() != null)
+					.filter(s -> {
+						// When earnings are "earned": deliveredAt; fallback to createdAt if deliveredAt is missing
+						LocalDateTime earnedAt = s.getDeliveredAt() != null ? s.getDeliveredAt() : s.getCreatedAt();
+						return earnedAt != null && !earnedAt.isBefore(start) && !earnedAt.isAfter(end);
+					})
+					.toList();
+
+			final double total = deliveredShipments.stream()
+					.mapToDouble(s -> s.getCalculatedPrice().doubleValue())
+					.sum();
+
+			final DateTimeFormatter dayLabelFmt = DateTimeFormatter.ofPattern("EEE, MMM d", Locale.ENGLISH);
+
+			final List<PartnerEarningsBreakdownDTO> breakdown = new ArrayList<>();
+			if (!isMonth) {
+				Map<LocalDate, List<Shipment>> byDay = deliveredShipments.stream()
+						.collect(Collectors.groupingBy(s -> {
+							LocalDateTime earnedAt = s.getDeliveredAt() != null ? s.getDeliveredAt() : s.getCreatedAt();
+							return earnedAt.toLocalDate();
+						}));
+
+				for (LocalDate d = startDate; !d.isAfter(today); d = d.plusDays(1)) {
+					List<Shipment> dayShipments = byDay.getOrDefault(d, List.of());
+					double dayTotal = dayShipments.stream().mapToDouble(s -> s.getCalculatedPrice().doubleValue()).sum();
+					breakdown.add(PartnerEarningsBreakdownDTO.builder()
+							.label(d.format(dayLabelFmt))
+							.deliveries(dayShipments.size())
+							.earnings(dayTotal)
+							.build());
+				}
+			} else {
+				// Group by "week of month" buckets: Week 1 = days 1-7, Week 2 = 8-14, etc.
+				Map<Integer, List<Shipment>> byWeek = deliveredShipments.stream()
+						.collect(Collectors.groupingBy(s -> {
+							LocalDateTime earnedAt = s.getDeliveredAt() != null ? s.getDeliveredAt() : s.getCreatedAt();
+							int dom = earnedAt.toLocalDate().getDayOfMonth();
+							return ((dom - 1) / 7) + 1;
+						}));
+
+				int lastWeekIndex = ((today.getDayOfMonth() - 1) / 7) + 1;
+				for (int w = 1; w <= lastWeekIndex; w++) {
+					List<Shipment> weekShipments = byWeek.getOrDefault(w, List.of());
+					double weekTotal = weekShipments.stream().mapToDouble(s -> s.getCalculatedPrice().doubleValue())
+							.sum();
+					breakdown.add(PartnerEarningsBreakdownDTO.builder()
+							.label("Week " + w)
+							.deliveries(weekShipments.size())
+							.earnings(weekTotal)
+							.build());
+				}
+			}
+
+			final List<PartnerEarningsShipmentDTO> shipments = deliveredShipments.stream()
+					.sorted(Comparator.comparing((Shipment s) -> {
+						LocalDateTime earnedAt = s.getDeliveredAt() != null ? s.getDeliveredAt() : s.getCreatedAt();
+						return earnedAt;
+					}, Comparator.nullsLast(Comparator.naturalOrder())).reversed())
+					.map(s -> {
+						LocalDateTime earnedAt = s.getDeliveredAt() != null ? s.getDeliveredAt() : s.getCreatedAt();
+						return PartnerEarningsShipmentDTO.builder()
+								.shipmentId(s.getShipmentId())
+								.earnedAt(earnedAt)
+								.amount(s.getCalculatedPrice().doubleValue())
+								.pickupAddress(s.getPickupAddress())
+								.deliveryAddress(s.getDeliveryAddress())
+								.build();
+					})
+					.toList();
+
+			return PartnerEarningsDTO.builder()
+					.period(normalizedPeriod)
+					.fromDate(startDate.toString())
+					.toDate(today.toString())
+					.deliveries(deliveredShipments.size())
+					.totalEarnings(total)
+					.bonus(0.0)
+					.breakdown(breakdown)
+					.shipments(shipments)
+					.message("Earnings loaded successfully")
+					.status("SUCCESS")
+					.build();
+		} catch (Exception e) {
+			return PartnerEarningsDTO.builder()
+					.message("Failed to load earnings: " + e.getMessage())
+					.status("FAILED")
 					.build();
 		}
 	}

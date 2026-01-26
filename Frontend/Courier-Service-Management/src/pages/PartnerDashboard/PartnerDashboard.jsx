@@ -247,7 +247,7 @@ export default function PageDashboard() {
             )
           )}
           {activeTab === "earnings" && (
-            <Earning />
+            <Earning dashboardStats={dashboardStats} />
           )}
           {activeTab === "profile" && (
             <PartnerProfile partnerData={partnerProfile} />

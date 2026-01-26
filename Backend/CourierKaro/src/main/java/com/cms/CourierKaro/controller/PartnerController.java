@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 
 import com.cms.CourierKaro.dto.AvailableOrderDTO;
 import com.cms.CourierKaro.dto.PartnerDashboardStatsDTO;
+import com.cms.CourierKaro.dto.PartnerEarningsDTO;
 import com.cms.CourierKaro.dto.PartnerEarningsHistoryDTO;
 import com.cms.CourierKaro.dto.PartnerOnlineStatusResponseDTO;
 import com.cms.CourierKaro.dto.PartnerOnlineStatusUpdateDTO;
@@ -195,6 +197,23 @@ public class PartnerController {
 							.build());
 		}
 		PartnerPayoutDTO response = partnerService.transferEarnings(userEmail, dto);
+		return ResponseEntity.ok(response);
+	}
+
+	@GetMapping("/earnings")
+	public ResponseEntity<?> getPartnerEarnings(
+			Principal principal,
+			@RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+			@RequestParam(value = "period", required = false) String period) {
+		String userEmail = resolveEmail(principal, authorizationHeader);
+		if (userEmail == null) {
+			return ResponseEntity.badRequest().body(
+					PartnerEarningsDTO.builder()
+							.message("Authentication required")
+							.status("FAILED")
+							.build());
+		}
+		PartnerEarningsDTO response = partnerService.getPartnerEarnings(userEmail, period);
 		return ResponseEntity.ok(response);
 	}
 

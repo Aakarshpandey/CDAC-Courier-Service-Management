@@ -15,6 +15,7 @@ import com.cms.CourierKaro.dto.PartnerProfileResponseDTO;
 import com.cms.CourierKaro.dto.PartnerProfileUpdateDTO;
 import com.cms.CourierKaro.dto.PartnerPayoutDTO;
 import com.cms.CourierKaro.dto.PartnerRegisterDTO;
+import com.cms.CourierKaro.dto.PartnerEarningsDTO;
 import com.cms.CourierKaro.dto.ProfilePhotoResponseDTO;
 import com.cms.CourierKaro.dto.TransferEarningsRequestDTO;
 import com.cms.CourierKaro.response.PartnerResp;
@@ -65,4 +66,6 @@ public interface PartnerService {
 	List<PartnerPayoutDTO> getPartnerPayouts(String userEmail);
 
 	PartnerPayoutDTO transferEarnings(String userEmail, TransferEarningsRequestDTO dto);
+
+	PartnerEarningsDTO getPartnerEarnings(String userEmail, String period);
 }

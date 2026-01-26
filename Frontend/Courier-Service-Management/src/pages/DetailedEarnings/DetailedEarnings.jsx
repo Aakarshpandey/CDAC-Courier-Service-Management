@@ -1,44 +1,62 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/NavBar/Navbar";
+import { getPartnerEarnings } from "../../services/users";
 
 export default function DetailedEarnings() {
   const navigate = useNavigate();
   const [selectedPeriod, setSelectedPeriod] = useState("week");
+  const [loading, setLoading] = useState(true);
+  const [earnings, setEarnings] = useState(null);
+  const [error, setError] = useState(null);
 
   const adminUser = { name: "Amit" };
 
-  // Sample earnings data
-  const earningsData = {
-    week: {
-      total: 7860,
-      orders: 52,
-      bonus: 500,
-      breakdown: [
-        { date: "Mon, Dec 4", orders: 8, earnings: 1240 },
-        { date: "Tue, Dec 5", orders: 7, earnings: 1050 },
-        { date: "Wed, Dec 6", orders: 9, earnings: 1380 },
-        { date: "Thu, Dec 7", orders: 6, earnings: 920 },
-        { date: "Fri, Dec 8", orders: 10, earnings: 1520 },
-        { date: "Sat, Dec 9", orders: 8, earnings: 1150 },
-        { date: "Sun, Dec 10", orders: 4, earnings: 600 },
-      ],
-    },
-    month: {
-      total: 32450,
-      orders: 218,
-      bonus: 2000,
-      breakdown: [
-        { date: "Week 1", orders: 54, earnings: 8120 },
-        { date: "Week 2", orders: 52, earnings: 7860 },
-        { date: "Week 3", orders: 58, earnings: 8740 },
-        { date: "Week 4", orders: 54, earnings: 7730 },
-      ],
-    },
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const resp = await getPartnerEarnings(selectedPeriod);
+        if (!mounted) return;
 
+        if (resp?.data?.status === "SUCCESS") {
+          setEarnings(resp.data);
+        } else {
+          setError(resp?.data?.message || "Failed to load earnings");
+        }
+      } catch (e) {
+        if (!mounted) return;
+        setError("Failed to load earnings");
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [selectedPeriod]);
+
+  const currentData = useMemo(() => {
+    const total = Number(earnings?.totalEarnings) || 0;
+    const orders = Number(earnings?.deliveries) || 0;
+    const bonus = Number(earnings?.bonus) || 0;
+    const breakdown = Array.isArray(earnings?.breakdown) ? earnings.breakdown : [];
+    const shipments = Array.isArray(earnings?.shipments) ? earnings.shipments : [];
+
+    return { total, orders, bonus, breakdown, shipments };
+  }, [earnings]);
+
+  const formatEarnedAt = (earnedAt) => {
+    if (!earnedAt) return "—";
+    try {
+      const d = new Date(earnedAt);
+      return d.toLocaleString();
+    } catch {
+      return "—";
+    }
   };
-
-  const currentData = earningsData[selectedPeriod];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -70,7 +88,7 @@ export default function DetailedEarnings() {
               Detailed Earnings
             </h1>
             <p className="text-gray-600">
-              Complete breakdown of your earnings
+              Complete breakdown of your earnings (only DELIVERED shipments)
             </p>
           </div>
         </div>
@@ -99,6 +117,12 @@ export default function DetailedEarnings() {
           </button>
         </div>
 
+        {error && (
+          <div className="mb-6 bg-white rounded-lg border border-red-200 p-4 text-sm text-red-700">
+            {error}
+          </div>
+        )}
+
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg p-6 text-white shadow-lg">
@@ -118,7 +142,9 @@ export default function DetailedEarnings() {
               </svg>
               <span className="text-sm opacity-90">Total Earnings</span>
             </div>
-            <p className="text-4xl font-bold">₹{currentData.total.toLocaleString()}</p>
+            <p className="text-4xl font-bold">
+              {loading ? "—" : `₹${currentData.total.toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
+            </p>
           </div>
 
           <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-6 text-white shadow-lg">
@@ -138,7 +164,7 @@ export default function DetailedEarnings() {
               </svg>
               <span className="text-sm opacity-90">Total Orders</span>
             </div>
-            <p className="text-4xl font-bold">{currentData.orders}</p>
+            <p className="text-4xl font-bold">{loading ? "—" : currentData.orders}</p>
           </div>
         </div>
 
@@ -178,16 +204,16 @@ export default function DetailedEarnings() {
                     className="hover:bg-gray-50 transition-colors"
                   >
                     <td className="px-6 py-4 text-sm font-medium text-gray-800">
-                      {item.date}
+                      {item.label}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">
-                      {item.orders}
+                      {item.deliveries}
                     </td>
                     <td className="px-6 py-4 text-sm font-semibold text-green-600">
-                      ₹{item.earnings.toLocaleString()}
+                      ₹{Number(item.earnings || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">
-                      ₹{Math.round(item.earnings / item.orders)}
+                      ₹{Number(item.deliveries) > 0 ? Math.round(Number(item.earnings || 0) / Number(item.deliveries)) : 0}
                     </td>
                   </tr>
                 ))}
@@ -201,13 +227,72 @@ export default function DetailedEarnings() {
                     {currentData.orders}
                   </td>
                   <td className="px-6 py-4 text-sm font-bold text-green-600">
-                    ₹{currentData.total.toLocaleString()}
+                    ₹{currentData.total.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                   </td>
                   <td className="px-6 py-4 text-sm font-bold text-gray-800">
-                    ₹{Math.round(currentData.total / currentData.orders)}
+                    ₹{currentData.orders > 0 ? Math.round(currentData.total / currentData.orders) : 0}
                   </td>
                 </tr>
               </tfoot>
+            </table>
+          </div>
+        </div>
+
+        {/* Delivered Shipments */}
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm mt-6">
+          <div className="p-6 border-b border-gray-200">
+            <h2 className="text-xl font-semibold text-gray-800">
+              Delivered Shipments
+            </h2>
+            <p className="text-sm text-gray-600 mt-1">
+              Earnings are recorded only when the shipment is delivered.
+            </p>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                    Shipment ID
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                    Delivered At
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                    Earnings
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {loading ? (
+                  <tr>
+                    <td className="px-6 py-4 text-sm text-gray-600" colSpan={3}>
+                      Loading…
+                    </td>
+                  </tr>
+                ) : currentData.shipments.length === 0 ? (
+                  <tr>
+                    <td className="px-6 py-4 text-sm text-gray-600" colSpan={3}>
+                      No delivered shipments in this period.
+                    </td>
+                  </tr>
+                ) : (
+                  currentData.shipments.map((s) => (
+                    <tr key={s.shipmentId} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 text-sm font-medium text-gray-800">
+                        #{s.shipmentId}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-600">
+                        {formatEarnedAt(s.earnedAt)}
+                      </td>
+                      <td className="px-6 py-4 text-sm font-semibold text-green-600">
+                        ₹{Number(s.amount || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
             </table>
           </div>
         </div>
@@ -235,19 +320,21 @@ export default function DetailedEarnings() {
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Average per Day</span>
                 <span className="font-semibold text-gray-800">
-                  ₹{Math.round(currentData.total / currentData.breakdown.length)}
+                  ₹{currentData.breakdown.length > 0 ? Math.round(currentData.total / currentData.breakdown.length) : 0}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Orders per Day</span>
                 <span className="font-semibold text-gray-800">
-                  {Math.round(currentData.orders / currentData.breakdown.length)}
+                  {currentData.breakdown.length > 0 ? Math.round(currentData.orders / currentData.breakdown.length) : 0}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Best Day</span>
                 <span className="font-semibold text-green-600">
-                  ₹{Math.max(...currentData.breakdown.map(d => d.earnings))}
+                  ₹{currentData.breakdown.length > 0
+                    ? Math.max(...currentData.breakdown.map(d => Number(d.earnings || 0)))
+                    : 0}
                 </span>
               </div>
             </div>
@@ -274,19 +361,19 @@ export default function DetailedEarnings() {
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Base Earnings</span>
                 <span className="font-semibold text-gray-800">
-                  ₹{(currentData.total - currentData.bonus).toLocaleString()}
+                  ₹{Math.max(0, currentData.total - currentData.bonus).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Bonus</span>
                 <span className="font-semibold text-green-600">
-                  ₹{currentData.bonus.toLocaleString()}
+                  ₹{currentData.bonus.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Bonus %</span>
                 <span className="font-semibold text-purple-600">
-                  {((currentData.bonus / currentData.total) * 100).toFixed(1)}%
+                  {currentData.total > 0 ? ((currentData.bonus / currentData.total) * 100).toFixed(1) : "0.0"}%
                 </span>
               </div>
             </div>
