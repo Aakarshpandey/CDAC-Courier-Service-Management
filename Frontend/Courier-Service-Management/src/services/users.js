@@ -141,3 +141,77 @@ export async function uploadPartnerProfilePhoto(file) {
         throw error;
     }
 }
+
+export async function removePartnerProfilePhoto() {
+    try {
+        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+        const token = localStorage.getItem("authToken");
+
+        const response = await axios.delete(`${API_URL}/api/partners/profile-photo`, {
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        });
+        return response;
+    } catch (error) {
+        console.error("Error removing partner profile photo:", error);
+        throw error;
+    }
+}
+
+export async function getAvailableOrders() {
+    try {
+        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+        const token = localStorage.getItem("authToken");
+
+        const response = await axios.get(`${API_URL}/api/partners/available-orders`, {
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        });
+        return response;
+    } catch (error) {
+        console.error("Error fetching available orders:", error);
+        throw error;
+    }
+}
+
+export async function getPartnerPayouts() {
+    try {
+        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+        const token = localStorage.getItem("authToken");
+
+        const response = await axios.get(`${API_URL}/api/partners/payouts`, {
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        });
+        return response;
+    } catch (error) {
+        console.error("Error fetching partner payouts:", error);
+        throw error;
+    }
+}
+
+export async function transferEarnings(amount) {
+    try {
+        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+        const token = localStorage.getItem("authToken");
+
+        const response = await axios.post(`${API_URL}/api/partners/transfer-earnings`, {
+            amount: amount
+        }, {
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        });
+        return response;
+    } catch (error) {
+        console.error("Error transferring earnings:", error);
+        throw error;
+    }
+}

@@ -14,8 +14,7 @@ export default function PageDashboard() {
   const [loading, setLoading] = useState(true);
   const [onlineUpdating, setOnlineUpdating] = useState(false);
 
-  useEffect(() => {
-    const fetchPartnerData = async () => {
+  const fetchPartnerData = async () => {
       try {
         setLoading(true);
         const token = localStorage.getItem("authToken");
@@ -48,7 +47,20 @@ export default function PageDashboard() {
       }
     };
 
+  useEffect(() => {
     fetchPartnerData();
+  }, []);
+
+  // Refresh profile when returning from edit page
+  useEffect(() => {
+    const handleFocus = () => {
+      const token = localStorage.getItem("authToken");
+      if (token) {
+        fetchPartnerData();
+      }
+    };
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
   }, []);
 
   const welcomeName = partnerProfile?.firstName || "Partner";
