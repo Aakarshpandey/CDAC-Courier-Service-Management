@@ -140,14 +140,7 @@ const OrderDetails = () => {
       <Navbar user={user} />
 
       <div className="max-w-4xl mx-auto px-6 py-8">
-        {/* Back Button */}
-        <button
-          onClick={() => navigate('/user-dashboard')}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition"
-        >
-          <ArrowLeft size={20} />
-          <span>Back to Dashboard</span>
-        </button>
+       
 
         {/* Order Header */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">

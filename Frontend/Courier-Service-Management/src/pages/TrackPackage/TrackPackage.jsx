@@ -1,13 +1,21 @@
 import React, { useState } from 'react';
 import { Search, Phone, AlertCircle, MessageCircle, ArrowLeft } from 'lucide-react';
 import Navbar from '../../components/NavBar/Navbar';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 
 export default function TrackPackage() {
   const [trackingId, setTrackingId] = useState('');
-
+  const navigate = useNavigate();
   const handleTrack = () => {
-    // Tracking functionality to be added later
-    console.log('Tracking ID:', trackingId);
+    if(trackingId){
+      navigate(`/order/${trackingId}`)
+    }
+    else{
+      toast.error("Enter tracking Id")
+    }
+     
   };
 
   return (
@@ -34,7 +42,7 @@ export default function TrackPackage() {
           </div>
           
           <p className="text-sm text-gray-600 mb-4">
-            Enter your tracking ID (e.g., CK2024010001)
+            Enter your tracking ID 
           </p>
 
           <div className="mb-4">

@@ -18,20 +18,7 @@ export default function Navbar({ user,profileImage }) {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
 
-                    {/* BACK BUTTON */}
-                    <div className="flex items-center space-x-3">
-                        {pathname != "/" && (
-                            <button
-                                className="mr-3 text-xl"
-                                onClick={() => window.history.back()}
-                            >
-                                <ArrowLeft className="w-5 h-5" />
-                            </button>
-                        )}
-
-                        {/* LOGO */}
-                        <Logo />
-                    </div>
+                    <div className="flex items-center space-x-3">   <Logo /> </div>
                     {/* MAIN NAV IF USER LOGGED IN */}
                     {(pathname === "/") && (
                         <div className="hidden md:flex space-x-8">
