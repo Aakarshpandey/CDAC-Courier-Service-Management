@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import Navbar from "../../components/NavBar/Navbar";
-import { getPartnerProfile, updatePartnerProfile, uploadPartnerProfilePhoto } from "../../services/users";
+import { getPartnerProfile, updatePartnerProfile, uploadPartnerProfilePhoto, removePartnerProfilePhoto } from "../../services/users";
 
 export default function PartnerEditProfile() {
   const navigate = useNavigate();
@@ -81,10 +81,18 @@ export default function PartnerEditProfile() {
     }
   };
 
-  const handleRemoveImage = () => {
-    // We only store URL in DB; removing would require an API to clear it.
-    setProfilePhotoUrl(null);
-    toast.success("Profile picture cleared (not saved yet)");
+  const handleRemoveImage = async () => {
+    try {
+      const resp = await removePartnerProfilePhoto();
+      if (resp.data.status === "SUCCESS") {
+        setProfilePhotoUrl(null);
+        toast.success("Profile picture removed");
+      } else {
+        toast.error(resp.data.message || "Failed to remove photo");
+      }
+    } catch (err) {
+      toast.error("Failed to remove photo");
+    }
   };
 
   const handleSave = async () => {
@@ -103,7 +111,10 @@ export default function PartnerEditProfile() {
       const resp = await updatePartnerProfile(payload);
       if (resp.data.responseStatus === "SUCCESS") {
         toast.success("Profile updated successfully!");
-        navigate("/partner-dashboard");
+        // Small delay to ensure backend has processed
+        setTimeout(() => {
+          navigate("/partner-dashboard");
+        }, 500);
       } else {
         toast.error(resp.data.message || "Update failed");
       }
