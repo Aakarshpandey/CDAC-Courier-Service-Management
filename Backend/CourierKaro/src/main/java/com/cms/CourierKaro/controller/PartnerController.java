@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.cms.CourierKaro.dto.PartnerApplicationDTO;
 import com.cms.CourierKaro.dto.PartnerDashboardStatsDTO;
@@ -23,7 +25,9 @@ import com.cms.CourierKaro.dto.PartnerEarningsHistoryDTO;
 import com.cms.CourierKaro.dto.PartnerOnlineStatusResponseDTO;
 import com.cms.CourierKaro.dto.PartnerOnlineStatusUpdateDTO;
 import com.cms.CourierKaro.dto.PartnerProfileResponseDTO;
+import com.cms.CourierKaro.dto.PartnerProfileUpdateDTO;
 import com.cms.CourierKaro.dto.PartnerRegisterDTO;
+import com.cms.CourierKaro.dto.ProfilePhotoResponseDTO;
 import com.cms.CourierKaro.response.PartnerResp;
 import com.cms.CourierKaro.service.PartnerService;
 import com.cms.CourierKaro.security.JwtTokenProvider;
@@ -95,6 +99,40 @@ public class PartnerController {
 		return ResponseEntity.ok(response);
 	}
 
+	@PutMapping("/profile")
+	public ResponseEntity<?> updatePartnerProfile(
+			Principal principal,
+			@RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+			@RequestBody PartnerProfileUpdateDTO dto) {
+		String userEmail = resolveEmail(principal, authorizationHeader);
+		if (userEmail == null) {
+			return ResponseEntity.badRequest().body(
+					PartnerProfileResponseDTO.builder()
+							.message("Authentication required")
+							.responseStatus("FAILED")
+							.build());
+		}
+		PartnerProfileResponseDTO response = partnerService.updatePartnerProfile(userEmail, dto);
+		return ResponseEntity.ok(response);
+	}
+
+	@PostMapping("/profile-photo")
+	public ResponseEntity<?> uploadPartnerProfilePhoto(
+			Principal principal,
+			@RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+			@RequestPart("file") MultipartFile file) {
+		String userEmail = resolveEmail(principal, authorizationHeader);
+		if (userEmail == null) {
+			return ResponseEntity.badRequest().body(
+					ProfilePhotoResponseDTO.builder()
+							.message("Authentication required")
+							.status("FAILED")
+							.build());
+		}
+		ProfilePhotoResponseDTO response = partnerService.uploadPartnerProfilePhoto(userEmail, file);
+		return ResponseEntity.ok(response);
+	}
+
 	private String resolveEmail(Principal principal, String authorizationHeader) {
 		if (principal != null) {
 			return principal.getName();
@@ -115,6 +153,7 @@ public class PartnerController {
 		}
 		return jwtTokenProvider.getEmailFromToken(token);
 	}
+
 	
 	/**
 	 * Get all suspended partner applications

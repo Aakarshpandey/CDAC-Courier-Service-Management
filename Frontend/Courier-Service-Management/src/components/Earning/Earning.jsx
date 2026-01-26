@@ -7,10 +7,10 @@ export default function Earnings() {
   return (
     <div className="grid grid-cols-1 gap-6">
       {/* This Week Performance */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
         <div className="flex items-center gap-2 mb-3">
           <svg
-            className="w-5 h-5 text-green-600"
+            className="w-5 h-5 text-green-600 dark:text-green-400"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -22,28 +22,28 @@ export default function Earnings() {
               d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
             />
           </svg>
-          <h3 className="font-semibold text-gray-800">This Week</h3>
+          <h3 className="font-semibold text-gray-800 dark:text-gray-100">This Week</h3>
         </div>
-        <p className="text-sm text-gray-500 mb-2">Your performance this week</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Your performance this week</p>
         <div className="space-y-3">
           <div className="flex justify-between items-center">
-            <span className="text-sm text-gray-600">Orders Completed</span>
-            <span className="font-semibold text-gray-800">52</span>
+            <span className="text-sm text-gray-600 dark:text-gray-400">Orders Completed</span>
+            <span className="font-semibold text-gray-800 dark:text-gray-100">52</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-sm text-gray-600">Total Earnings</span>
-            <span className="font-semibold text-green-600">₹7,860</span>
+            <span className="text-sm text-gray-600 dark:text-gray-400">Total Earnings</span>
+            <span className="font-semibold text-green-600 dark:text-green-400">₹7,860</span>
           </div>
           {/* <div className="flex justify-between items-center">
             <span className="text-sm text-gray-600">Distance Covered</span>
             <span className="font-semibold text-gray-800">1,124 km</span>
           </div> */}
           <div className="flex justify-between items-center">
-            <span className="text-sm text-gray-600">Average Rating</span>
-            <span className="font-semibold text-gray-800 flex items-center gap-1">
+            <span className="text-sm text-gray-600 dark:text-gray-400">Average Rating</span>
+            <span className="font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-1">
               4.8
               <svg
-                className="w-4 h-4 text-yellow-500"
+                className="w-4 h-4 text-yellow-500 dark:text-yellow-400"
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
@@ -51,20 +51,20 @@ export default function Earnings() {
               </svg>
             </span>
           </div>
-          <div className="pt-3 border-t border-gray-200">
+          <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-gray-800">
+              <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
                 Weekly Bonus
               </span>
-              <span className="text-lg font-bold text-green-600">₹500</span>
+              <span className="text-lg font-bold text-green-600 dark:text-green-400">₹500</span>
             </div>
           </div>
           
           {/* View Details Button */}
-          <div className="pt-3 border-t border-gray-200">
+          <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
             <button
               onClick={() => navigate("/detailed-earnings")}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+              className="w-full bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white font-medium py-2.5 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
             >
               <svg
                 className="w-5 h-5"

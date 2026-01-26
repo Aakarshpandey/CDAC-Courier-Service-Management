@@ -1,25 +1,55 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import Navbar from "../../components/NavBar/Navbar";
+import { getPartnerProfile, updatePartnerProfile, uploadPartnerProfilePhoto } from "../../services/users";
 
 export default function PartnerEditProfile() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const [profileImage, setProfileImage] = useState(null);
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+  const [profilePhotoUrl, setProfilePhotoUrl] = useState(null);
   const [profileData, setProfileData] = useState({
-    firstName: "Amit",
-    lastName: "Kumar",
-    email: "amit.kumar@email.com",
-    phone: "+91 98765 12345",
-    vehicleType: "Bike",
-    vehicleModel: "Honda Activa",
-    vehicleNumber: "DL01AB1234",
-    address: "Green Park, New Delhi",
-    city: "Delhi",
-    state: "Delhi",
-    pincode: "110016",
+    firstName: "",
+    lastName: "",
+    email: "",
+    phoneNumber: "",
+    vehicleTypeName: "",
+    vehicleModel: "",
+    vehicleRegNumber: "",
+    driverAddress: "",
+    preferredCity: "",
+    pincode: "",
+    bankAccountNumber: "",
   });
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const resp = await getPartnerProfile();
+        if (resp.data.responseStatus === "SUCCESS") {
+          const p = resp.data;
+          setProfileData({
+            firstName: p.firstName || "",
+            lastName: p.lastName || "",
+            email: p.email || "",
+            phoneNumber: p.phoneNumber || "",
+            vehicleTypeName: p.vehicleTypeName || "",
+            vehicleModel: p.vehicleModel || "",
+            vehicleRegNumber: p.vehicleRegNumber || "",
+            driverAddress: p.driverAddress || "",
+            preferredCity: p.preferredCity || "",
+            pincode: p.pincode?.toString?.() || "",
+            bankAccountNumber: p.bankAccountNumber?.toString?.() || "",
+          });
+          setProfilePhotoUrl(p.profilePhotoUrl || null);
+        }
+      } catch (e) {
+        toast.error("Failed to load profile");
+      }
+    };
+    load();
+  }, []);
 
   const handleInputChange = (field, value) => {
     setProfileData((prev) => ({
@@ -35,38 +65,64 @@ export default function PartnerEditProfile() {
         toast.error("Image size should be less than 2MB");
         return;
       }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfileImage(reader.result);
-        toast.success("Profile picture updated!");
-      };
-      reader.readAsDataURL(file);
+      (async () => {
+        try {
+          const resp = await uploadPartnerProfilePhoto(file);
+          if (resp.data.status === "SUCCESS") {
+            setProfilePhotoUrl(resp.data.profilePhotoUrl);
+            toast.success("Profile picture updated!");
+          } else {
+            toast.error(resp.data.message || "Upload failed");
+          }
+        } catch (err) {
+          toast.error("Upload failed");
+        }
+      })();
     }
   };
 
   const handleRemoveImage = () => {
-    setProfileImage(null);
-    toast.success("Profile picture removed");
+    // We only store URL in DB; removing would require an API to clear it.
+    setProfilePhotoUrl(null);
+    toast.success("Profile picture cleared (not saved yet)");
   };
 
   const handleSave = async () => {
     setIsLoading(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    console.log("Profile updated:", profileData);
-    setIsLoading(false);
-    toast.success("Profile updated successfully!");
+    try {
+      const payload = {
+        firstName: profileData.firstName,
+        lastName: profileData.lastName,
+        phoneNumber: profileData.phoneNumber,
+        vehicleModel: profileData.vehicleModel,
+        driverAddress: profileData.driverAddress,
+        preferredCity: profileData.preferredCity,
+        pincode: profileData.pincode ? parseInt(profileData.pincode) : null,
+        bankAccountNumber: profileData.bankAccountNumber ? parseInt(profileData.bankAccountNumber) : null,
+      };
+      const resp = await updatePartnerProfile(payload);
+      if (resp.data.responseStatus === "SUCCESS") {
+        toast.success("Profile updated successfully!");
+        navigate("/partner-dashboard");
+      } else {
+        toast.error(resp.data.message || "Update failed");
+      }
+    } catch (e) {
+      toast.error("Update failed");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleCancel = () => {
     navigate("/partner-dashboard");
   };
 
-  const adminUser = { name: "Amit" };
+  const user = { name: profileData.firstName || "Partner", profilePhotoUrl };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar user={adminUser} profileImage={profileImage} />
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+      <Navbar user={user} />
 
       <div className="max-w-5xl mx-auto px-6 py-6">
         {/* Header */}
@@ -118,17 +174,17 @@ export default function PartnerEditProfile() {
             </div>
             <div className="flex items-center gap-6">
               <div className="relative">
-                {profileImage ? (
+                {profilePhotoUrl ? (
                   <img
-                    src={profileImage}
+                    src={profilePhotoUrl.startsWith("http") ? profilePhotoUrl : `${API_URL}${profilePhotoUrl}`}
                     alt="Profile"
                     className="w-24 h-24 rounded-full object-cover border-4 border-blue-100"
                   />
                 ) : (
                   <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center border-4 border-blue-100">
                     <span className="text-white text-3xl font-semibold">
-                      {profileData.firstName[0]}
-                      {profileData.lastName[0]}
+                      {(profileData.firstName?.[0] || "P")}
+                      {(profileData.lastName?.[0] || "")}
                     </span>
                   </div>
                 )}
@@ -157,7 +213,7 @@ export default function PartnerEditProfile() {
                       className="hidden"
                     />
                   </label>
-                  {profileImage && (
+                  {profilePhotoUrl && (
                     <button
                       onClick={handleRemoveImage}
                       className="px-4 py-2 border border-red-300 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
@@ -279,9 +335,9 @@ export default function PartnerEditProfile() {
                   <input
                     type="email"
                     value={profileData.email}
-                    onChange={(e) => handleInputChange("email", e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                    placeholder="Enter email"
+                    disabled
+                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
+                    placeholder="Email"
                   />
                 </div>
               </div>
@@ -307,8 +363,8 @@ export default function PartnerEditProfile() {
                   </div>
                   <input
                     type="tel"
-                    value={profileData.phone}
-                    onChange={(e) => handleInputChange("phone", e.target.value)}
+                    value={profileData.phoneNumber}
+                    onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
                     className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     placeholder="Enter phone number"
                   />
@@ -342,18 +398,12 @@ export default function PartnerEditProfile() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Vehicle Type <span className="text-red-500">*</span>
                 </label>
-                <select
-                  value={profileData.vehicleType}
-                  onChange={(e) =>
-                    handleInputChange("vehicleType", e.target.value)
-                  }
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                >
-                  <option value="Bike">Bike</option>
-                  <option value="Scooter">Scooter</option>
-                  <option value="Car">Car</option>
-                  <option value="Van">Van</option>
-                </select>
+                <input
+                  type="text"
+                  value={profileData.vehicleTypeName}
+                  disabled
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -362,9 +412,7 @@ export default function PartnerEditProfile() {
                 <input
                   type="text"
                   value={profileData.vehicleModel}
-                  onChange={(e) =>
-                    handleInputChange("vehicleModel", e.target.value)
-                  }
+                  onChange={(e) => handleInputChange("vehicleModel", e.target.value)}
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   placeholder="e.g., Honda Activa"
                 />
@@ -376,13 +424,12 @@ export default function PartnerEditProfile() {
                 </label>
                 <input
                   type="text"
-                  value={profileData.vehicleNumber}
-                  onChange={(e) =>
-                    handleInputChange("vehicleNumber", e.target.value)
-                  }
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all uppercase"
+                  value={profileData.vehicleRegNumber}
+                  disabled
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed uppercase"
                   placeholder="e.g., DL01AB1234"
                 />
+                <p className="text-xs text-gray-500 mt-1">Registration number cannot be changed.</p>
               </div>
             </div>
           </div>
@@ -420,10 +467,8 @@ export default function PartnerEditProfile() {
                 </label>
                 <input
                   type="text"
-                  value={profileData.address}
-                  onChange={(e) =>
-                    handleInputChange("address", e.target.value)
-                  }
+                  value={profileData.driverAddress}
+                  onChange={(e) => handleInputChange("driverAddress", e.target.value)}
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   placeholder="Enter your street address"
                 />
@@ -435,8 +480,8 @@ export default function PartnerEditProfile() {
                   </label>
                   <input
                     type="text"
-                    value={profileData.city}
-                    onChange={(e) => handleInputChange("city", e.target.value)}
+                    value={profileData.preferredCity}
+                    onChange={(e) => handleInputChange("preferredCity", e.target.value)}
                     className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     placeholder="City"
                   />
@@ -447,10 +492,9 @@ export default function PartnerEditProfile() {
                   </label>
                   <input
                     type="text"
-                    value={profileData.state}
-                    onChange={(e) => handleInputChange("state", e.target.value)}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                    placeholder="State"
+                    value={"—"}
+                    disabled
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
                   />
                 </div>
                 <div>
