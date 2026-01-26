@@ -94,7 +94,7 @@ export const calculatePriceFromDistance = (vehicleType, distanceKm) => {
 export const buildShipmentRequest = (formData, pickupAddress, deliveryAddress, distance, calculatedPrice) => {
   return {
     // TODO: Replace hardcoded email with actual user email from authentication/context
-    userEmail: "vipulthelastairbender@gmail.com", // HARDCODED FOR DEVELOPMENT
+    userEmail: localStorage.getItem('userEmail'), // HARDCODED FOR DEVELOPMENT
     pickupLocation: {
       fullAddress: pickupAddress,
       contactName: formData.pickupContactName,
