@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
 import Logo from "../../components/Logo/Logo";
@@ -7,7 +7,16 @@ import axios from "axios";
 import { login } from "../../services/users";
 
 export default function Login() {
+  const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState("user");
+
+  // Auto-select partner tab if query parameter is present
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    if (tabParam === "partner") {
+      setActiveTab("partner");
+    }
+  }, [searchParams]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);

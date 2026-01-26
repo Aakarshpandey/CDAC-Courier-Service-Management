@@ -1,33 +1,34 @@
 import React, { useState } from 'react';
-import { ArrowLeft, User, Car, FileText, Briefcase, IndianRupee, Clock, Star, Check } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, User, Car, FileText, Briefcase, IndianRupee, Clock, Star, Check, CheckCircle } from 'lucide-react';
 import Navbar from '../../components/NavBar/Navbar';
-
+import { registerPartner } from '../../services/users';
 
 const BecomePartner = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     phone: '',
-    dateOfBirth: '',
+    password: '',
+    confirmPassword: '',
     address: '',
     city: '',
     pincode: '',
     vehicleType: '',
     vehicleModel: '',
     vehicleNumber: '',
-    manufacturingYear: '',
     hasInsurance: false,
     drivingLicense: '',
     aadharNumber: '',
     panNumber: '',
     bankAccount: '',
-    ifscCode: '',
-    preferredAreas: '',
-    workingHours: '',
-    experienceLevel: '',
     agreeTerms: false,
     agreeBackgroundCheck: false
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState({ type: '', text: '' });
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -41,14 +42,133 @@ const BecomePartner = () => {
     setFormData(prev => ({ ...prev, vehicleType: type }));
   };
 
-  const handleSubmit = () => {
-    console.log('Form submitted:', formData);
-    alert('Application submitted successfully! We will review your application and contact you soon.');
-    // Add your submission logic here
+  const splitFullName = (fullName) => {
+    const parts = fullName.trim().split(/\s+/);
+    if (parts.length === 1) {
+      return { firstName: parts[0], lastName: '' };
+    }
+    const lastName = parts.pop();
+    const firstName = parts.join(' ');
+    return { firstName, lastName };
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!formData.agreeTerms || !formData.agreeBackgroundCheck) {
+      setSubmitMessage({ type: 'error', text: 'Please accept the terms and conditions' });
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      setSubmitMessage({ type: 'error', text: 'Passwords do not match' });
+      return;
+    }
+
+    if (!formData.vehicleType) {
+      setSubmitMessage({ type: 'error', text: 'Please select a vehicle type' });
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitMessage({ type: '', text: '' });
+
+    try {
+      const { firstName, lastName } = splitFullName(formData.fullName);
+      
+      const registrationData = {
+        firstName,
+        lastName,
+        email: formData.email,
+        phoneNumber: formData.phone,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+        vehicleTypeName: formData.vehicleType,
+        vehicleRegNumber: formData.vehicleNumber,
+        vehicleModel: formData.vehicleModel,
+        drivingLiscenseNumber: formData.drivingLicense,
+        driverAddress: formData.address,
+        pincode: parseInt(formData.pincode) || 0,
+        preferredCity: formData.city,
+        panNumber: formData.panNumber,
+        bankAccountNumber: formData.bankAccount ? parseInt(formData.bankAccount) : null,
+        aadharNumber: formData.aadharNumber ? parseInt(formData.aadharNumber) : null,
+        validInsurance: formData.hasInsurance
+      };
+
+      const response = await registerPartner(registrationData);
+      
+      if (response.data.status === 'SUCCESS') {
+        // Show success modal
+        setShowSuccessModal(true);
+        // Reset form
+        setFormData({
+          fullName: '',
+          email: '',
+          phone: '',
+          password: '',
+          confirmPassword: '',
+          address: '',
+          city: '',
+          pincode: '',
+          vehicleType: '',
+          vehicleModel: '',
+          vehicleNumber: '',
+          hasInsurance: false,
+          drivingLicense: '',
+          aadharNumber: '',
+          panNumber: '',
+          bankAccount: '',
+          agreeTerms: false,
+          agreeBackgroundCheck: false
+        });
+        // Redirect to login after 2 seconds with partner tab auto-selected
+        setTimeout(() => {
+          navigate('/login?tab=partner');
+        }, 2000);
+      } else {
+        setSubmitMessage({ type: 'error', text: response.data.message || 'Registration failed. Please try again.' });
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || error.message || 'Registration failed. Please try again.';
+      setSubmitMessage({ type: 'error', text: errorMessage });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-xl p-8 max-w-md w-full mx-4 transform transition-all">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                <CheckCircle className="text-green-600" size={32} />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Registration Successful!
+              </h2>
+              <p className="text-gray-600 mb-6">
+                Your partner account has been created successfully. You will be redirected to the login page shortly.
+              </p>
+              <div className="w-full bg-blue-50 rounded-lg p-4 mb-4">
+                <p className="text-sm text-blue-800">
+                  <strong>Next Step:</strong> Please login with your email and password to access your partner dashboard.
+                </p>
+              </div>
+              <button
+                onClick={() => navigate('/login?tab=partner')}
+                className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+              >
+                Go to Login
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
      <Navbar />
 
@@ -102,7 +222,17 @@ const BecomePartner = () => {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Form Section */}
           <div className="lg:col-span-2">
-            <div className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Success/Error Message */}
+              {submitMessage.text && (
+                <div className={`p-4 rounded-lg ${
+                  submitMessage.type === 'success' 
+                    ? 'bg-green-50 text-green-800 border border-green-200' 
+                    : 'bg-red-50 text-red-800 border border-red-200'
+                }`}>
+                  {submitMessage.text}
+                </div>
+              )}
               {/* Personal Information */}
               <div className="bg-white rounded-xl shadow-md p-6">
                 <div className="flex items-center gap-2 mb-4">
@@ -156,14 +286,28 @@ const BecomePartner = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Date of Birth *
+                      Password *
                     </label>
                     <input
-                      type="text"
-                      name="dateOfBirth"
-                      value={formData.dateOfBirth}
+                      type="password"
+                      name="password"
+                      value={formData.password}
                       onChange={handleInputChange}
-                      placeholder="dd-mm-yyyy"
+                      placeholder="Create a password"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Confirm Password *
+                    </label>
+                    <input
+                      type="password"
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleInputChange}
+                      placeholder="Confirm your password"
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       required
                     />
@@ -228,7 +372,7 @@ const BecomePartner = () => {
                   <div className="grid md:grid-cols-2 gap-4">
                     <button
                       type="button"
-                      onClick={() => handleVehicleTypeSelect('Bike/Scooter', '₹300-500/day')}
+                      onClick={() => handleVehicleTypeSelect('Bike/Scooter')}
                       className={`p-4 border-2 rounded-lg text-left transition ${
                         formData.vehicleType === 'Bike/Scooter'
                           ? 'border-blue-600 bg-blue-50'
@@ -240,7 +384,7 @@ const BecomePartner = () => {
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleVehicleTypeSelect('Car/Sedan', '₹500-800/day')}
+                      onClick={() => handleVehicleTypeSelect('Car/Sedan')}
                       className={`p-4 border-2 rounded-lg text-left transition ${
                         formData.vehicleType === 'Car/Sedan'
                           ? 'border-blue-600 bg-blue-50'
@@ -252,7 +396,7 @@ const BecomePartner = () => {
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleVehicleTypeSelect('Auto Rickshaw', '₹400-600/day')}
+                      onClick={() => handleVehicleTypeSelect('Auto Rickshaw')}
                       className={`p-4 border-2 rounded-lg text-left transition ${
                         formData.vehicleType === 'Auto Rickshaw'
                           ? 'border-blue-600 bg-blue-50'
@@ -264,7 +408,7 @@ const BecomePartner = () => {
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleVehicleTypeSelect('Small Truck', '₹800-1000/day')}
+                      onClick={() => handleVehicleTypeSelect('Small Truck')}
                       className={`p-4 border-2 rounded-lg text-left transition ${
                         formData.vehicleType === 'Small Truck'
                           ? 'border-blue-600 bg-blue-50'
@@ -277,7 +421,7 @@ const BecomePartner = () => {
                   </div>
                   <button
                     type="button"
-                    onClick={() => handleVehicleTypeSelect('Large Truck', '₹1200-2000/day')}
+                    onClick={() => handleVehicleTypeSelect('Large Truck')}
                     className={`mt-4 w-full p-4 border-2 rounded-lg text-left transition ${
                       formData.vehicleType === 'Large Truck'
                         ? 'border-blue-600 bg-blue-50'
@@ -314,20 +458,6 @@ const BecomePartner = () => {
                       value={formData.vehicleNumber}
                       onChange={handleInputChange}
                       placeholder="e.g., DL01AB1234"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Manufacturing Year *
-                    </label>
-                    <input
-                      type="text"
-                      name="manufacturingYear"
-                      value={formData.manufacturingYear}
-                      onChange={handleInputChange}
-                      placeholder="e.g., 2020"
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       required
                     />
@@ -412,82 +542,9 @@ const BecomePartner = () => {
                       required
                     />
                   </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      IFSC Code *
-                    </label>
-                    <input
-                      type="text"
-                      name="ifscCode"
-                      value={formData.ifscCode}
-                      onChange={handleInputChange}
-                      placeholder="Enter IFSC code"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      required
-                    />
-                  </div>
                 </div>
               </div>
 
-              {/* Work Preferences */}
-              <div className="bg-white rounded-xl shadow-md p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <Briefcase className="text-orange-600" size={20} />
-                  <h2 className="text-xl font-semibold">Work Preferences</h2>
-                </div>
-                <p className="text-sm text-gray-600 mb-6">Tell us about your availability and preferences</p>
-                
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Preferred Working Areas *
-                    </label>
-                    <input
-                      type="text"
-                      name="preferredAreas"
-                      value={formData.preferredAreas}
-                      onChange={handleInputChange}
-                      placeholder="e.g., Gurgaon, Noida, South Delhi"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Working Hours *
-                    </label>
-                    <select
-                      name="workingHours"
-                      value={formData.workingHours}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      required
-                    >
-                      <option value="">Select working hours</option>
-                      <option value="full-time">Full Time (8+ hours)</option>
-                      <option value="part-time">Part Time (4-8 hours)</option>
-                      <option value="flexible">Flexible</option>
-                    </select>
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Experience Level *
-                    </label>
-                    <select
-                      name="experienceLevel"
-                      value={formData.experienceLevel}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      required
-                    >
-                      <option value="">Select experience</option>
-                      <option value="beginner">Beginner (0-1 years)</option>
-                      <option value="intermediate">Intermediate (1-3 years)</option>
-                      <option value="experienced">Experienced (3+ years)</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
 
               {/* Terms and Conditions */}
               <div className="bg-white rounded-xl shadow-md p-6">
@@ -530,12 +587,13 @@ const BecomePartner = () => {
 
               {/* Submit Button */}
               <button
-                onClick={handleSubmit}
-                className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Submit Application
+                {isSubmitting ? 'Submitting...' : 'Submit Application'}
               </button>
-            </div>
+            </form>
           </div>
 
           {/* Sidebar */}
