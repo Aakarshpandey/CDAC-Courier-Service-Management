@@ -6,9 +6,11 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cms.CourierKaro.dto.RecentOrdersDTO;
@@ -60,5 +62,21 @@ public class ShipmentController {
         String userEmail = principal.getName();
         List<RecentOrdersDTO> shipments = shipmentService.getShipments(userEmail);
         return ResponseEntity.ok(shipments);
+    }
+    @GetMapping("/user")
+    public ResponseEntity<?> getUserShipments(@RequestParam String email, Principal principal) {
+            // Use principal if authenticated, otherwise use email from query param
+//            String userEmail = principal.getName();
+             
+            String userEmail = email;          
+            List<ShipmentResponseDTO> shipments = shipmentService.getUserShipments(userEmail);
+            return ResponseEntity.ok(shipments);
+     
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getShipmentById(@PathVariable Long id) {
+    	ShipmentResponseDTO shipment = shipmentService.getShipmentById(id);
+    	return ResponseEntity.ok(shipment);
     }
 }

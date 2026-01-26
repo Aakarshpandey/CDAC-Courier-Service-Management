@@ -1,5 +1,7 @@
 package com.cms.CourierKaro.entity;
 
+import java.math.BigDecimal;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -28,12 +30,12 @@ public class VehicleType {
 	private String typeName;
 	
 	@Column(name ="base_fare")
-	private Double baseFare;
+	private BigDecimal baseFare;
 	
 	
 	@Column(name ="per_km_rate")
-	private Double perKmRate;
+	private BigDecimal perKmRate;
 	
 	@Column(name ="max_weight_kg")
-	private Double maxWeigthKg;
+	private BigDecimal maxWeigthKg;
 }
