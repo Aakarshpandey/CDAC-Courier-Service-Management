@@ -69,6 +69,7 @@ public class PartnerServiceImpl implements PartnerService {
 	private final ShipmentRepository shipmentRepository;
 	private final PartnerPayoutRepository partnerPayoutRepository;
 	private final ModelMapper modelMapper;
+
 	@Override
 	public PartnerResp registerPartner(PartnerRegisterDTO dto) {
 		try {
@@ -520,9 +521,12 @@ public class PartnerServiceImpl implements PartnerService {
 					.profilePhotoUrl(url)
 					.build();
 		} catch (Exception e) {
-			return ProfilePhotoResponseDTO.builder().status("FAILED").message("Upload failed: " + e.getMessage()).build();
+			return ProfilePhotoResponseDTO.builder().status("FAILED").message("Upload failed: " + e.getMessage())
+					.build();
 		}
+	}
 
+	@Override
 	public PartnerResp rejectPartner(Long partnerId) {
 		try {
 			Partner partner = partnerRepository.findById(partnerId)
@@ -609,6 +613,7 @@ public class PartnerServiceImpl implements PartnerService {
 				.earnings(page.getContent())
 				.build();
 	}
+
 	@Override
 	public ProfilePhotoResponseDTO removePartnerProfilePhoto(String userEmail) {
 		try {
