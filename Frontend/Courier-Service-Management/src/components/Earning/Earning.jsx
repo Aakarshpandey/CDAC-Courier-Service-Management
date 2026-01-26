@@ -1,8 +1,52 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getPartnerEarnings } from "../../services/users";
 
-export default function Earnings() {
+export default function Earnings({ dashboardStats }) {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [earnings, setEarnings] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const resp = await getPartnerEarnings("week");
+        if (!mounted) return;
+
+        if (resp?.data?.status === "SUCCESS") {
+          setEarnings(resp.data);
+        } else {
+          setError(resp?.data?.message || "Failed to load earnings");
+        }
+      } catch (e) {
+        if (!mounted) return;
+        setError("Failed to load earnings");
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const summary = useMemo(() => {
+    const deliveries = Number(earnings?.deliveries) || 0;
+    const totalEarnings = Number(earnings?.totalEarnings) || 0;
+    const bonus = Number(earnings?.bonus) || 0;
+    const avgRating = Number(dashboardStats?.avgRating) || 0;
+
+    return {
+      deliveries,
+      totalEarnings,
+      bonus,
+      avgRating,
+    };
+  }, [earnings, dashboardStats]);
 
   return (
     <div className="grid grid-cols-1 gap-6">
@@ -24,15 +68,26 @@ export default function Earnings() {
           </svg>
           <h3 className="font-semibold text-gray-800 dark:text-gray-100">This Week</h3>
         </div>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Your performance this week</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+          Earnings shown here are only for shipments marked as <span className="font-medium">DELIVERED</span>.
+        </p>
         <div className="space-y-3">
+          {error && (
+            <div className="text-sm text-red-600 dark:text-red-400">
+              {error}
+            </div>
+          )}
           <div className="flex justify-between items-center">
             <span className="text-sm text-gray-600 dark:text-gray-400">Orders Completed</span>
-            <span className="font-semibold text-gray-800 dark:text-gray-100">52</span>
+            <span className="font-semibold text-gray-800 dark:text-gray-100">
+              {loading ? "—" : summary.deliveries}
+            </span>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-sm text-gray-600 dark:text-gray-400">Total Earnings</span>
-            <span className="font-semibold text-green-600 dark:text-green-400">₹7,860</span>
+            <span className="font-semibold text-green-600 dark:text-green-400">
+              {loading ? "—" : `₹${summary.totalEarnings.toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
+            </span>
           </div>
           {/* <div className="flex justify-between items-center">
             <span className="text-sm text-gray-600">Distance Covered</span>
@@ -41,7 +96,7 @@ export default function Earnings() {
           <div className="flex justify-between items-center">
             <span className="text-sm text-gray-600 dark:text-gray-400">Average Rating</span>
             <span className="font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-1">
-              4.8
+              {dashboardStats ? summary.avgRating.toFixed(1) : "—"}
               <svg
                 className="w-4 h-4 text-yellow-500 dark:text-yellow-400"
                 fill="currentColor"
@@ -51,14 +106,18 @@ export default function Earnings() {
               </svg>
             </span>
           </div>
-          <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                Weekly Bonus
-              </span>
-              <span className="text-lg font-bold text-green-600 dark:text-green-400">₹500</span>
+          {!loading && summary.bonus > 0 && (
+            <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                  Weekly Bonus
+                </span>
+                <span className="text-lg font-bold text-green-600 dark:text-green-400">
+                  ₹{summary.bonus.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                </span>
+              </div>
             </div>
-          </div>
+          )}
           
           {/* View Details Button */}
           <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
