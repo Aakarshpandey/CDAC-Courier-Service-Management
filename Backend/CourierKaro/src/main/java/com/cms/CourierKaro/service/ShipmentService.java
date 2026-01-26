@@ -11,4 +11,5 @@ public interface ShipmentService {
     List<ShipmentResponseDTO> getUserShipments(String userEmail);
     ShipmentResponseDTO getShipmentById(Long shipmentId);
 	List<RecentOrdersDTO> getShipments(String userEmail);
+    ShipmentResponseDTO cancelShipment(Long shipmentId);
 }

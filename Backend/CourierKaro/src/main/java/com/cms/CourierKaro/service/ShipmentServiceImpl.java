@@ -156,5 +156,24 @@ public class ShipmentServiceImpl implements ShipmentService {
         return shipmentRepository.findShipmentDTOById(shipmentId)
                 .orElseThrow(() -> new RuntimeException("Shipment not found with id: " + shipmentId));
     }
+    
+    @Override
+    public ShipmentResponseDTO cancelShipment(Long shipmentId) {
+        Shipment shipment = shipmentRepository.findById(shipmentId)
+                .orElseThrow(() -> new RuntimeException("Shipment not found with id: " + shipmentId));
+
+        if (shipment.getStatus() != Status.PENDING) {
+            throw new RuntimeException("Only pending orders can be cancelled");
+        }
+
+        shipment.setStatus(Status.CANCELLED);
+        shipmentRepository.save(shipment);
+
+        return ShipmentResponseDTO.builder()
+                .shipmentId(shipmentId)
+                .status("SUCCESS")
+                .message("Order cancelled successfully")
+                .build();
+    }
 
 }

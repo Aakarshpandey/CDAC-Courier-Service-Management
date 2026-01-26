@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -78,5 +79,11 @@ public class ShipmentController {
     public ResponseEntity<?> getShipmentById(@PathVariable Long id) {
     	ShipmentResponseDTO shipment = shipmentService.getShipmentById(id);
     	return ResponseEntity.ok(shipment);
+    }
+    
+    @PutMapping("/{id}")
+    public ResponseEntity<?> cancelShipment(@PathVariable Long id) {
+            ShipmentResponseDTO response = shipmentService.cancelShipment(id);
+            return ResponseEntity.ok(response);
     }
 }
