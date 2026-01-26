@@ -14,7 +14,7 @@ const getAuthToken = () => {
  */
 export async function getSuspendedPartners() {
     try {
-        const response = await axios.get(`${API_BASE_URL}/partner/applications`, {
+        const response = await axios.get(`${API_BASE_URL}/api/partners/applications`, {
             headers: {
                 "Authorization": `Bearer ${getAuthToken()}`,
                 "Content-Type": "application/json",
@@ -34,7 +34,7 @@ export async function getSuspendedPartners() {
 export async function approvePartner(partnerId) {
     try {
         const response = await axios.put(
-            `${API_BASE_URL}/partner/approve/${partnerId}`,
+            `${API_BASE_URL}/api/partners/approve/${partnerId}`,
             {},
             {
                 headers: {
@@ -57,7 +57,7 @@ export async function approvePartner(partnerId) {
 export async function rejectPartner(partnerId) {
     try {
         const response = await axios.put(
-            `${API_BASE_URL}/partner/reject/${partnerId}`,
+            `${API_BASE_URL}/api/partners/reject/${partnerId}`,
             {},
             {
                 headers: {
