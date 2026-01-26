@@ -7,7 +7,9 @@ import com.cms.CourierKaro.dto.PartnerDashboardStatsDTO;
 import com.cms.CourierKaro.dto.PartnerOnlineStatusResponseDTO;
 import com.cms.CourierKaro.dto.PartnerOnlineStatusUpdateDTO;
 import com.cms.CourierKaro.dto.PartnerProfileResponseDTO;
+import com.cms.CourierKaro.dto.PartnerProfileUpdateDTO;
 import com.cms.CourierKaro.dto.PartnerRegisterDTO;
+import com.cms.CourierKaro.dto.ProfilePhotoResponseDTO;
 import com.cms.CourierKaro.entity.Partner;
 import com.cms.CourierKaro.entity.PartnerStatus;
 import com.cms.CourierKaro.entity.Role;
@@ -22,9 +24,14 @@ import com.cms.CourierKaro.repository.VehicleTypeRepository;
 import com.cms.CourierKaro.response.PartnerResp;
 
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Locale;
 import java.util.List;
+import java.util.UUID;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -361,6 +368,100 @@ public class PartnerServiceImpl implements PartnerService {
 					.status("FAILED")
 					.message("Failed to update status: " + e.getMessage())
 					.build();
+		}
+	}
+
+	@Override
+	public PartnerProfileResponseDTO updatePartnerProfile(String userEmail, PartnerProfileUpdateDTO dto) {
+		try {
+			User user = userRepository.findByEmail(userEmail).orElse(null);
+			if (user == null) {
+				return PartnerProfileResponseDTO.builder().message("User not found").responseStatus("FAILED").build();
+			}
+
+			Partner partner = partnerRepository.findByUserId(user).orElse(null);
+			if (partner == null) {
+				return PartnerProfileResponseDTO.builder().message("Partner profile not found").responseStatus("FAILED").build();
+			}
+
+			if (dto.getFirstName() != null)
+				user.setFirstName(dto.getFirstName());
+			if (dto.getLastName() != null)
+				user.setLastName(dto.getLastName());
+			if (dto.getPhoneNumber() != null)
+				user.setPhoneNumber(dto.getPhoneNumber());
+
+			if (dto.getVehicleModel() != null)
+				partner.setVehicleModel(dto.getVehicleModel());
+			if (dto.getDriverAddress() != null)
+				partner.setDriverAddress(dto.getDriverAddress());
+			if (dto.getPreferredCity() != null)
+				partner.setPreferredCity(dto.getPreferredCity());
+			if (dto.getPincode() != null)
+				partner.setPincode(dto.getPincode());
+			if (dto.getBankAccountNumber() != null)
+				partner.setBankAccountNumber(dto.getBankAccountNumber());
+
+			userRepository.save(user);
+			partnerRepository.save(partner);
+
+			// Return fresh profile
+			return getPartnerProfile(userEmail);
+		} catch (Exception e) {
+			return PartnerProfileResponseDTO.builder()
+					.message("Failed to update profile: " + e.getMessage())
+					.responseStatus("FAILED")
+					.build();
+		}
+	}
+
+	@Override
+	public ProfilePhotoResponseDTO uploadPartnerProfilePhoto(String userEmail, org.springframework.web.multipart.MultipartFile file) {
+		try {
+			if (file == null || file.isEmpty()) {
+				return ProfilePhotoResponseDTO.builder().status("FAILED").message("File is required").build();
+			}
+
+			// Basic validation
+			if (file.getSize() > 2 * 1024 * 1024) {
+				return ProfilePhotoResponseDTO.builder().status("FAILED").message("File too large (max 2MB)").build();
+			}
+
+			String contentType = file.getContentType();
+			if (contentType == null || !contentType.toLowerCase(Locale.ROOT).startsWith("image/")) {
+				return ProfilePhotoResponseDTO.builder().status("FAILED").message("Only image files are allowed").build();
+			}
+
+			User user = userRepository.findByEmail(userEmail).orElse(null);
+			if (user == null) {
+				return ProfilePhotoResponseDTO.builder().status("FAILED").message("User not found").build();
+			}
+
+			// Save to ./uploads/partners/
+			String original = file.getOriginalFilename() == null ? "upload" : file.getOriginalFilename();
+			String ext = "";
+			int dot = original.lastIndexOf('.');
+			if (dot >= 0 && dot < original.length() - 1) {
+				ext = original.substring(dot);
+			}
+			String filename = UUID.randomUUID().toString() + ext;
+
+			Path uploadDir = Paths.get("uploads", "partners");
+			Files.createDirectories(uploadDir);
+			Path target = uploadDir.resolve(filename);
+			Files.write(target, file.getBytes());
+
+			String url = "/uploads/partners/" + filename;
+			user.setProfilePhotoUrl(url);
+			userRepository.save(user);
+
+			return ProfilePhotoResponseDTO.builder()
+					.status("SUCCESS")
+					.message("Profile photo uploaded")
+					.profilePhotoUrl(url)
+					.build();
+		} catch (Exception e) {
+			return ProfilePhotoResponseDTO.builder().status("FAILED").message("Upload failed: " + e.getMessage()).build();
 		}
 	}
 }
