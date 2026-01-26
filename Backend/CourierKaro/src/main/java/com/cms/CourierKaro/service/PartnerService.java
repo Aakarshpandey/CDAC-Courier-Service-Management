@@ -1,9 +1,13 @@
 package com.cms.CourierKaro.service;
 
+import java.sql.Timestamp;
 import java.util.List;
+
+import org.springframework.data.domain.Pageable;
 
 import com.cms.CourierKaro.dto.PartnerApplicationDTO;
 import com.cms.CourierKaro.dto.PartnerDashboardStatsDTO;
+import com.cms.CourierKaro.dto.PartnerEarningsHistoryDTO;
 import com.cms.CourierKaro.dto.PartnerOnlineStatusResponseDTO;
 import com.cms.CourierKaro.dto.PartnerOnlineStatusUpdateDTO;
 import com.cms.CourierKaro.dto.PartnerProfileResponseDTO;
@@ -35,5 +39,7 @@ public interface PartnerService {
 	 * @return Response indicating success or failure
 	 */
 	PartnerResp rejectPartner(Long partnerId);
+	
+	PartnerEarningsHistoryDTO getEarningsHistory(String userEmail, Timestamp startDate, Timestamp endDate, Pageable pageable);
 }
 

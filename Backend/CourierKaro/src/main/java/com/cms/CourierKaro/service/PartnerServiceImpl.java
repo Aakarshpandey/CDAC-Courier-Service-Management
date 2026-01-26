@@ -1,9 +1,13 @@
 package com.cms.CourierKaro.service;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.cms.CourierKaro.dto.DailyEarningDTO;
 import com.cms.CourierKaro.dto.PartnerDashboardStatsDTO;
+import com.cms.CourierKaro.dto.PartnerEarningsHistoryDTO;
 import com.cms.CourierKaro.dto.PartnerOnlineStatusResponseDTO;
 import com.cms.CourierKaro.dto.PartnerOnlineStatusUpdateDTO;
 import com.cms.CourierKaro.dto.PartnerProfileResponseDTO;
@@ -15,6 +19,7 @@ import com.cms.CourierKaro.entity.Shipment;
 import com.cms.CourierKaro.entity.Status;
 import com.cms.CourierKaro.entity.User;
 import com.cms.CourierKaro.entity.VehicleType;
+import com.cms.CourierKaro.repository.PartnerPayoutRepository;
 import com.cms.CourierKaro.repository.PartnerRepository;
 import com.cms.CourierKaro.repository.ShipmentRepository;
 import com.cms.CourierKaro.repository.UserRepository;
@@ -22,6 +27,7 @@ import com.cms.CourierKaro.repository.VehicleTypeRepository;
 import com.cms.CourierKaro.response.PartnerResp;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -39,6 +45,7 @@ public class PartnerServiceImpl implements PartnerService {
 	private final VehicleTypeRepository vehicleTypeRepository;
 	private final ShipmentRepository shipmentRepository;
 	private final ModelMapper modelMapper;
+	private final PartnerPayoutRepository partnerPayoutRepository; 
 
 	@Override
 	public PartnerResp registerPartner(PartnerRegisterDTO dto) {
@@ -462,5 +469,26 @@ public class PartnerServiceImpl implements PartnerService {
 		
 		return dto;
 	}
+	
+    // Add imports: PartnerPayoutRepository, PartnerEarningsHistoryDTO, etc.
+    // Inject PartnerPayoutRepository
+
+    @Override
+    public PartnerEarningsHistoryDTO getEarningsHistory(String userEmail, Timestamp startDate, Timestamp endDate, Pageable pageable) {
+        User user = userRepository.findByEmail(userEmail).orElseThrow(() -> new RuntimeException("User not found"));
+        Partner partner = partnerRepository.findByUserId(user).orElseThrow(() -> new RuntimeException("Partner not found"));
+
+        if (partner == null) {
+            throw new RuntimeException("Partner not found");
+        }
+
+        Page<DailyEarningDTO> page = partnerPayoutRepository.findEarningsHistory(partner, startDate, endDate, pageable);
+        Double total = partnerPayoutRepository.calculateTotalEarnings(partner);
+        
+        return PartnerEarningsHistoryDTO.builder()
+                .totalEarnings(BigDecimal.valueOf(total != null ? total : 0.0))
+                .earnings(page.getContent())
+                .build();
+    }
 }
 
