@@ -3,18 +3,27 @@ package com.cms.CourierKaro.service;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import com.cms.CourierKaro.dto.PartnerDashboardStatsDTO;
+import com.cms.CourierKaro.dto.PartnerOnlineStatusResponseDTO;
+import com.cms.CourierKaro.dto.PartnerOnlineStatusUpdateDTO;
+import com.cms.CourierKaro.dto.PartnerProfileResponseDTO;
 import com.cms.CourierKaro.dto.PartnerRegisterDTO;
 import com.cms.CourierKaro.entity.Partner;
 import com.cms.CourierKaro.entity.PartnerStatus;
 import com.cms.CourierKaro.entity.Role;
+import com.cms.CourierKaro.entity.Shipment;
+import com.cms.CourierKaro.entity.Status;
 import com.cms.CourierKaro.entity.User;
 import com.cms.CourierKaro.entity.VehicleType;
 import com.cms.CourierKaro.repository.PartnerRepository;
+import com.cms.CourierKaro.repository.ShipmentRepository;
 import com.cms.CourierKaro.repository.UserRepository;
 import com.cms.CourierKaro.repository.VehicleTypeRepository;
 import com.cms.CourierKaro.response.PartnerResp;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import jakarta.transaction.Transactional;
@@ -28,6 +37,7 @@ public class PartnerServiceImpl implements PartnerService {
 	private final UserRepository userRepository;
 	private final PartnerRepository partnerRepository;
 	private final VehicleTypeRepository vehicleTypeRepository;
+	private final ShipmentRepository shipmentRepository;
 	private final ModelMapper modelMapper;
 
 	@Override
@@ -177,6 +187,181 @@ public class PartnerServiceImpl implements PartnerService {
 		if (simplified.isBlank())
 			return raw.trim();
 		return Character.toUpperCase(simplified.charAt(0)) + simplified.substring(1);
+	}
+
+	@Override
+	public PartnerProfileResponseDTO getPartnerProfile(String userEmail) {
+		try {
+			User user = userRepository.findByEmail(userEmail).orElse(null);
+			if (user == null) {
+				return PartnerProfileResponseDTO.builder()
+						.message("User not found")
+						.responseStatus("FAILED")
+						.build();
+			}
+
+			Partner partner = partnerRepository.findByUserId(user).orElse(null);
+			if (partner == null) {
+				return PartnerProfileResponseDTO.builder()
+						.message("Partner profile not found")
+						.responseStatus("FAILED")
+						.build();
+			}
+
+			return PartnerProfileResponseDTO.builder()
+					.partnerId(partner.getPartnerId())
+					.userId(user.getId())
+					.firstName(user.getFirstName())
+					.lastName(user.getLastName())
+					.email(user.getEmail())
+					.phoneNumber(user.getPhoneNumber())
+					.profilePhotoUrl(user.getProfilePhotoUrl())
+					.vehicleTypeName(partner.getVehicleTypeId() != null ? partner.getVehicleTypeId().getTypeName() : null)
+					.vehicleRegNumber(partner.getVehicleRegNumber())
+					.vehicleModel(partner.getVehicleModel())
+					.drivingLicenseNumber(partner.getDrivingLiscenseNumber())
+					.driverAddress(partner.getDriverAddress())
+					.pincode(partner.getPincode())
+					.preferredCity(partner.getPreferredCity())
+					.panNumber(partner.getPanNumber())
+					.bankAccountNumber(partner.getBankAccountNumber())
+					.aadharNumber(partner.getAadharNumber())
+					.validInsurance(partner.isValidInsurance())
+					.isApproved(partner.isApproved())
+					.isOnline(partner.isOnline())
+					.avgRating(partner.getAvgRating())
+					.status(partner.getStatus() != null ? partner.getStatus().toString() : null)
+					.message("Partner profile loaded successfully")
+					.responseStatus("SUCCESS")
+					.build();
+		} catch (Exception e) {
+			return PartnerProfileResponseDTO.builder()
+					.message("Failed to load partner profile: " + e.getMessage())
+					.responseStatus("FAILED")
+					.build();
+		}
+	}
+
+	@Override
+	public PartnerDashboardStatsDTO getPartnerDashboardStats(String userEmail) {
+		try {
+			User user = userRepository.findByEmail(userEmail).orElse(null);
+			if (user == null) {
+				return PartnerDashboardStatsDTO.builder()
+						.message("User not found")
+						.status("FAILED")
+						.build();
+			}
+
+			Partner partner = partnerRepository.findByUserId(user).orElse(null);
+			if (partner == null) {
+				return PartnerDashboardStatsDTO.builder()
+						.message("Partner profile not found")
+						.status("FAILED")
+						.build();
+			}
+
+			List<Shipment> allShipments = shipmentRepository.findByPartnerId(partner);
+			
+			// Calculate today's date range
+			LocalDate today = LocalDate.now();
+			LocalDateTime startOfDay = today.atStartOfDay();
+			LocalDateTime endOfDay = today.atTime(23, 59, 59);
+
+			// Filter today's shipments
+			List<Shipment> todayShipments = allShipments.stream()
+					.filter(s -> s.getCreatedAt() != null 
+							&& !s.getCreatedAt().isBefore(startOfDay)
+							&& !s.getCreatedAt().isAfter(endOfDay))
+					.toList();
+
+			// Calculate today's orders count
+			int todayOrdersCount = todayShipments.size();
+
+			// Calculate today's earnings (only from completed deliveries)
+			double todayEarnings = todayShipments.stream()
+					.filter(s -> s.getStatus() == Status.DELIVERED && s.getCalculatedPrice() != null)
+					.mapToDouble(s -> s.getCalculatedPrice().doubleValue())
+					.sum();
+
+			// Calculate total earnings (only from completed deliveries)
+			double totalEarnings = allShipments.stream()
+					.filter(s -> s.getStatus() == Status.DELIVERED && s.getCalculatedPrice() != null)
+					.mapToDouble(s -> s.getCalculatedPrice().doubleValue())
+					.sum();
+
+			// Count completed deliveries
+			int completedDeliveries = (int) allShipments.stream()
+					.filter(s -> s.getStatus() == Status.DELIVERED)
+					.count();
+
+			// Calculate total distance (only if partner has orders)
+			Double totalDistanceKm = null;
+			if (!allShipments.isEmpty()) {
+				totalDistanceKm = allShipments.stream()
+						.filter(s -> s.getDistanceKm() != null)
+						.mapToDouble(s -> s.getDistanceKm().doubleValue())
+						.sum();
+			}
+
+			return PartnerDashboardStatsDTO.builder()
+					.todayOrders(todayOrdersCount)
+					.todayEarnings(todayEarnings)
+					.totalEarnings(totalEarnings)
+					.completedDeliveries(completedDeliveries)
+					.avgRating(partner.getAvgRating())
+					.totalDistanceKm(totalDistanceKm) // null if no orders
+					.message("Dashboard stats loaded successfully")
+					.status("SUCCESS")
+					.build();
+		} catch (Exception e) {
+			return PartnerDashboardStatsDTO.builder()
+					.message("Failed to load dashboard stats: " + e.getMessage())
+					.status("FAILED")
+					.build();
+		}
+	}
+
+	@Override
+	public PartnerOnlineStatusResponseDTO updateOnlineStatus(String userEmail, PartnerOnlineStatusUpdateDTO dto) {
+		try {
+			if (dto == null || dto.getIsOnline() == null) {
+				return PartnerOnlineStatusResponseDTO.builder()
+						.status("FAILED")
+						.message("isOnline is required")
+						.build();
+			}
+
+			User user = userRepository.findByEmail(userEmail).orElse(null);
+			if (user == null) {
+				return PartnerOnlineStatusResponseDTO.builder()
+						.status("FAILED")
+						.message("User not found")
+						.build();
+			}
+
+			Partner partner = partnerRepository.findByUserId(user).orElse(null);
+			if (partner == null) {
+				return PartnerOnlineStatusResponseDTO.builder()
+						.status("FAILED")
+						.message("Partner profile not found")
+						.build();
+			}
+
+			partner.setOnline(dto.getIsOnline());
+			partnerRepository.save(partner);
+
+			return PartnerOnlineStatusResponseDTO.builder()
+					.status("SUCCESS")
+					.message("Online status updated")
+					.isOnline(partner.isOnline())
+					.build();
+		} catch (Exception e) {
+			return PartnerOnlineStatusResponseDTO.builder()
+					.status("FAILED")
+					.message("Failed to update status: " + e.getMessage())
+					.build();
+		}
 	}
 }
 

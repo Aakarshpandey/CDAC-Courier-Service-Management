@@ -1,15 +1,25 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-export default function Profile() {
-  const profileData = {
-    name: "Amit Kumar",
-    partnerId: "PCK204001",
-    rating: "4.9",
-    phone: "+91 98765 12345",
-    email: "amit.kumar@email.com",
-    vehicle: "Honda Activa (DL01AB1234)",
-    joined: "March 2024",
+export default function Profile({ partnerData }) {
+  const profileData = partnerData ? {
+    name: `${partnerData.firstName || ''} ${partnerData.lastName || ''}`.trim() || 'Partner',
+    partnerId: partnerData.partnerId ? `PCK${partnerData.partnerId}` : "N/A",
+    rating: partnerData.avgRating ? partnerData.avgRating.toFixed(1) : "0.0",
+    phone: partnerData.phoneNumber || "N/A",
+    email: partnerData.email || "N/A",
+    vehicle: partnerData.vehicleTypeName && partnerData.vehicleRegNumber 
+      ? `${partnerData.vehicleTypeName} (${partnerData.vehicleRegNumber})`
+      : partnerData.vehicleTypeName || partnerData.vehicleRegNumber || "N/A",
+    joined: partnerData.createdAt || "N/A",
+  } : {
+    name: "Loading...",
+    partnerId: "N/A",
+    rating: "0.0",
+    phone: "N/A",
+    email: "N/A",
+    vehicle: "N/A",
+    joined: "N/A",
   };
   const navigate = useNavigate();
 
