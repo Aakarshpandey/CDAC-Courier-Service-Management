@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import com.cms.CourierKaro.dto.AllOrdersDTO;
@@ -34,6 +35,8 @@ public class ShipmentServiceImpl implements ShipmentService {
     private final UserRepository userRepository;
     private final VehicleTypeRepository vehicleTypeRepository;
     private final LocationRepository locationRepository;
+    
+    private final ModelMapper mapper;
 
     @Override
     public ShipmentResponseDTO createShipment(ShipmentRequestDTO request, String userEmail) {
@@ -41,39 +44,30 @@ public class ShipmentServiceImpl implements ShipmentService {
         User customer = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + userEmail));
 
-        // Get or create vehicle type
-        VehicleType vehicleType = getOrCreateVehicleType(request.getVehicleType());
+        
+        // Get vehicle type
+        VehicleType vehicleType =vehicleTypeRepository.findByTypeNameIgnoreCase(request.getVehicleType());
 
-        // Create pickup location
-        Location pickupLocation = new Location();
-        pickupLocation.setPincode(request.getPickupLocation().getPincode());
-        pickupLocation = locationRepository.save(pickupLocation);
+        // Create pickup and delivery location
+        Location pickupLocation = locationRepository.save(mapper.map(request.getPickupLocation(), Location.class));
+        Location deliveryLocation = locationRepository.save(mapper.map(request.getDeliveryLocation(), Location.class));
 
-        // Create delivery location
-        Location deliveryLocation = new Location();
-        deliveryLocation.setPincode(request.getDeliveryLocation().getPincode());
-        deliveryLocation = locationRepository.save(deliveryLocation);
-
-        // Calculate distance based on pincodes (simplified calculation)
-        BigDecimal distance = calculateDistance(
-                request.getPickupLocation().getPincode(),
-                request.getDeliveryLocation().getPincode()
-        );
-
-        // Calculate price: baseFare + (perKmRate * distance)
-        BigDecimal baseFare = BigDecimal.valueOf(vehicleType.getBaseFare());
-        BigDecimal perKmRate = BigDecimal.valueOf(vehicleType.getPerKmRate());
-        BigDecimal calculatedPrice = baseFare.add(perKmRate.multiply(distance));
+    
 
         // Create shipment
         Shipment shipment = new Shipment();
+//        Shipment shipment2 =mapper.map(request, Shipment.class);
+//        System.out.println(shipment);
+//        System.out.println(shipment2);
+        
+        //4 associations
         shipment.setCustormerId(customer);
         shipment.setVehicleTypeId(vehicleType);
         shipment.setPickupLocationId(pickupLocation);
         shipment.setDeliveryLocationId(deliveryLocation);
 
         // Set package details
-        shipment.setPackageType(parsePackageType(request.getPackageType()));
+        shipment.setPackageType(PackageType.valueOf(request.getPackageType().toUpperCase()));
         shipment.setWeightKg(BigDecimal.valueOf(request.getWeight()));
 
         // Set pickup details
@@ -87,8 +81,8 @@ public class ShipmentServiceImpl implements ShipmentService {
         shipment.setDeliveryPhone(request.getDeliveryLocation().getPhoneNo());
 
         // Set pricing
-        shipment.setDistanceKm(distance);
-        shipment.setCalculatedPrice(calculatedPrice);
+        shipment.setDistanceKm(request.getDistanceKm());
+        shipment.setCalculatedPrice(request.getCalculatedPrice());
 
         // Set status
         shipment.setStatus(Status.PENDING);
@@ -113,87 +107,20 @@ public class ShipmentServiceImpl implements ShipmentService {
                 .packageType(shipment.getPackageType().name())
                 .weight(shipment.getWeightKg())
                 .vehicleType(vehicleType.getTypeName())
-                .baseFare(baseFare)
-                .perKmRate(perKmRate)
-                .distanceKm(distance)
-                .calculatedPrice(calculatedPrice)
+                .baseFare(vehicleType.getBaseFare())
+                .perKmRate(vehicleType.getPerKmRate())
+                .distanceKm(request.getDistanceKm())
+                .calculatedPrice(request.getCalculatedPrice())
                 .createdAt(shipment.getCreatedAt())
                 .build();
     }
 
-    private VehicleType getOrCreateVehicleType(String vehicleTypeName) {
-        return vehicleTypeRepository.findByTypeNameIgnoreCase(vehicleTypeName)
-                .orElseGet(() -> createVehicleType(vehicleTypeName));
-    }
+  
+  
 
-    private VehicleType createVehicleType(String typeName) {
-        VehicleType vehicleType = new VehicleType();
-        vehicleType.setTypeName(typeName.toLowerCase());
+    
 
-        switch (typeName.toLowerCase()) {
-            case "bike":
-                vehicleType.setBaseFare(50.0);
-                vehicleType.setPerKmRate(5.0);
-                vehicleType.setMaxWeigthKg(10.0);
-                break;
-            case "car":
-                vehicleType.setBaseFare(150.0);
-                vehicleType.setPerKmRate(10.0);
-                vehicleType.setMaxWeigthKg(50.0);
-                break;
-            case "small truck":
-            case "small_truck":
-            case "smalltruck":
-                vehicleType.setTypeName("small truck");
-                vehicleType.setBaseFare(300.0);
-                vehicleType.setPerKmRate(15.0);
-                vehicleType.setMaxWeigthKg(500.0);
-                break;
-            case "large truck":
-            case "large_truck":
-            case "largetruck":
-                vehicleType.setTypeName("large truck");
-                vehicleType.setBaseFare(600.0);
-                vehicleType.setPerKmRate(20.0);
-                vehicleType.setMaxWeigthKg(2000.0);
-                break;
-            default:
-                throw new RuntimeException("Invalid vehicle type: " + typeName +
-                        ". Valid types are: bike, car, small truck, large truck");
-        }
 
-        return vehicleTypeRepository.save(vehicleType);
-    }
-
-    private BigDecimal calculateDistance(String pickupPincode, String deliveryPincode) {
-        // Simplified distance calculation based on pincode difference
-        // In production, use a geocoding API like Google Maps
-        try {
-            int pickup = Integer.parseInt(pickupPincode);
-            int delivery = Integer.parseInt(deliveryPincode);
-            int diff = Math.abs(pickup - delivery);
-
-            // Approximate distance based on pincode difference
-            // Each pincode unit difference roughly equals 0.5-2 km in urban areas
-            double distance = (diff * 0.1) + 5; // Minimum 5 km + variation
-
-            return BigDecimal.valueOf(distance).setScale(2, RoundingMode.HALF_UP);
-        } catch (NumberFormatException e) {
-            // Default distance if pincodes can't be parsed
-            return BigDecimal.valueOf(10.0);
-        }
-    }
-
-    private PackageType parsePackageType(String packageType) {
-        if (packageType == null || packageType.isEmpty()) {
-            return PackageType.OTHER;
-        }
-        try {
-            return PackageType.valueOf(packageType.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return PackageType.OTHER;
-        }
-    }
 
 	@Override
 	public List<RecentOrdersDTO> getShipments(String userEmail) {
@@ -206,4 +133,42 @@ public class ShipmentServiceImpl implements ShipmentService {
 		// All orders: Direct DTO projection - returns complete order list with partner info
 		return shipmentRepository.findAllOrdersDTO();
 	}
+
+	@Override
+    public List<ShipmentResponseDTO> getUserShipments(String userEmail) {
+        List<ShipmentResponseDTO> shipments = shipmentRepository.findShipmentsByEmail(userEmail);
+
+        if (shipments.isEmpty()) {
+            userRepository.findByEmail(userEmail)
+                    .orElseThrow(() -> new RuntimeException("User not found with email: " + userEmail));
+        }
+
+        return shipments;
+    }
+
+    @Override
+    public ShipmentResponseDTO getShipmentById(Long shipmentId) {
+        return shipmentRepository.findShipmentDTOById(shipmentId)
+                .orElseThrow(() -> new RuntimeException("Shipment not found with id: " + shipmentId));
+    }
+    
+    @Override
+    public ShipmentResponseDTO cancelShipment(Long shipmentId) {
+        Shipment shipment = shipmentRepository.findById(shipmentId)
+                .orElseThrow(() -> new RuntimeException("Shipment not found with id: " + shipmentId));
+
+        if (shipment.getStatus() != Status.PENDING) {
+            throw new RuntimeException("Only pending orders can be cancelled");
+        }
+
+        shipment.setStatus(Status.CANCELLED);
+        shipmentRepository.save(shipment);
+
+        return ShipmentResponseDTO.builder()
+                .shipmentId(shipmentId)
+                .status("SUCCESS")
+                .message("Order cancelled successfully")
+                .build();
+    }
+
 }

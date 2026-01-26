@@ -8,5 +8,5 @@ import com.cms.CourierKaro.entity.VehicleType;
 
 public interface VehicleTypeRepository extends JpaRepository<VehicleType, Long> {
     Optional<VehicleType> findByTypeName(String typeName);
-    Optional<VehicleType> findByTypeNameIgnoreCase(String typeName);
+    VehicleType findByTypeNameIgnoreCase(String typeName);
 }

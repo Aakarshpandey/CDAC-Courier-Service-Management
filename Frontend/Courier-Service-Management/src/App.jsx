@@ -19,6 +19,7 @@ import PartnerEditProfile from "./pages/PartnerEditProfile/PartnerEditProfile";
 import DetailedEarnings from "./pages/DetailedEarnings/DetailedEarnings";
 import UserEditProfile from "./pages/UserEditProfile/UserEditProfile";
 import AuthCallback from './components/AuthCallback/AuthCallback';
+import OrderDetails from "./pages/OrderDetails/OrderDetails";
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
         <Route path="/partner-app-setting" element={<PartnerAppSetting />} />
         <Route path="/partner-edit-profile" element={<PartnerEditProfile />} />
         <Route path="/detailed-earnings" element={<DetailedEarnings />} />
+        <Route path="/order/:id" element={<OrderDetails />} />
         <Route path="/auth-callback" element={<AuthCallback />} />
       </Routes>
 

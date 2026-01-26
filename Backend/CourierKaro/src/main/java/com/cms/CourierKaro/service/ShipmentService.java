@@ -9,8 +9,10 @@ import com.cms.CourierKaro.dto.ShipmentResponseDTO;
 
 public interface ShipmentService {
     ShipmentResponseDTO createShipment(ShipmentRequestDTO request, String userEmail);
-
+    List<ShipmentResponseDTO> getUserShipments(String userEmail);
+    ShipmentResponseDTO getShipmentById(Long shipmentId);
 	List<RecentOrdersDTO> getShipments(String userEmail);
 
 	List<AllOrdersDTO> getAllOrders(String userEmail);
+    ShipmentResponseDTO cancelShipment(Long shipmentId);
 }

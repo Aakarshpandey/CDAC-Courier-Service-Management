@@ -1,5 +1,7 @@
 package com.cms.CourierKaro.dto;
 
+import java.math.BigDecimal;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,4 +18,6 @@ public class ShipmentRequestDTO {
     private String packageType;
     private Double weight;
     private String vehicleType;
+    private BigDecimal distanceKm;
+    private BigDecimal calculatedPrice;
 }
