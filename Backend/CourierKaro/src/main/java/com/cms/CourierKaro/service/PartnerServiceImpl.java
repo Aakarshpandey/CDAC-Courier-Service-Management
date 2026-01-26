@@ -421,6 +421,8 @@ public class PartnerServiceImpl implements PartnerService {
 					.message("Failed to update profile: " + e.getMessage())
 					.responseStatus("FAILED")
 					.build();
+		}
+	}
 
 	public List<com.cms.CourierKaro.dto.PartnerApplicationDTO> getSuspendedPartners() {
 		try {
@@ -501,6 +503,7 @@ public class PartnerServiceImpl implements PartnerService {
 		} catch (Exception e) {
 			return ProfilePhotoResponseDTO.builder().status("FAILED").message("Upload failed: " + e.getMessage()).build();
 		}
+	}
 
 	public PartnerResp rejectPartner(Long partnerId) {
 		try {

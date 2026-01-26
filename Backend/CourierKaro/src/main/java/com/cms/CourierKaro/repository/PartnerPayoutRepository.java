@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.cms.CourierKaro.dto.DailyEarningDTO;
 import com.cms.CourierKaro.entity.Partner;
 import com.cms.CourierKaro.entity.PartnerPayout;
 
@@ -22,7 +23,7 @@ public interface PartnerPayoutRepository extends JpaRepository<PartnerPayout, Lo
            "AND (:endDate IS NULL OR p.paidAt <= :endDate) " +
            "GROUP BY DATE(p.paidAt) " +
            "ORDER BY DATE(p.paidAt) DESC")
-    Page<com.cms.CourierKaro.dto.DailyEarningDTO> findEarningsHistory(
+    Page<DailyEarningDTO> findEarningsHistory(
         @Param("partner") Partner partner, 
         @Param("startDate") Timestamp startDate, 
         @Param("endDate") Timestamp endDate, 
