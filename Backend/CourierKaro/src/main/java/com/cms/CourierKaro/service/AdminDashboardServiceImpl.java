@@ -1,5 +1,6 @@
 package com.cms.CourierKaro.service;
 import com.cms.CourierKaro.dto.AdminStatsDTO;
+import com.cms.CourierKaro.dto.PartnerApprovalDTO;
 import com.cms.CourierKaro.dto.PartnerProfileResponseDTO;
 import com.cms.CourierKaro.entity.Partner;
 import com.cms.CourierKaro.entity.PartnerStatus;
@@ -11,6 +12,8 @@ import com.cms.CourierKaro.repository.ShipmentRepository;
 import com.cms.CourierKaro.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -93,5 +96,20 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
         response.put("totalPages", partnerPage.getTotalPages());
         response.put("currentPage", partnerPage.getNumber());
         return response;
+    }
+    
+    @Override
+    @Transactional
+    public void updatePartnerApproval(Long partnerId, PartnerApprovalDTO approvalDto) {
+        Partner partner = partnerRepository.findById(partnerId)
+                .orElseThrow(() -> new RuntimeException("Partner not found with id: " + partnerId));
+        partner.setApproved(approvalDto.isApproved());
+        
+        // If approved, you might want to set status to ACTIVE, 
+        // if rejected/unapproved, maybe INACTIVE or keeping it as is.
+        if (approvalDto.isApproved()) {
+            partner.setStatus(PartnerStatus.ACTIVE);
+        }
+        partnerRepository.save(partner);
     }
 }
