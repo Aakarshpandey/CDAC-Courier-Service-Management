@@ -1,8 +1,10 @@
 package com.cms.CourierKaro.controller;
 
 import java.security.Principal;
+import java.sql.Timestamp;
 import java.util.List;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,6 +27,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 
 import com.cms.CourierKaro.dto.AvailableOrderDTO;
 import com.cms.CourierKaro.dto.PartnerDashboardStatsDTO;
+import com.cms.CourierKaro.dto.PartnerEarningsHistoryDTO;
 import com.cms.CourierKaro.dto.PartnerOnlineStatusResponseDTO;
 import com.cms.CourierKaro.dto.PartnerOnlineStatusUpdateDTO;
 import com.cms.CourierKaro.dto.PartnerProfileResponseDTO;
@@ -248,6 +252,24 @@ public class PartnerController {
 		return ResponseEntity.ok(response);
 	}
 	
+    // Add imports
+    // import java.sql.Timestamp;
+    // import org.springframework.data.domain.PageRequest;
+    
+    @GetMapping("/earnings/history")
+    public ResponseEntity<?> getEarningsHistory(
+            Principal principal,
+            @RequestParam(required = false) Timestamp startDate,
+            @RequestParam(required = false) Timestamp endDate,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        
+        String userEmail = principal.getName();
+        PartnerEarningsHistoryDTO response = partnerService.getEarningsHistory(
+            userEmail, startDate, endDate, PageRequest.of(page, size)
+        );
+        return ResponseEntity.ok(response);
+    }
 	
 }
 
