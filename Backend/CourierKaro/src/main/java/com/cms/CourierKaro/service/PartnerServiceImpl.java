@@ -1,5 +1,15 @@
 package com.cms.CourierKaro.service;
 
+import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -161,7 +171,7 @@ public class PartnerServiceImpl implements PartnerService {
 			partner.setApproved(false);
 			partner.setOnline(false);
 			partner.setAvgRating(0.0);
-			partner.setStatus(PartnerStatus.INACTIVE);
+			partner.setStatus(PartnerStatus.SUSPENDED);
 
 			Partner savedPartner = partnerRepository.save(partner);
 
@@ -515,6 +525,7 @@ public class PartnerServiceImpl implements PartnerService {
 					.build();
 		}
 	}
+	@Override
 
 	public PartnerResp rejectPartner(Long partnerId) {
 		try {
