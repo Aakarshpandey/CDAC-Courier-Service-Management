@@ -79,6 +79,7 @@ public class PartnerServiceImpl implements PartnerService {
 	private final ShipmentRepository shipmentRepository;
 	private final PartnerPayoutRepository partnerPayoutRepository;
 	private final ModelMapper modelMapper;
+
 	@Override
 	public PartnerResp registerPartner(PartnerRegisterDTO dto) {
 		try {
@@ -538,8 +539,8 @@ public class PartnerServiceImpl implements PartnerService {
 					.build();
 		}
 	}
-	@Override
 
+	@Override
 	public PartnerResp rejectPartner(Long partnerId) {
 		try {
 			Partner partner = partnerRepository.findById(partnerId)
@@ -626,6 +627,7 @@ public class PartnerServiceImpl implements PartnerService {
 				.earnings(page.getContent())
 				.build();
 	}
+
 	@Override
 	public ProfilePhotoResponseDTO removePartnerProfilePhoto(String userEmail) {
 		try {
