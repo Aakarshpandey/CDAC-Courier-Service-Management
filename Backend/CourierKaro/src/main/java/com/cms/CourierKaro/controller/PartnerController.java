@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 
 import com.cms.CourierKaro.dto.AvailableOrderDTO;
 import com.cms.CourierKaro.dto.PartnerDashboardStatsDTO;
+import com.cms.CourierKaro.dto.AcceptedOrderDTO;
 import com.cms.CourierKaro.dto.PartnerEarningsDTO;
 import com.cms.CourierKaro.dto.PartnerEarningsHistoryDTO;
 import com.cms.CourierKaro.dto.PartnerOnlineStatusResponseDTO;
@@ -214,6 +215,22 @@ public class PartnerController {
 							.build());
 		}
 		PartnerEarningsDTO response = partnerService.getPartnerEarnings(userEmail, period);
+		return ResponseEntity.ok(response);
+	}
+
+	@PostMapping("/accept-order/{shipmentId}")
+	public ResponseEntity<?> acceptOrder(
+			Principal principal,
+			@RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+			@PathVariable Long shipmentId) {
+		String userEmail = resolveEmail(principal, authorizationHeader);
+		if (userEmail == null) {
+			return ResponseEntity.badRequest().body(
+					AcceptedOrderDTO.builder()
+							.message("Authentication required")
+							.build());
+		}
+		AcceptedOrderDTO response = partnerService.acceptOrder(userEmail, shipmentId);
 		return ResponseEntity.ok(response);
 	}
 

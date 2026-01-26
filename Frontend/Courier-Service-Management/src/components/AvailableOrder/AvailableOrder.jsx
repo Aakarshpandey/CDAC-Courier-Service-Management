@@ -32,9 +32,7 @@ export default function AvailableOrders() {
   }, []);
 
   const handleAcceptOrder = (orderId) => {
-    console.log("Accepting order:", orderId);
-    // Add your order acceptance logic here
-    navigate("/accept-order");
+    navigate("/accept-order", { state: { shipmentId: orderId } });
   };
 
   const formatDate = (dateString) => {

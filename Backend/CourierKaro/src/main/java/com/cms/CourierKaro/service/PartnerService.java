@@ -68,4 +68,6 @@ public interface PartnerService {
 	PartnerPayoutDTO transferEarnings(String userEmail, TransferEarningsRequestDTO dto);
 
 	PartnerEarningsDTO getPartnerEarnings(String userEmail, String period);
+
+	AcceptedOrderDTO acceptOrder(String userEmail, Long shipmentId);
 }
