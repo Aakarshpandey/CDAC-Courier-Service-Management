@@ -262,6 +262,18 @@ const UserDashboard = () => {
                   </span>
                 </div>
 
+                <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                      <Package className="text-red-600" size={20} />
+                    </div>
+                    <span className="text-gray-700">Cancelled</span>
+                  </div>
+                  <span className="text-2xl font-bold text-red-600">
+                    {shipments.filter(s => s.status === 'CANCELLED').length}
+                  </span>
+                </div>
+
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">

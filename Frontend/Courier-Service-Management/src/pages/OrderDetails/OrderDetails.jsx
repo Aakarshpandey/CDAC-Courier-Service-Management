@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Package, MapPin, User, Phone, Clock, Truck, CreditCard, Loader, CheckCircle, Circle } from 'lucide-react';
+import { ArrowLeft, Package, MapPin, User, Phone, Clock, Truck, CreditCard, Loader, CheckCircle, Circle, XCircle } from 'lucide-react';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 import Navbar from '../../components/NavBar/Navbar';
 
 const OrderDetails = () => {
@@ -12,6 +13,7 @@ const OrderDetails = () => {
   const [shipment, setShipment] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isCancelling, setIsCancelling] = useState(false);
 
   useEffect(() => {
     fetchShipmentDetails();
@@ -29,6 +31,25 @@ const OrderDetails = () => {
       setError('Failed to load shipment details');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleCancelOrder = async () => {
+    if (!window.confirm('Are you sure you want to cancel this order?')) {
+      return;
+    }
+
+    setIsCancelling(true);
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+      await axios.put(`${API_URL}/api/shipments/${id}`);
+      toast.success('Order cancelled successfully');
+      fetchShipmentDetails();
+    } catch (err) {
+      console.error('Error cancelling order:', err);
+      toast.error(err.response?.data?.message || 'Failed to cancel order');
+    } finally {
+      setIsCancelling(false);
     }
   };
 
@@ -316,9 +337,21 @@ const OrderDetails = () => {
           </button>
           {shipment.status === 'PENDING' && (
             <button
-              className="flex-1 py-3 px-6 bg-red-50 text-red-600 rounded-lg font-medium hover:bg-red-100 transition border border-red-200"
+              onClick={handleCancelOrder}
+              disabled={isCancelling}
+              className="flex-1 py-3 px-6 bg-red-50 text-red-600 rounded-lg font-medium hover:bg-red-100 transition border border-red-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              Cancel Order
+              {isCancelling ? (
+                <>
+                  <Loader className="animate-spin" size={18} />
+                  Cancelling...
+                </>
+              ) : (
+                <>
+                  <XCircle size={18} />
+                  Cancel Order
+                </>
+              )}
             </button>
           )}
         </div>

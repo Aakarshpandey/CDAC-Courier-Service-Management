@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapPin, Package, ArrowLeft, Truck, Calculator, Loader } from 'lucide-react';
+import toast from 'react-hot-toast';
 import Navbar from '../../components/NavBar/Navbar';
 import { useJsApiLoader, GoogleMap, Autocomplete, DirectionsRenderer, Marker } from '@react-google-maps/api';
 import {
@@ -100,7 +101,7 @@ const BookingDetails = () => {
     const deliveryAddress = deliveryInputRef.current?.value || formData.deliveryAddress;
 
     if (!pickupAddress || !deliveryAddress) {
-      alert('Please enter both pickup and delivery addresses');
+      toast.error('Please enter both pickup and delivery addresses');
       return;
     }
 
@@ -133,7 +134,7 @@ const BookingDetails = () => {
 
     } catch (error) {
       console.error('Error calculating route:', error);
-      alert('Could not calculate route. Please check the addresses.');
+      toast.error('Could not calculate route. Please check the addresses.');
     }
   };
 
@@ -155,7 +156,7 @@ const BookingDetails = () => {
 
     // Require price calculation before submitting
     if (!calculatedPrice) {
-      alert('Please calculate the price before booking');
+      toast.error('Please calculate the price before booking');
       return;
     }
 
@@ -174,14 +175,14 @@ const BookingDetails = () => {
       console.log('Shipment response:', response);
 
       if (response.status === 'SUCCESS') {
-        alert(`Booking Confirmed!\n\nShipment ID: ${response.shipmentId}\nTotal Price: ${response.calculatedPrice}`);
+        toast.success(`Booking Confirmed! Shipment ID: ${response.shipmentId}`);
         navigate('/user-dashboard');
       } else {
-        alert(`Error: ${response.message}`);
+        toast.error(`Error: ${response.message}`);
       }
     } catch (error) {
       console.error('Error creating shipment:', error);
-      alert(`Failed to create shipment: ${error.response?.data?.message || error.message}`);
+      toast.error(`Failed to create shipment: ${error.response?.data?.message || error.message}`);
     } finally {
       setIsLoading(false);
     }
