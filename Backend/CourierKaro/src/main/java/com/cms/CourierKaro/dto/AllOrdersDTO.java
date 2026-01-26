@@ -3,9 +3,8 @@ package com.cms.CourierKaro.dto;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import com.cms.CourierKaro.entity.Status;
-
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,12 +14,16 @@ import lombok.ToString;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @ToString
-public class RecentOrdersDTO {
+public class AllOrdersDTO {
     private Long shipmentId;
     private String firstName;
     private String lastName;
-    private Status status;
-    private BigDecimal calculatedPrice;
-    private LocalDateTime createdAt;
+    private String pickupAddress;
+    private String deliveryAddress;
+    private String partnerFirstName;
+    private String partnerLastName;
+    private String status;
+    private BigDecimal amount;
 }

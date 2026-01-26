@@ -7,6 +7,7 @@ import java.util.List;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import com.cms.CourierKaro.dto.AllOrdersDTO;
 import com.cms.CourierKaro.dto.RecentOrdersDTO;
 import com.cms.CourierKaro.dto.ShipmentRequestDTO;
 import com.cms.CourierKaro.dto.ShipmentResponseDTO;
@@ -123,20 +124,14 @@ public class ShipmentServiceImpl implements ShipmentService {
 
 	@Override
 	public List<RecentOrdersDTO> getShipments(String userEmail) {
-		// Fetch ALL shipments sorted by createdAt descending (not filtered by customer)
-		List<Shipment> shipments = shipmentRepository.findAllByOrderByCreatedAtDesc();
-		
-		// Map to DTO
-		return shipments.stream()
-				.map(shipment -> new RecentOrdersDTO(
-						shipment.getShipmentId(),
-						shipment.getCustormerId().getFirstName(),
-						shipment.getCustormerId().getLastName(),
-						shipment.getStatus(),
-						shipment.getCalculatedPrice(),
-						shipment.getCreatedAt()
-				))
-				.toList();
+		// Recent orders: Direct DTO projection - returns limited recent orders
+		return shipmentRepository.findRecentOrdersDTO();
+	}
+
+	@Override
+	public List<AllOrdersDTO> getAllOrders(String userEmail) {
+		// All orders: Direct DTO projection - returns complete order list with partner info
+		return shipmentRepository.findAllOrdersDTO();
 	}
 
 	@Override

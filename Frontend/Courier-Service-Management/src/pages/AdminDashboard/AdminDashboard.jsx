@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { Package, TrendingUp, Users, DollarSign, MapPin, Eye, Edit, Search, Filter, Download, Plus, Bike, Car, Truck, Star } from 'lucide-react';
 import Navbar from '../../components/NavBar/Navbar';
-
+import { getShipments, getAllOrders } from '../../services/shipments';  
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -13,6 +13,58 @@ export default function AdminDashboard() {
     analytics: []
   });
 
+
+//useEffect to call API when tab changes
+useEffect(() => {
+  const fetchTabData = async () => {
+    switch (activeTab) {
+      case 'overview':
+        if (!tabData.recentOrders || tabData.recentOrders.length === 0) {
+          try {
+            const response = await getShipments();
+            setTabData(prev => ({ ...prev, recentOrders: response }));
+          } catch (error) {
+            console.error('Failed to fetch recent orders:', error);
+          }
+        }
+        break;
+      
+      case 'orders':
+        // Fetch all orders when orders tab is active
+        if (!tabData.allOrders || tabData.allOrders.length === 0) {
+          try {
+            const response = await getAllOrders();
+            setTabData(prev => ({ ...prev, allOrders: response }));
+            console.log("All Orders:", response);
+          } catch (error) {
+            console.error('Failed to fetch all orders:', error);
+          }
+        }
+        break;
+      
+      case 'partners':
+        // Fetch partners when partners tab is active
+        if (!tabData.partners || tabData.partners.length === 0) {
+          // const partnersData = await getPartners();
+          // setTabData(prev => ({ ...prev, partners: partnersData }));
+        }
+        break;
+      
+      case 'customers':
+        // Fetch customers when customers tab is active
+        if (!tabData.customers || tabData.customers.length === 0) {
+          // const customersData = await getCustomers();
+          // setTabData(prev => ({ ...prev, customers: customersData }));
+        }
+        break;
+      
+      default:
+        break;
+    }
+  };
+
+  fetchTabData();
+}, [activeTab]); // This runs whenever activeTab changes
   
 
   // Sample data
@@ -30,11 +82,7 @@ export default function AdminDashboard() {
     revenueChange: '+8.2%'
   };
 
-  const recentOrders = [
-    { id: 'CK001234', customer: 'Priya Singh', status: 'IN TRANSIT', amount: 450, time: '2 hours ago' },
-    { id: 'CK001235', customer: 'Arjun Mehta', status: 'DELIVERED', amount: 250, time: '4 hours ago' },
-    { id: 'CK001236', customer: 'Sneha Reddy', status: 'PENDING', amount: 380, time: '1 hour ago' }
-  ];
+ 
 
   const allOrders = [
     { id: 'CK001234', customer: 'Priya Singh', route: 'Connaught Place, Delhi → Sector 62, Noida', partner: 'Rajesh Kumar', status: 'IN TRANSIT', amount: 450 },
@@ -161,6 +209,7 @@ export default function AdminDashboard() {
 
         {/* Tab Content */}
         {activeTab === 'overview' && (
+          
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-6">
               <div>
@@ -172,15 +221,15 @@ export default function AdminDashboard() {
               </button>
             </div>
             <div className="space-y-4">
-              {recentOrders.map((order) => (
-                <div key={order.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-gray-300">
+              {tabData.recentOrders.map((order) => (
+                <div key={order.shipmentId} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-gray-300">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
                       <Package className="w-6 h-6 text-blue-600" />
                     </div>
                     <div>
-                      <div className="font-semibold">{order.id}</div>
-                      <div className="text-sm text-gray-600">{order.customer}</div>
+                      <div className="font-semibold">{order.shipmentId}</div>
+                      <div className="text-sm text-gray-600">{order.firstName + " " + order.lastName}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-6">
@@ -189,7 +238,7 @@ export default function AdminDashboard() {
                     </span>
                     <div className="text-right">
                       <div className="font-semibold">₹{order.amount}</div>
-                      <div className="text-sm text-gray-600">{order.time}</div>
+                      <div className="text-sm text-gray-600">{new Date(order.createdAt).toLocaleString()}</div>
                     </div>
                   </div>
                 </div>
@@ -238,18 +287,18 @@ export default function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {allOrders.map((order) => (
-                    <tr key={order.id} className="border-b border-gray-100">
-                      <td className="py-4 text-sm font-medium">{order.id}</td>
-                      <td className="py-4 text-sm">{order.customer}</td>
+                  {tabData.allOrders.map((order) => (
+                    <tr key={order.shipmentId} className="border-b border-gray-100">
+                      <td className="py-4 text-sm font-medium">{order.shipmentId}</td>
+                      <td className="py-4 text-sm">{order.firstName + " " + order.lastName}</td>
                       <td className="py-4 text-sm text-gray-600 max-w-xs">
                         <div className="flex items-center gap-1">
-                          <span className="truncate">{order.route.split('→')[0].trim()}</span>
+                          <span className="truncate">{order.pickupAddress}</span>
                           <span>→</span>
-                          <span className="truncate">{order.route.split('→')[1].trim()}</span>
+                          <span className="truncate">{order.deliveryAddress}</span>
                         </div>
                       </td>
-                      <td className="py-4 text-sm">{order.partner}</td>
+                      <td className="py-4 text-sm">{order.partnerFirstName + " " + order.partnerLastName}</td>
                       <td className="py-4">
                         <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
                           {order.status}

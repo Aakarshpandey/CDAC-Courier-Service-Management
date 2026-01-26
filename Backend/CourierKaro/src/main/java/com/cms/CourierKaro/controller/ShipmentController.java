@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cms.CourierKaro.dto.AllOrdersDTO;
 import com.cms.CourierKaro.dto.RecentOrdersDTO;
 import com.cms.CourierKaro.dto.ShipmentRequestDTO;
 import com.cms.CourierKaro.dto.ShipmentResponseDTO;
@@ -61,8 +62,15 @@ public class ShipmentController {
     @GetMapping("/recentOrders")
     public ResponseEntity<?> getRecentOrders(Principal principal) {
         String userEmail = principal.getName();
-        List<RecentOrdersDTO> shipments = shipmentService.getShipments(userEmail);
-        return ResponseEntity.ok(shipments);
+        List<RecentOrdersDTO> recentOrders = shipmentService.getShipments(userEmail);
+        return ResponseEntity.ok(recentOrders);
+    }
+    
+    @GetMapping("/allOrders")
+    public ResponseEntity<?> getAllOrders(Principal principal) {
+        String userEmail = principal.getName();
+        List<AllOrdersDTO> allOrders = shipmentService.getAllOrders(userEmail);
+        return ResponseEntity.ok(allOrders);
     }
     @GetMapping("/user")
     public ResponseEntity<?> getUserShipments(@RequestParam String email, Principal principal) {
@@ -87,3 +95,4 @@ public class ShipmentController {
             return ResponseEntity.ok(response);
     }
 }
+
