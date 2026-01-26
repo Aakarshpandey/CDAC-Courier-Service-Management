@@ -69,8 +69,6 @@ public class PartnerServiceImpl implements PartnerService {
 	private final ShipmentRepository shipmentRepository;
 	private final PartnerPayoutRepository partnerPayoutRepository;
 	private final ModelMapper modelMapper;
-	private final PartnerPayoutRepository partnerPayoutRepository;
-
 	@Override
 	public PartnerResp registerPartner(PartnerRegisterDTO dto) {
 		try {
@@ -442,17 +440,18 @@ public class PartnerServiceImpl implements PartnerService {
 		}
 	}
 
-	public List<com.cms.CourierKaro.dto.PartnerApplicationDTO> getSuspendedPartners() {
+	@Override
+	public List<com.cms.CourierKaro.dto.PartnerApplicationDTO> getPendingPartners() {
 		try {
 			// Use the optimized query with JOIN FETCH to avoid N+1 problem
-			List<Partner> suspendedPartners = partnerRepository.findByStatusWithDetails(PartnerStatus.SUSPENDED);
+			List<Partner> pendingPartners = partnerRepository.findByIsApprovedWithDetails(false);
 
 			// Map Partner entities to PartnerApplicationDTO
-			return suspendedPartners.stream()
+			return pendingPartners.stream()
 					.map(this::mapToApplicationDTO)
 					.toList();
 		} catch (Exception e) {
-			throw new RuntimeException("Failed to fetch suspended partners: " + e.getMessage(), e);
+			throw new RuntimeException("Failed to fetch pending partners: " + e.getMessage(), e);
 		}
 	}
 
@@ -612,6 +611,7 @@ public class PartnerServiceImpl implements PartnerService {
 				.totalEarnings(BigDecimal.valueOf(total != null ? total : 0.0))
 				.earnings(page.getContent())
 				.build();
+	}
 	@Override
 	public ProfilePhotoResponseDTO removePartnerProfilePhoto(String userEmail) {
 		try {
