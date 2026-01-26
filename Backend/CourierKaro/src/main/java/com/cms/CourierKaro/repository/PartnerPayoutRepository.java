@@ -32,4 +32,7 @@ public interface PartnerPayoutRepository extends JpaRepository<PartnerPayout, Lo
 
     @Query("SELECT SUM(p.amount) FROM PartnerPayout p WHERE p.partner = :partner")
     Double calculateTotalEarnings(@Param("partner") Partner partner);
+
+	List<PartnerPayout> findByPartner(Partner partner);
+	List<PartnerPayout> findByPartnerOrderByPaidAtDesc(Partner partner);
 }
