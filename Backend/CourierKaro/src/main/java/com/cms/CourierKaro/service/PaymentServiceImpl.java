@@ -16,6 +16,8 @@ import com.cms.CourierKaro.entity.Shipment;
 import com.cms.CourierKaro.repository.PaymentRepository;
 import com.cms.CourierKaro.repository.ShipmentRepository;
 import com.cms.CourierKaro.dto.PaymentResponseDTO;
+import com.cms.CourierKaro.dto.PaymentWebhookDTO;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -78,5 +80,18 @@ public class PaymentServiceImpl implements PaymentService {
         );
         dto.setShipment(shipmentSummary);
         return dto;
+    }
+    
+    @Override
+    public void processWebhook(PaymentWebhookDTO webhookDto) {
+        Payment payment = paymentRepository.findByTransactionGatewayId(webhookDto.getTransactionGatewayId())
+                .orElseThrow(() -> new RuntimeException("Payment not found with gateway ID: " + webhookDto.getTransactionGatewayId()));
+        PaymentStatus newStatus = PaymentStatus.valueOf(webhookDto.getStatus().toUpperCase());
+        payment.setStatus(newStatus);
+        paymentRepository.save(payment);
+        // Update Shipment Payment Status as well
+        Shipment shipment = payment.getShipmentId();
+        shipment.setPaymentStatus(newStatus);
+        shipmentRepository.save(shipment);
     }
 }
