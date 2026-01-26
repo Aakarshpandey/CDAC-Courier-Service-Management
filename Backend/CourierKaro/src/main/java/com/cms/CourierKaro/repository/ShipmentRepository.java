@@ -17,6 +17,7 @@ import com.cms.CourierKaro.entity.User;
 public interface ShipmentRepository extends JpaRepository<Shipment, Long> {
     List<Shipment> findByCustormerId(User customer);
     List<Shipment> findByCustormerIdOrderByCreatedAtDesc(User customer);
+    List<Shipment> findByPartnerId(com.cms.CourierKaro.entity.Partner partner);
     
     // Original method without JOIN FETCH (causes N+1 problem)
     List<Shipment> findAllByOrderByCreatedAtDesc();
