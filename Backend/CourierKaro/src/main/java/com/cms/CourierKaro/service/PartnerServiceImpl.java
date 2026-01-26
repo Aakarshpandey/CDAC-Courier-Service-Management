@@ -1,5 +1,15 @@
 package com.cms.CourierKaro.service;
 
+import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
@@ -22,16 +32,6 @@ import com.cms.CourierKaro.repository.ShipmentRepository;
 import com.cms.CourierKaro.repository.UserRepository;
 import com.cms.CourierKaro.repository.VehicleTypeRepository;
 import com.cms.CourierKaro.response.PartnerResp;
-
-import java.math.BigDecimal;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Locale;
-import java.util.List;
-import java.util.UUID;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -146,7 +146,7 @@ public class PartnerServiceImpl implements PartnerService {
 			partner.setApproved(false);
 			partner.setOnline(false);
 			partner.setAvgRating(0.0);
-			partner.setStatus(PartnerStatus.INACTIVE);
+			partner.setStatus(PartnerStatus.SUSPENDED);
 
 			Partner savedPartner = partnerRepository.save(partner);
 
@@ -412,6 +412,8 @@ public class PartnerServiceImpl implements PartnerService {
 					.message("Failed to update profile: " + e.getMessage())
 					.responseStatus("FAILED")
 					.build();
+		}
+	}
 	public List<com.cms.CourierKaro.dto.PartnerApplicationDTO> getSuspendedPartners() {
 		try {
 			// Use the optimized query with JOIN FETCH to avoid N+1 problem
@@ -491,6 +493,8 @@ public class PartnerServiceImpl implements PartnerService {
 		} catch (Exception e) {
 			return ProfilePhotoResponseDTO.builder().status("FAILED").message("Upload failed: " + e.getMessage()).build();
 		}
+	}
+	@Override
 	public PartnerResp rejectPartner(Long partnerId) {
 		try {
 			Partner partner = partnerRepository.findById(partnerId)
