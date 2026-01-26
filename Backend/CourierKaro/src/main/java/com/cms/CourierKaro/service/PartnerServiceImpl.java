@@ -412,6 +412,34 @@ public class PartnerServiceImpl implements PartnerService {
 					.message("Failed to update profile: " + e.getMessage())
 					.responseStatus("FAILED")
 					.build();
+	public List<com.cms.CourierKaro.dto.PartnerApplicationDTO> getSuspendedPartners() {
+		try {
+			// Use the optimized query with JOIN FETCH to avoid N+1 problem
+			List<Partner> suspendedPartners = partnerRepository.findByStatusWithDetails(PartnerStatus.SUSPENDED);
+			
+			// Map Partner entities to PartnerApplicationDTO
+			return suspendedPartners.stream()
+					.map(this::mapToApplicationDTO)
+					.toList();
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to fetch suspended partners: " + e.getMessage(), e);
+		}
+	}
+
+	@Override
+	public PartnerResp approvePartner(Long partnerId) {
+		try {
+			Partner partner = partnerRepository.findById(partnerId)
+					.orElseThrow(() -> new RuntimeException("Partner not found with ID: " + partnerId));
+			
+			// Update partner status to INACTIVE and set approved flag
+			partner.setStatus(PartnerStatus.INACTIVE);
+			partner.setApproved(true);
+			partnerRepository.save(partner);
+			
+			return new PartnerResp("Partner approved successfully", "SUCCESS");
+		} catch (Exception e) {
+			return new PartnerResp("Failed to approve partner: " + e.getMessage(), "FAILED");
 		}
 	}
 
@@ -463,6 +491,70 @@ public class PartnerServiceImpl implements PartnerService {
 		} catch (Exception e) {
 			return ProfilePhotoResponseDTO.builder().status("FAILED").message("Upload failed: " + e.getMessage()).build();
 		}
+	public PartnerResp rejectPartner(Long partnerId) {
+		try {
+			Partner partner = partnerRepository.findById(partnerId)
+					.orElseThrow(() -> new RuntimeException("Partner not found with ID: " + partnerId));
+			
+			// Update partner status to DELETED (soft delete)
+			partner.setStatus(PartnerStatus.DELETED);
+			partner.setApproved(false);
+			partnerRepository.save(partner);
+			
+			return new PartnerResp("Partner application rejected", "SUCCESS");
+		} catch (Exception e) {
+			return new PartnerResp("Failed to reject partner: " + e.getMessage(), "FAILED");
+		}
+	}
+	
+	/**
+	 * Helper method to map Partner entity to PartnerApplicationDTO
+	 * Avoids N+1 problem as userId and vehicleTypeId are already fetched
+	 */
+	private com.cms.CourierKaro.dto.PartnerApplicationDTO mapToApplicationDTO(Partner partner) {
+		com.cms.CourierKaro.dto.PartnerApplicationDTO dto = new com.cms.CourierKaro.dto.PartnerApplicationDTO();
+		
+		// Partner basic info
+		dto.setPartnerId(partner.getPartnerId());
+		dto.setStatus(partner.getStatus());
+		dto.setVehicleRegNumber(partner.getVehicleRegNumber());
+		dto.setVehicleModel(partner.getVehicleModel());
+		dto.setDrivingLiscenseNumber(partner.getDrivingLiscenseNumber());
+		dto.setDriverAddress(partner.getDriverAddress());
+		dto.setPincode(partner.getPincode());
+		dto.setPreferredCity(partner.getPreferredCity());
+		dto.setPanNumber(partner.getPanNumber());
+		dto.setBankAccountNumber(partner.getBankAccountNumber());
+		dto.setAadharNumber(partner.getAadharNumber());
+		dto.setValidInsurance(partner.isValidInsurance());
+		dto.setApproved(partner.isApproved());
+		dto.setOnline(partner.isOnline());
+		dto.setAvgRating(partner.getAvgRating());
+		
+		// Map User info (already fetched via JOIN FETCH)
+		User user = partner.getUserId();
+		if (user != null) {
+			com.cms.CourierKaro.dto.PartnerApplicationDTO.UserInfoDTO userInfo = 
+				new com.cms.CourierKaro.dto.PartnerApplicationDTO.UserInfoDTO();
+			userInfo.setId(user.getId());
+			userInfo.setFirstName(user.getFirstName());
+			userInfo.setLastName(user.getLastName());
+			userInfo.setEmail(user.getEmail());
+			userInfo.setPhoneNumber(user.getPhoneNumber());
+			dto.setUserId(userInfo);
+		}
+		
+		// Map VehicleType info (already fetched via JOIN FETCH)
+		VehicleType vehicleType = partner.getVehicleTypeId();
+		if (vehicleType != null) {
+			com.cms.CourierKaro.dto.PartnerApplicationDTO.VehicleTypeInfoDTO vehicleInfo = 
+				new com.cms.CourierKaro.dto.PartnerApplicationDTO.VehicleTypeInfoDTO();
+			vehicleInfo.setVehicleTypeId(vehicleType.getId());
+			vehicleInfo.setTypeName(vehicleType.getTypeName());
+			dto.setVehicleTypeId(vehicleInfo);
+		}
+		
+		return dto;
 	}
 }
 

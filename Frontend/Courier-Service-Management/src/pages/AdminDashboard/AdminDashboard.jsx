@@ -107,7 +107,7 @@ useEffect(() => {
       // Refresh the applications list
       const updatedApplications = await getSuspendedPartners();
       setTabData(prev => ({ ...prev, applications: updatedApplications }));
-      alert('Partner approved successfully!');
+      alert('Partner approved successfully! Status set to INACTIVE. Partner can now manage their online/offline status.');
     } catch (error) {
       console.error('Failed to approve partner:', error);
       alert('Failed to approve partner. Please try again.');
