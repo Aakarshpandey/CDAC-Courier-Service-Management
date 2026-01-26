@@ -1,17 +1,20 @@
 import React, { useState,useEffect } from 'react';
-import { Package, TrendingUp, Users, DollarSign, MapPin, Eye, Edit, Search, Filter, Download, Plus, Bike, Car, Truck, Star } from 'lucide-react';
+import { Package, TrendingUp, Users, DollarSign, MapPin, Eye, Edit, Search, Filter, Download, Plus, Bike, Car, Truck, Star, Check, X, FileText, Phone, Mail, CreditCard } from 'lucide-react';
 import Navbar from '../../components/NavBar/Navbar';
-import { getShipments, getAllOrders } from '../../services/shipments';  
+import { getShipments, getAllOrders } from '../../services/shipments';
+import { getSuspendedPartners, approvePartner, rejectPartner } from '../../services/PartnerService';
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
 
   const [tabData, setTabData] = useState({
     recentOrders: [],
     allOrders: [],
-    partners: [],
+    applications: [],
     customers: [],
     analytics: []
   });
+
+  const [loadingApplications, setLoadingApplications] = useState(false);
 
 
 //useEffect to call API when tab changes
@@ -42,11 +45,18 @@ useEffect(() => {
         }
         break;
       
-      case 'partners':
-        // Fetch partners when partners tab is active
-        if (!tabData.partners || tabData.partners.length === 0) {
-          // const partnersData = await getPartners();
-          // setTabData(prev => ({ ...prev, partners: partnersData }));
+      case 'applications':
+        // Fetch suspended partners when applications tab is active
+        if (!tabData.applications || tabData.applications.length === 0) {
+          setLoadingApplications(true);
+          try {
+            const applicationsData = await getSuspendedPartners();
+            setTabData(prev => ({ ...prev, applications: applicationsData }));
+          } catch (error) {
+            console.error('Failed to fetch partner applications:', error);
+          } finally {
+            setLoadingApplications(false);
+          }
         }
         break;
       
@@ -90,11 +100,35 @@ useEffect(() => {
     { id: 'CK001236', customer: 'Sneha Reddy', route: 'Koramangala, Bangalore → Whitefield, Bangalore', partner: 'Unassigned', status: 'PENDING', amount: 380 }
   ];
 
-  const partners = [
-    { id: 'PK2024001', name: 'Rajesh Kumar', contact: '+91 98765 43210', vehicle: 'Bike', rating: 4.8, status: 'ACTIVE', deliveries: 234, earnings: 15670 },
-    { id: 'PK2024002', name: 'Suresh Patil', contact: '+91 87654 32109', vehicle: 'Car', rating: 4.6, status: 'ACTIVE', deliveries: 189, earnings: 12450 },
-    { id: 'PK2024003', name: 'Amit Singh', contact: '+91 76543 21098', vehicle: 'Small Truck', rating: 4.9, status: 'OFFLINE', deliveries: 156, earnings: 18920 }
-  ];
+  // Handler for approving a partner application
+  const handleApprovePartner = async (partnerId) => {
+    try {
+      await approvePartner(partnerId);
+      // Refresh the applications list
+      const updatedApplications = await getSuspendedPartners();
+      setTabData(prev => ({ ...prev, applications: updatedApplications }));
+      alert('Partner approved successfully!');
+    } catch (error) {
+      console.error('Failed to approve partner:', error);
+      alert('Failed to approve partner. Please try again.');
+    }
+  };
+
+  // Handler for rejecting a partner application
+  const handleRejectPartner = async (partnerId) => {
+    if (window.confirm('Are you sure you want to reject this partner application?')) {
+      try {
+        await rejectPartner(partnerId);
+        // Refresh the applications list
+        const updatedApplications = await getSuspendedPartners();
+        setTabData(prev => ({ ...prev, applications: updatedApplications }));
+        alert('Partner application rejected.');
+      } catch (error) {
+        console.error('Failed to reject partner:', error);
+        alert('Failed to reject partner. Please try again.');
+      }
+    }
+  };
 
   const customers = [
     { id: 'CU001', name: 'Priya Singh', email: 'priya.singh@email.com', contact: '+91 98765 43210', totalOrders: 45, totalSpent: 12500, status: 'ACTIVE', lastOrder: '1/20/2024' },
@@ -122,6 +156,8 @@ useEffect(() => {
       case 'ACTIVE': return 'bg-green-100 text-green-700';
       case 'OFFLINE': return 'bg-gray-100 text-gray-700';
       case 'PREMIUM': return 'bg-purple-100 text-purple-700';
+      case 'SUSPENDED': return 'bg-orange-100 text-orange-700';
+      case 'INACTIVE': return 'bg-gray-100 text-gray-700';
       default: return 'bg-gray-100 text-gray-700';
     }
   };
@@ -191,7 +227,7 @@ useEffect(() => {
         {/* Tabs */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
           <div className="flex border-b border-gray-200">
-            {['overview', 'orders', 'partners', 'customers', 'analytics'].map((tab) => (
+            {['overview', 'orders', 'applications', 'customers', 'analytics'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -323,74 +359,137 @@ useEffect(() => {
           </div>
         )}
 
-        {activeTab === 'partners' && (
+        {activeTab === 'applications' && (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-xl font-semibold mb-1">Delivery Partners</h2>
-                <p className="text-gray-600 text-sm">Manage delivery partner accounts and performance</p>
+                <h2 className="text-xl font-semibold mb-1">Partner Applications</h2>
+                <p className="text-gray-600 text-sm">Review and approve pending partner applications</p>
               </div>
-              <div className="flex gap-3">
-                <button className="px-4 py-2 border border-gray-300 rounded-lg text-sm flex items-center gap-2 hover:bg-gray-50">
-                  <Eye className="w-4 h-4" />
-                  View Applications
-                </button>
-                <button className="px-4 py-2 bg-black text-white rounded-lg text-sm flex items-center gap-2 hover:bg-gray-800">
-                  <Plus className="w-4 h-4" />
-                  Add Partner
-                </button>
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-gray-600">
+                  {tabData.applications.length} pending application{tabData.applications.length !== 1 ? 's' : ''}
+                </span>
               </div>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="border-b border-gray-200">
-                  <tr className="text-left">
-                    <th className="pb-3 text-sm font-medium text-gray-600">Partner ID</th>
-                    <th className="pb-3 text-sm font-medium text-gray-600">Name</th>
-                    <th className="pb-3 text-sm font-medium text-gray-600">Contact</th>
-                    <th className="pb-3 text-sm font-medium text-gray-600">Vehicle</th>
-                    <th className="pb-3 text-sm font-medium text-gray-600">Rating</th>
-                    <th className="pb-3 text-sm font-medium text-gray-600">Status</th>
-                    <th className="pb-3 text-sm font-medium text-gray-600">Deliveries</th>
-                    <th className="pb-3 text-sm font-medium text-gray-600">Earnings</th>
-                    <th className="pb-3 text-sm font-medium text-gray-600">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {partners.map((partner) => (
-                    <tr key={partner.id} className="border-b border-gray-100">
-                      <td className="py-4 text-sm font-medium">{partner.id}</td>
-                      <td className="py-4 text-sm">{partner.name}</td>
-                      <td className="py-4 text-sm text-gray-600">{partner.contact}</td>
-                      <td className="py-4 text-sm">{partner.vehicle}</td>
-                      <td className="py-4 text-sm">
-                        <div className="flex items-center gap-1">
-                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                          <span>{partner.rating}</span>
+            
+            {loadingApplications ? (
+              <div className="text-center py-12">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <p className="text-gray-600 mt-4">Loading applications...</p>
+              </div>
+            ) : tabData.applications.length === 0 ? (
+              <div className="text-center py-12">
+                <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600">No pending applications</p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {tabData.applications.map((application) => (
+                  <div key={application.partnerId} className="border border-gray-200 rounded-lg p-6 hover:border-gray-300 transition-colors">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-4">
+                        <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xl font-bold">
+                          {application.userId?.firstName?.charAt(0) || 'P'}{application.userId?.lastName?.charAt(0) || 'A'}
                         </div>
-                      </td>
-                      <td className="py-4">
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(partner.status)}`}>
-                          {partner.status}
-                        </span>
-                      </td>
-                      <td className="py-4 text-sm">{partner.deliveries}</td>
-                      <td className="py-4 text-sm font-medium">₹{partner.earnings.toLocaleString()}</td>
-                      <td className="py-4">
-                        <div className="flex gap-2">
-                          <button className="p-1 hover:bg-gray-100 rounded">
-                            <Eye className="w-4 h-4" />
-                          </button>
-                          <button className="p-1 hover:bg-gray-100 rounded">
-                            <Edit className="w-4 h-4" />
-                          </button>
+                        <div>
+                          <h3 className="text-lg font-semibold">
+                            {application.userId?.firstName} {application.userId?.lastName}
+                          </h3>
+                          <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium mt-1 ${getStatusColor(application.status)}`}>
+                            {application.status}
+                          </span>
                         </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleApprovePartner(application.partnerId)}
+                          className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm flex items-center gap-2 hover:bg-green-700 transition-colors"
+                        >
+                          <Check className="w-4 h-4" />
+                          Approve
+                        </button>
+                        <button
+                          onClick={() => handleRejectPartner(application.partnerId)}
+                          className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm flex items-center gap-2 hover:bg-red-700 transition-colors"
+                        >
+                          <X className="w-4 h-4" />
+                          Reject
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {/* Contact Information */}
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-semibold text-gray-700 mb-2">Contact Information</h4>
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Mail className="w-4 h-4" />
+                          <span>{application.userId?.email || 'N/A'}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Phone className="w-4 h-4" />
+                          <span>{application.userId?.phoneNumber || 'N/A'}</span>
+                        </div>
+                      </div>
+
+                      {/* Vehicle Information */}
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-semibold text-gray-700 mb-2">Vehicle Details</h4>
+                        <div className="flex items-center gap-2 text-sm">
+                          <Truck className="w-4 h-4 text-blue-600" />
+                          <span className="font-medium">{application.vehicleTypeId?.typeName || 'N/A'}</span>
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          <div>Reg: {application.vehicleRegNumber || 'N/A'}</div>
+                          <div>Model: {application.vehicleModel || 'N/A'}</div>
+                        </div>
+                      </div>
+
+                      {/* Location Information */}
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-semibold text-gray-700 mb-2">Location</h4>
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <MapPin className="w-4 h-4" />
+                          <span>{application.preferredCity || 'N/A'}</span>
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          Pincode: {application.pincode || 'N/A'}
+                        </div>
+                      </div>
+
+                      {/* Documents */}
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-semibold text-gray-700 mb-2">Documents</h4>
+                        <div className="text-sm text-gray-600">
+                          <div>License: {application.drivingLiscenseNumber || 'N/A'}</div>
+                          <div>PAN: {application.panNumber || 'N/A'}</div>
+                          <div>Aadhar: {application.aadharNumber || 'N/A'}</div>
+                        </div>
+                      </div>
+
+                      {/* Banking Information */}
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-semibold text-gray-700 mb-2">Banking</h4>
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <CreditCard className="w-4 h-4" />
+                          <span>{application.bankAccountNumber || 'N/A'}</span>
+                        </div>
+                      </div>
+
+                      {/* Additional Info */}
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-semibold text-gray-700 mb-2">Additional Info</h4>
+                        <div className="text-sm text-gray-600">
+                          <div>Insurance: {application.validInsurance ? '✓ Valid' : '✗ Invalid'}</div>
+                          <div>Address: {application.driverAddress || 'N/A'}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
