@@ -215,3 +215,30 @@ export async function transferEarnings(amount) {
         throw error;
     }
 }
+
+export async function getPartnerEarnings(period = "week") {
+    try {
+        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+        const token = localStorage.getItem("authToken");
+
+        if (!token) {
+            throw new Error("No authentication token found");
+        }
+
+        const response = await axios.get(`${API_URL}/api/partners/earnings`, {
+            params: { period },
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        });
+        return response;
+    } catch (error) {
+        console.error("Error fetching partner earnings:", error);
+        if (error.response) {
+            console.error("Response data:", error.response.data);
+            console.error("Response status:", error.response.status);
+        }
+        throw error;
+    }
+}
