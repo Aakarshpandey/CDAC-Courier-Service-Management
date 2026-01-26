@@ -3,20 +3,27 @@ package com.cms.CourierKaro.service;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import com.cms.CourierKaro.dto.AvailableOrderDTO;
 import com.cms.CourierKaro.dto.PartnerDashboardStatsDTO;
 import com.cms.CourierKaro.dto.PartnerOnlineStatusResponseDTO;
 import com.cms.CourierKaro.dto.PartnerOnlineStatusUpdateDTO;
 import com.cms.CourierKaro.dto.PartnerProfileResponseDTO;
 import com.cms.CourierKaro.dto.PartnerProfileUpdateDTO;
+import com.cms.CourierKaro.dto.PartnerPayoutDTO;
 import com.cms.CourierKaro.dto.PartnerRegisterDTO;
 import com.cms.CourierKaro.dto.ProfilePhotoResponseDTO;
+import com.cms.CourierKaro.dto.TransferEarningsRequestDTO;
+import com.cms.CourierKaro.entity.Location;
 import com.cms.CourierKaro.entity.Partner;
+import com.cms.CourierKaro.entity.PartnerPayout;
 import com.cms.CourierKaro.entity.PartnerStatus;
+import com.cms.CourierKaro.entity.PaymentStatus;
 import com.cms.CourierKaro.entity.Role;
 import com.cms.CourierKaro.entity.Shipment;
 import com.cms.CourierKaro.entity.Status;
 import com.cms.CourierKaro.entity.User;
 import com.cms.CourierKaro.entity.VehicleType;
+import com.cms.CourierKaro.repository.PartnerPayoutRepository;
 import com.cms.CourierKaro.repository.PartnerRepository;
 import com.cms.CourierKaro.repository.ShipmentRepository;
 import com.cms.CourierKaro.repository.UserRepository;
@@ -45,6 +52,7 @@ public class PartnerServiceImpl implements PartnerService {
 	private final PartnerRepository partnerRepository;
 	private final VehicleTypeRepository vehicleTypeRepository;
 	private final ShipmentRepository shipmentRepository;
+	private final PartnerPayoutRepository partnerPayoutRepository;
 	private final ModelMapper modelMapper;
 
 	@Override
@@ -58,7 +66,8 @@ public class PartnerServiceImpl implements PartnerService {
 				return new PartnerResp("Email is required", "FAILED");
 			}
 
-			// `users.email` is globally unique; keep behavior consistent with existing user flow.
+			// `users.email` is globally unique; keep behavior consistent with existing user
+			// flow.
 			if (userRepository.existsByEmail(dto.getEmail())) {
 				return new PartnerResp("Email already registered", "EMAIL_EXIST");
 			}
@@ -223,7 +232,8 @@ public class PartnerServiceImpl implements PartnerService {
 					.email(user.getEmail())
 					.phoneNumber(user.getPhoneNumber())
 					.profilePhotoUrl(user.getProfilePhotoUrl())
-					.vehicleTypeName(partner.getVehicleTypeId() != null ? partner.getVehicleTypeId().getTypeName() : null)
+					.vehicleTypeName(
+							partner.getVehicleTypeId() != null ? partner.getVehicleTypeId().getTypeName() : null)
 					.vehicleRegNumber(partner.getVehicleRegNumber())
 					.vehicleModel(partner.getVehicleModel())
 					.drivingLicenseNumber(partner.getDrivingLiscenseNumber())
@@ -269,7 +279,7 @@ public class PartnerServiceImpl implements PartnerService {
 			}
 
 			List<Shipment> allShipments = shipmentRepository.findByPartnerId(partner);
-			
+
 			// Calculate today's date range
 			LocalDate today = LocalDate.now();
 			LocalDateTime startOfDay = today.atStartOfDay();
@@ -277,7 +287,7 @@ public class PartnerServiceImpl implements PartnerService {
 
 			// Filter today's shipments
 			List<Shipment> todayShipments = allShipments.stream()
-					.filter(s -> s.getCreatedAt() != null 
+					.filter(s -> s.getCreatedAt() != null
 							&& !s.getCreatedAt().isBefore(startOfDay)
 							&& !s.getCreatedAt().isAfter(endOfDay))
 					.toList();
@@ -381,7 +391,8 @@ public class PartnerServiceImpl implements PartnerService {
 
 			Partner partner = partnerRepository.findByUserId(user).orElse(null);
 			if (partner == null) {
-				return PartnerProfileResponseDTO.builder().message("Partner profile not found").responseStatus("FAILED").build();
+				return PartnerProfileResponseDTO.builder().message("Partner profile not found").responseStatus("FAILED")
+						.build();
 			}
 
 			if (dto.getFirstName() != null)
@@ -412,11 +423,14 @@ public class PartnerServiceImpl implements PartnerService {
 					.message("Failed to update profile: " + e.getMessage())
 					.responseStatus("FAILED")
 					.build();
+		}
+	}
+
 	public List<com.cms.CourierKaro.dto.PartnerApplicationDTO> getSuspendedPartners() {
 		try {
 			// Use the optimized query with JOIN FETCH to avoid N+1 problem
 			List<Partner> suspendedPartners = partnerRepository.findByStatusWithDetails(PartnerStatus.SUSPENDED);
-			
+
 			// Map Partner entities to PartnerApplicationDTO
 			return suspendedPartners.stream()
 					.map(this::mapToApplicationDTO)
@@ -431,12 +445,12 @@ public class PartnerServiceImpl implements PartnerService {
 		try {
 			Partner partner = partnerRepository.findById(partnerId)
 					.orElseThrow(() -> new RuntimeException("Partner not found with ID: " + partnerId));
-			
+
 			// Update partner status to INACTIVE and set approved flag
 			partner.setStatus(PartnerStatus.INACTIVE);
 			partner.setApproved(true);
 			partnerRepository.save(partner);
-			
+
 			return new PartnerResp("Partner approved successfully", "SUCCESS");
 		} catch (Exception e) {
 			return new PartnerResp("Failed to approve partner: " + e.getMessage(), "FAILED");
@@ -444,7 +458,8 @@ public class PartnerServiceImpl implements PartnerService {
 	}
 
 	@Override
-	public ProfilePhotoResponseDTO uploadPartnerProfilePhoto(String userEmail, org.springframework.web.multipart.MultipartFile file) {
+	public ProfilePhotoResponseDTO uploadPartnerProfilePhoto(String userEmail,
+			org.springframework.web.multipart.MultipartFile file) {
 		try {
 			if (file == null || file.isEmpty()) {
 				return ProfilePhotoResponseDTO.builder().status("FAILED").message("File is required").build();
@@ -457,7 +472,8 @@ public class PartnerServiceImpl implements PartnerService {
 
 			String contentType = file.getContentType();
 			if (contentType == null || !contentType.toLowerCase(Locale.ROOT).startsWith("image/")) {
-				return ProfilePhotoResponseDTO.builder().status("FAILED").message("Only image files are allowed").build();
+				return ProfilePhotoResponseDTO.builder().status("FAILED").message("Only image files are allowed")
+						.build();
 			}
 
 			User user = userRepository.findByEmail(userEmail).orElse(null);
@@ -489,31 +505,34 @@ public class PartnerServiceImpl implements PartnerService {
 					.profilePhotoUrl(url)
 					.build();
 		} catch (Exception e) {
-			return ProfilePhotoResponseDTO.builder().status("FAILED").message("Upload failed: " + e.getMessage()).build();
+			return ProfilePhotoResponseDTO.builder().status("FAILED").message("Upload failed: " + e.getMessage())
+					.build();
 		}
+	}
+
 	public PartnerResp rejectPartner(Long partnerId) {
 		try {
 			Partner partner = partnerRepository.findById(partnerId)
 					.orElseThrow(() -> new RuntimeException("Partner not found with ID: " + partnerId));
-			
+
 			// Update partner status to DELETED (soft delete)
 			partner.setStatus(PartnerStatus.DELETED);
 			partner.setApproved(false);
 			partnerRepository.save(partner);
-			
+
 			return new PartnerResp("Partner application rejected", "SUCCESS");
 		} catch (Exception e) {
 			return new PartnerResp("Failed to reject partner: " + e.getMessage(), "FAILED");
 		}
 	}
-	
+
 	/**
 	 * Helper method to map Partner entity to PartnerApplicationDTO
 	 * Avoids N+1 problem as userId and vehicleTypeId are already fetched
 	 */
 	private com.cms.CourierKaro.dto.PartnerApplicationDTO mapToApplicationDTO(Partner partner) {
 		com.cms.CourierKaro.dto.PartnerApplicationDTO dto = new com.cms.CourierKaro.dto.PartnerApplicationDTO();
-		
+
 		// Partner basic info
 		dto.setPartnerId(partner.getPartnerId());
 		dto.setStatus(partner.getStatus());
@@ -530,12 +549,11 @@ public class PartnerServiceImpl implements PartnerService {
 		dto.setApproved(partner.isApproved());
 		dto.setOnline(partner.isOnline());
 		dto.setAvgRating(partner.getAvgRating());
-		
+
 		// Map User info (already fetched via JOIN FETCH)
 		User user = partner.getUserId();
 		if (user != null) {
-			com.cms.CourierKaro.dto.PartnerApplicationDTO.UserInfoDTO userInfo = 
-				new com.cms.CourierKaro.dto.PartnerApplicationDTO.UserInfoDTO();
+			com.cms.CourierKaro.dto.PartnerApplicationDTO.UserInfoDTO userInfo = new com.cms.CourierKaro.dto.PartnerApplicationDTO.UserInfoDTO();
 			userInfo.setId(user.getId());
 			userInfo.setFirstName(user.getFirstName());
 			userInfo.setLastName(user.getLastName());
@@ -543,18 +561,217 @@ public class PartnerServiceImpl implements PartnerService {
 			userInfo.setPhoneNumber(user.getPhoneNumber());
 			dto.setUserId(userInfo);
 		}
-		
+
 		// Map VehicleType info (already fetched via JOIN FETCH)
 		VehicleType vehicleType = partner.getVehicleTypeId();
 		if (vehicleType != null) {
-			com.cms.CourierKaro.dto.PartnerApplicationDTO.VehicleTypeInfoDTO vehicleInfo = 
-				new com.cms.CourierKaro.dto.PartnerApplicationDTO.VehicleTypeInfoDTO();
+			com.cms.CourierKaro.dto.PartnerApplicationDTO.VehicleTypeInfoDTO vehicleInfo = new com.cms.CourierKaro.dto.PartnerApplicationDTO.VehicleTypeInfoDTO();
 			vehicleInfo.setVehicleTypeId(vehicleType.getId());
 			vehicleInfo.setTypeName(vehicleType.getTypeName());
 			dto.setVehicleTypeId(vehicleInfo);
 		}
-		
+
 		return dto;
 	}
-}
 
+	@Override
+	public ProfilePhotoResponseDTO removePartnerProfilePhoto(String userEmail) {
+		try {
+			User user = userRepository.findByEmail(userEmail).orElse(null);
+			if (user == null) {
+				return ProfilePhotoResponseDTO.builder().status("FAILED").message("User not found").build();
+			}
+
+			user.setProfilePhotoUrl(null);
+			userRepository.save(user);
+
+			return ProfilePhotoResponseDTO.builder()
+					.status("SUCCESS")
+					.message("Profile photo removed")
+					.profilePhotoUrl(null)
+					.build();
+		} catch (Exception e) {
+			return ProfilePhotoResponseDTO.builder().status("FAILED")
+					.message("Failed to remove photo: " + e.getMessage()).build();
+		}
+	}
+
+	@Override
+	public List<AvailableOrderDTO> getAvailableOrders(String userEmail) {
+		try {
+			User user = userRepository.findByEmail(userEmail).orElse(null);
+			if (user == null) {
+				return List.of();
+			}
+
+			Partner partner = partnerRepository.findByUserId(user).orElse(null);
+			if (partner == null || !partner.isOnline()) {
+				return List.of();
+			}
+
+			int partnerPincode = partner.getPincode();
+			String partnerPincodeStr = String.valueOf(partnerPincode);
+
+			// Get all PENDING shipments (available orders)
+			List<Shipment> allPending = shipmentRepository.findAll().stream()
+					.filter(s -> s.getStatus() == Status.PENDING && s.getPartnerId() == null)
+					.toList();
+
+			// Filter by pincode match (pickup or delivery location pincode matches partner
+			// pincode)
+			return allPending.stream()
+					.filter(s -> {
+						Location pickup = s.getPickupLocationId();
+						Location delivery = s.getDeliveryLocationId();
+
+						boolean pickupMatch = pickup != null && pickup.getPincode() != null
+								&& pickup.getPincode().equals(partnerPincodeStr);
+						boolean deliveryMatch = delivery != null && delivery.getPincode() != null
+								&& delivery.getPincode().equals(partnerPincodeStr);
+
+						return pickupMatch || deliveryMatch;
+					})
+					.map(s -> {
+						Location pickup = s.getPickupLocationId();
+						Location delivery = s.getDeliveryLocationId();
+						User customer = s.getCustormerId();
+
+						return AvailableOrderDTO.builder()
+								.shipmentId(s.getShipmentId())
+								.pickupAddress(s.getPickupAddress())
+								.deliveryAddress(s.getDeliveryAddress())
+								.pickupPincode(pickup != null ? pickup.getPincode() : null)
+								.deliveryPincode(delivery != null ? delivery.getPincode() : null)
+								.distanceKm(s.getDistanceKm())
+								.calculatedPrice(s.getCalculatedPrice())
+								.packageType(s.getPackageType() != null ? s.getPackageType().toString() : null)
+								.weightKg(s.getWeightKg())
+								.vehicleTypeName(
+										s.getVehicleTypeId() != null ? s.getVehicleTypeId().getTypeName() : null)
+								.createdAt(s.getCreatedAt())
+								.customerName(
+										customer != null
+												? (customer.getFirstName() + " "
+														+ (customer.getLastName() != null ? customer.getLastName()
+																: ""))
+														.trim()
+												: "Unknown")
+								.build();
+					})
+					.toList();
+		} catch (Exception e) {
+			return List.of();
+		}
+	}
+
+	@Override
+	public List<PartnerPayoutDTO> getPartnerPayouts(String userEmail) {
+		try {
+			User user = userRepository.findByEmail(userEmail).orElse(null);
+			if (user == null) {
+				return List.of();
+			}
+
+			Partner partner = partnerRepository.findByUserId(user).orElse(null);
+			if (partner == null) {
+				return List.of();
+			}
+
+			List<PartnerPayout> payouts = partnerPayoutRepository.findByPartnerOrderByPaidAtDesc(partner);
+
+			return payouts.stream()
+					.map(p -> PartnerPayoutDTO.builder()
+							.payoutId(p.getPayoutId())
+							.shipmentId(p.getShipment() != null ? p.getShipment().getShipmentId() : null)
+							.amount(p.getAmount())
+							.paymentStatus(p.getPaymentStatus() != null ? p.getPaymentStatus().toString() : null)
+							.paidAt(p.getPaidAt())
+							.status("SUCCESS")
+							.build())
+					.toList();
+		} catch (Exception e) {
+			return List.of();
+		}
+	}
+
+	@Override
+	public PartnerPayoutDTO transferEarnings(String userEmail, TransferEarningsRequestDTO dto) {
+		try {
+			if (dto.getAmount() == null || dto.getAmount() <= 0) {
+				return PartnerPayoutDTO.builder()
+						.status("FAILED")
+						.message("Invalid amount")
+						.build();
+			}
+
+			User user = userRepository.findByEmail(userEmail).orElse(null);
+			if (user == null) {
+				return PartnerPayoutDTO.builder()
+						.status("FAILED")
+						.message("User not found")
+						.build();
+			}
+
+			Partner partner = partnerRepository.findByUserId(user).orElse(null);
+			if (partner == null) {
+				return PartnerPayoutDTO.builder()
+						.status("FAILED")
+						.message("Partner profile not found")
+						.build();
+			}
+
+			if (partner.getBankAccountNumber() == null) {
+				return PartnerPayoutDTO.builder()
+						.status("FAILED")
+						.message("Bank account number not set. Please update your profile.")
+						.build();
+			}
+
+			// Calculate available earnings (from completed deliveries not yet paid out)
+			List<Shipment> completedShipments = shipmentRepository.findByPartnerId(partner).stream()
+					.filter(s -> s.getStatus() == Status.DELIVERED && s.getCalculatedPrice() != null)
+					.toList();
+
+			// Get already paid out shipments
+			List<Long> paidShipmentIds = partnerPayoutRepository.findByPartner(partner).stream()
+					.filter(p -> p.getShipment() != null)
+					.map(p -> p.getShipment().getShipmentId())
+					.toList();
+
+			double availableEarnings = completedShipments.stream()
+					.filter(s -> !paidShipmentIds.contains(s.getShipmentId()))
+					.mapToDouble(s -> s.getCalculatedPrice().doubleValue())
+					.sum();
+
+			if (dto.getAmount() > availableEarnings) {
+				return PartnerPayoutDTO.builder()
+						.status("FAILED")
+						.message("Insufficient earnings. Available: ₹" + availableEarnings)
+						.build();
+			}
+
+			// Create payout record (simplified - in real system, this would trigger payment
+			// gateway)
+			PartnerPayout payout = new PartnerPayout();
+			payout.setPartner(partner);
+			payout.setAmount(dto.getAmount());
+			payout.setPaymentStatus(PaymentStatus.PENDING);
+			payout.setPaidAt(null); // Will be set when payment is processed
+			// Note: shipment is null for manual transfers
+			partnerPayoutRepository.save(payout);
+
+			return PartnerPayoutDTO.builder()
+					.payoutId(payout.getPayoutId())
+					.amount(payout.getAmount())
+					.paymentStatus(payout.getPaymentStatus().toString())
+					.status("SUCCESS")
+					.message("Transfer request submitted. Amount will be transferred to your bank account.")
+					.build();
+		} catch (Exception e) {
+			return PartnerPayoutDTO.builder()
+					.status("FAILED")
+					.message("Transfer failed: " + e.getMessage())
+					.build();
+		}
+	}
+}
