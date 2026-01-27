@@ -16,6 +16,7 @@ public class AdminDashboardController {
     private final AdminDashboardService adminDashboardService;
     @GetMapping("/dashboard/stats")
     public ResponseEntity<AdminStatsDTO> getDashboardStats() {
+    	System.out.println(adminDashboardService.getDashboardStats());
         return ResponseEntity.ok(adminDashboardService.getDashboardStats());
     }
     @GetMapping("/users")
