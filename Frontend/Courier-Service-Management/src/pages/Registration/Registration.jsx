@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Eye, EyeOff, Package, User, Briefcase, ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
 import Logo from "../../components/Logo/Logo";
-import { registerPartner } from "../../services/users";
+import { registerPartner, registerUser } from "../../services/users";
 import { useNavigate } from "react-router-dom";
 
 export default function Registration() {
@@ -99,7 +99,7 @@ export default function Registration() {
       });
       return;
     }
-    const response = await registerPartner(formData);
+    const response = await registerUser(formData);
     console.log(response);
     if(response.status == 200){
       toast.success(response.data.message);
