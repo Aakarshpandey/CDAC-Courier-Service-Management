@@ -33,6 +33,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public UserResp registerUser(UserRegisterDTO dto) {
 
+		System.out.println(dto);
 		if (!dto.getPassword().equals(dto.getConfirmPassword())) {
 			return new UserResp("Password does not match", "FAILED");
 		}
