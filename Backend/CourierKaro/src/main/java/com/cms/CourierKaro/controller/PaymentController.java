@@ -10,6 +10,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cms.CourierKaro.dto.PaymentCreateDTO;
 import com.cms.CourierKaro.dto.PaymentInitiateResponseDTO;
 import com.cms.CourierKaro.service.PaymentService;
+import com.cms.CourierKaro.dto.PaymentResponseDTO;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import com.cms.CourierKaro.dto.PaymentWebhookDTO;
+import java.util.Collections;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/payments")
@@ -22,5 +28,17 @@ public class PaymentController {
     public ResponseEntity<PaymentInitiateResponseDTO> createPayment(@RequestBody PaymentCreateDTO paymentDto) {
         PaymentInitiateResponseDTO response = paymentService.createPayment(paymentDto);
         return ResponseEntity.ok(response);
+    }
+    
+    @GetMapping("/{paymentId}")
+    public ResponseEntity<PaymentResponseDTO> getPaymentDetails(@PathVariable Long paymentId) {
+        PaymentResponseDTO response = paymentService.getPaymentById(paymentId);
+        return ResponseEntity.ok(response);
+    }
+    
+    @PostMapping("/webhook")
+    public ResponseEntity<Map<String, String>> handleWebhook(@RequestBody PaymentWebhookDTO webhookDto) {
+        paymentService.processWebhook(webhookDto);
+        return ResponseEntity.ok(Collections.singletonMap("status", "SUCCESS"));
     }
 }

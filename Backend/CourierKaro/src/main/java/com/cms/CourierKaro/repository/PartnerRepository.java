@@ -39,6 +39,20 @@ public interface PartnerRepository extends JpaRepository<Partner, Long> {
 	       "JOIN FETCH p.vehicleTypeId " +
 	       "WHERE p.isApproved = :isApproved")
 	List<Partner> findByIsApprovedWithDetails(@Param("isApproved") boolean isApproved);
+	
+	
+	long countByStatus(PartnerStatus status);
+	
+	
+	@Query("SELECT p FROM Partner p " +
+	           "JOIN FETCH p.userId " +
+	           "JOIN FETCH p.vehicleTypeId " +
+	           "WHERE (:status IS NULL OR p.status = :status) " +
+	           "AND (:isApproved IS NULL OR p.isApproved = :isApproved)")
+	    org.springframework.data.domain.Page<com.cms.CourierKaro.entity.Partner> findAllPartners(
+	            @Param("status") com.cms.CourierKaro.entity.PartnerStatus status, 
+	            @Param("isApproved") Boolean isApproved, 
+	            org.springframework.data.domain.Pageable pageable);
 }
 
 
