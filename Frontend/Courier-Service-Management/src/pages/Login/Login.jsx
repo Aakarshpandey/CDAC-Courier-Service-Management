@@ -3,8 +3,10 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
 import Logo from "../../components/Logo/Logo";
-import axios from "axios";
 import { login } from "../../services/users";
+import { setUser } from "../../store/userSlice";
+import { useDispatch } from "react-redux";
+
 
 export default function Login() {
   const [searchParams] = useSearchParams();
@@ -23,6 +25,7 @@ export default function Login() {
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -55,10 +58,16 @@ export default function Login() {
       // Check if login was successful
       if (response.data.status === "SUCCESS") {
         // Store the JWT token
-        localStorage.setItem("authToken", response.data.token);
-        localStorage.setItem("userEmail", response.data.email);
-        localStorage.setItem("userRole", response.data.role);
-        localStorage.setItem("userName", `${response.data.firstName} ${response.data.lastName}`);
+        // localStorage.setItem("authToken", response.data.token);
+        // localStorage.setItem("userEmail", response.data.email);
+        // localStorage.setItem("userRole", response.data.role);
+        // localStorage.setItem("userName", `${response.data.firstName} ${response.data.lastName}`);
+
+         dispatch(setUser({
+          name: `${response.data.firstName} ${response.data.lastName}`,
+          email: response.data.email,
+          role: response.data.role,
+        }));
 
         toast.success(response.data.message || "Login successful");
 

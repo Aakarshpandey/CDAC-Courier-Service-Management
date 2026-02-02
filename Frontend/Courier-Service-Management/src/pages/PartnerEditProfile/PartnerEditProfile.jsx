@@ -129,11 +129,10 @@ export default function PartnerEditProfile() {
     navigate("/partner-dashboard");
   };
 
-  const user = { name: profileData.firstName || "Partner", profilePhotoUrl };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-      <Navbar user={user} />
+      <Navbar profileImage={profilePhotoUrl}/>
 
       <div className="max-w-5xl mx-auto px-6 py-6">
         {/* Header */}

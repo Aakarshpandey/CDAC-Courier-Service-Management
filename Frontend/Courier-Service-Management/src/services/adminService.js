@@ -1,24 +1,13 @@
-import axios from "axios";
+import api from "./api";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
-
-// Get the auth token from localStorage
-const getAuthToken = () => {
-    return localStorage.getItem('authToken');
-};
 
 /**
  * Fetch dashboard statistics for admin
  * @returns {Promise} Dashboard stats including total orders, active deliveries, partners, and revenue
  */
 export async function getDashboardStats() {
-    try {
-        const response = await axios.get(`${API_BASE_URL}/api/admin/dashboard/stats`, {
-            headers: {
-                "Authorization": `Bearer ${getAuthToken()}`,
-                "Content-Type": "application/json",
-            },
-        });
+   try {
+        const response = await api.get("/api/admin/dashboard/stats");
         return response.data;
     } catch (error) {
         console.error("Error fetching dashboard stats:", error);
@@ -40,12 +29,7 @@ export async function getAllUsers(search = null, page = 0, size = 10) {
         params.append('page', page);
         params.append('size', size);
 
-        const response = await axios.get(`${API_BASE_URL}/api/admin/users?${params.toString()}`, {
-            headers: {
-                "Authorization": `Bearer ${getAuthToken()}`,
-                "Content-Type": "application/json",
-            },
-        });
+        const response = await api.get(`/api/admin/users?${params.toString()}`);
         return response.data;
     } catch (error) {
         console.error("Error fetching users:", error);
@@ -69,12 +53,7 @@ export async function getAllPartners(status = null, isApproved = null, page = 0,
         params.append('page', page);
         params.append('size', size);
 
-        const response = await axios.get(`${API_BASE_URL}/api/admin/partners?${params.toString()}`, {
-            headers: {
-                "Authorization": `Bearer ${getAuthToken()}`,
-                "Content-Type": "application/json",
-            },
-        });
+        const response = await api.get(`/api/admin/partners?${params.toString()}`);
         return response.data;
     } catch (error) {
         console.error("Error fetching partners:", error);
@@ -90,15 +69,9 @@ export async function getAllPartners(status = null, isApproved = null, page = 0,
  */
 export async function updatePartnerApproval(partnerId, approvalData) {
     try {
-        const response = await axios.put(
-            `${API_BASE_URL}/api/admin/partners/${partnerId}/approval`,
-            approvalData,
-            {
-                headers: {
-                    "Authorization": `Bearer ${getAuthToken()}`,
-                    "Content-Type": "application/json",
-                },
-            }
+       const response = await api.put(
+            `/api/admin/partners/${partnerId}/approval`,
+            approvalData
         );
         return response.data;
     } catch (error) {

@@ -88,17 +88,14 @@ export default function PaymentSettings() {
       toast.error("Update failed");
     }
   };
-
-  const user = partnerProfile 
-    ? { name: partnerProfile.firstName || "Partner", profilePhotoUrl: partnerProfile.profilePhotoUrl }
-    : { name: "Partner" };
+const profilePhotoUrl = partnerProfile?.profilePhotoUrl || null;
 
   // Calculate today's earnings (from dashboard stats - would need separate call, simplified here)
   const todayEarnings = 0; // This should come from dashboard stats
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Navbar user={user} />
+      <Navbar profileImage={profilePhotoUrl}/>
 
       <div className="max-w-5xl mx-auto px-6 py-6">
         <div className="mb-6 flex items-center gap-4">

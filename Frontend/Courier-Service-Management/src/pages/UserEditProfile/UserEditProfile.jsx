@@ -26,7 +26,7 @@ const EditProfile = () => {
     newPassword: '',
     confirmPassword: ''
   });
-  const user = { name: "Rohan Sharma" }
+  
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
@@ -45,7 +45,7 @@ const EditProfile = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-     <Navbar user={user} />
+     <Navbar />
       {/* Main Content */}
       <div className="max-w-5xl mx-auto px-6 py-8">
         {/* Page Title */}

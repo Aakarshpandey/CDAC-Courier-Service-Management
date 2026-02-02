@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 import com.cms.CourierKaro.entity.User;
 import com.cms.CourierKaro.repository.UserRepository;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -50,19 +51,32 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         
         // Generate JWT token
         String token = jwtUtils.generateToken(email, role, true);
+
         
-        // Build frontend callback URL with token and redirect path
+        Cookie cookie = new Cookie("jwt", token);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(7 * 24 * 60 * 60); // 7 days for OAuth users
+        response.addCookie(cookie);
+
+        // Get user's name for frontend display
+        String name = dbUser != null && dbUser.getFirstName() != null
+                ? dbUser.getFirstName() + (dbUser.getLastName() != null ? " " + dbUser.getLastName() : "")
+                : oidcUser.getFullName();
+
+        // Build frontend callback URL with user info and redirect path
         String targetUrl = UriComponentsBuilder
                 .fromUriString("http://localhost:5173/auth-callback")
-                .queryParam("token", token)
                 .queryParam("redirect", redirectPath)
                 .queryParam("role", role)
+                .queryParam("name", name != null ? name : "")
+                .queryParam("email", email)
                 .build()
                 .toUriString();
 
         System.out.println("OAuth2 login successful. Redirecting to: " + targetUrl);
+
         
-        // Redirect to frontend
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
 }

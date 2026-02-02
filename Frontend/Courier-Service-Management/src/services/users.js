@@ -1,9 +1,8 @@
-import axios from "axios";
+import api from "./api";
 
 export async function registerPartner(params) {
     try {
-        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
-        const response = await axios.post(`${API_URL}/api/partners/register`, params);
+        const response = await api.post("/api/partners/register", params);
         return response;
     } catch (error) {
         console.error("Error registering partner:", error);
@@ -13,8 +12,7 @@ export async function registerPartner(params) {
 
 export async function registerUser(params) {
     try {
-        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
-        const response = await axios.post(`${API_URL}/register`, params);
+        const response = await api.post("/register", params);
         return response;
     } catch (error) {
         console.error("Error registering User:", error);
@@ -22,16 +20,12 @@ export async function registerUser(params) {
     }
 }
 
-
-
 export async function login(email, password, activeTab, rememberMe) {
     try {
-        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
-
-        const response = await axios.post(`${API_URL}/login`, {
+        const response = await api.post("/login", {
             email: email,
             password: password,
-            loginType: `ROLE_${activeTab.toUpperCase()}`, // "ROLE_USER" or "ROLE_PARTNER"
+            loginType: `ROLE_${activeTab.toUpperCase()}`,
             rememberMe: rememberMe
         });
 
@@ -45,9 +39,8 @@ export async function login(email, password, activeTab, rememberMe) {
 
 export async function adminLogin(email, password) {
     try {
-        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
-        const response = await axios.post(`${API_URL}/login`, {
+        const response = await api.post(`/login`, {
             email: email,
             password: password,
             loginType: "ROLE_ADMIN",
@@ -61,22 +54,9 @@ export async function adminLogin(email, password) {
         throw error;
     }
 }
-
 export async function getPartnerProfile() {
     try {
-        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
-        const token = localStorage.getItem("authToken");
-
-        if (!token) {
-            throw new Error("No authentication token found");
-        }
-
-        const response = await axios.get(`${API_URL}/api/partners/profile`, {
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            }
-        });
+        const response = await api.get("/api/partners/profile");
         return response;
     } catch (error) {
         console.error("Error fetching partner profile:", error);
@@ -90,19 +70,7 @@ export async function getPartnerProfile() {
 
 export async function getPartnerDashboardStats() {
     try {
-        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
-        const token = localStorage.getItem("authToken");
-
-        if (!token) {
-            throw new Error("No authentication token found");
-        }
-
-        const response = await axios.get(`${API_URL}/api/partners/dashboard/stats`, {
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            }
-        });
+        const response = await api.get("/api/partners/dashboard/stats");
         return response;
     } catch (error) {
         console.error("Error fetching partner dashboard stats:", error);
@@ -116,16 +84,8 @@ export async function getPartnerDashboardStats() {
 
 export async function updatePartnerOnlineStatus(isOnline) {
     try {
-        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
-        const token = localStorage.getItem("authToken");
-
-        const response = await axios.put(`${API_URL}/api/partners/online-status`, {
+        const response = await api.put("/api/partners/online-status", {
             isOnline: isOnline
-        }, {
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            }
         });
         return response;
     } catch (error) {
@@ -136,15 +96,7 @@ export async function updatePartnerOnlineStatus(isOnline) {
 
 export async function updatePartnerProfile(profileUpdate) {
     try {
-        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
-        const token = localStorage.getItem("authToken");
-
-        const response = await axios.put(`${API_URL}/api/partners/profile`, profileUpdate, {
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            }
-        });
+        const response = await api.put("/api/partners/profile", profileUpdate);
         return response;
     } catch (error) {
         console.error("Error updating partner profile:", error);
@@ -154,15 +106,11 @@ export async function updatePartnerProfile(profileUpdate) {
 
 export async function uploadPartnerProfilePhoto(file) {
     try {
-        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
-        const token = localStorage.getItem("authToken");
-
         const formData = new FormData();
         formData.append("file", file);
 
-        const response = await axios.post(`${API_URL}/api/partners/profile-photo`, formData, {
+        const response = await api.post("/api/partners/profile-photo", formData, {
             headers: {
-                "Authorization": `Bearer ${token}`,
                 "Content-Type": "multipart/form-data"
             }
         });
@@ -175,15 +123,7 @@ export async function uploadPartnerProfilePhoto(file) {
 
 export async function removePartnerProfilePhoto() {
     try {
-        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
-        const token = localStorage.getItem("authToken");
-
-        const response = await axios.delete(`${API_URL}/api/partners/profile-photo`, {
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            }
-        });
+        const response = await api.delete("/api/partners/profile-photo");
         return response;
     } catch (error) {
         console.error("Error removing partner profile photo:", error);
@@ -193,15 +133,7 @@ export async function removePartnerProfilePhoto() {
 
 export async function getAvailableOrders() {
     try {
-        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
-        const token = localStorage.getItem("authToken");
-
-        const response = await axios.get(`${API_URL}/api/partners/available-orders`, {
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            }
-        });
+        const response = await api.get("/api/partners/available-orders");
         return response;
     } catch (error) {
         console.error("Error fetching available orders:", error);
@@ -211,15 +143,7 @@ export async function getAvailableOrders() {
 
 export async function getPartnerPayouts() {
     try {
-        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
-        const token = localStorage.getItem("authToken");
-
-        const response = await axios.get(`${API_URL}/api/partners/payouts`, {
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            }
-        });
+        const response = await api.get("/api/partners/payouts");
         return response;
     } catch (error) {
         console.error("Error fetching partner payouts:", error);
@@ -229,16 +153,8 @@ export async function getPartnerPayouts() {
 
 export async function transferEarnings(amount) {
     try {
-        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
-        const token = localStorage.getItem("authToken");
-
-        const response = await axios.post(`${API_URL}/api/partners/transfer-earnings`, {
+        const response = await api.post("/api/partners/transfer-earnings", {
             amount: amount
-        }, {
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            }
         });
         return response;
     } catch (error) {
@@ -249,19 +165,8 @@ export async function transferEarnings(amount) {
 
 export async function getPartnerEarnings(period = "week") {
     try {
-        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
-        const token = localStorage.getItem("authToken");
-
-        if (!token) {
-            throw new Error("No authentication token found");
-        }
-
-        const response = await axios.get(`${API_URL}/api/partners/earnings`, {
-            params: { period },
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            }
+        const response = await api.get("/api/partners/earnings", {
+            params: { period }
         });
         return response;
     } catch (error) {
@@ -276,19 +181,7 @@ export async function getPartnerEarnings(period = "week") {
 
 export async function acceptOrder(shipmentId) {
     try {
-        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
-        const token = localStorage.getItem("authToken");
-
-        if (!token) {
-            throw new Error("No authentication token found");
-        }
-
-        const response = await axios.post(`${API_URL}/api/partners/accept-order/${shipmentId}`, {}, {
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            }
-        });
+        const response = await api.post(`/api/partners/accept-order/${shipmentId}`, {});
         return response;
     } catch (error) {
         console.error("Error accepting order:", error);
@@ -299,22 +192,12 @@ export async function acceptOrder(shipmentId) {
         throw error;
     }
 }
-
+//getting partners order
 export async function getMyOrders() {
     try {
-        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
-        const token = localStorage.getItem("authToken");
+        
 
-        if (!token) {
-            throw new Error("No authentication token found");
-        }
-
-        const response = await axios.get(`${API_URL}/api/partners/my-orders`, {
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            }
-        });
+        const response = await api.get(`/api/partners/available-orders`);
         return response;
     } catch (error) {
         console.error("Error fetching my orders:", error);
@@ -328,22 +211,12 @@ export async function getMyOrders() {
 
 export async function submitRating(shipmentId, rating, review) {
     try {
-        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
-        const token = localStorage.getItem("authToken");
+        
 
-        if (!token) {
-            throw new Error("No authentication token found");
-        }
-
-        const response = await axios.post(`${API_URL}/api/ratings`, {
+        const response = await api.post(`$/api/ratings`, {
             shipmentId,
             rating,
             review
-        }, {
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            }
         });
         return response;
     } catch (error) {

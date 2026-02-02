@@ -13,7 +13,7 @@ import {
   createShipment
 } from '../../services/BookingDetailsService';
 
-const adminUser = { name: "Rohan Sharma" };
+
 
 const libraries = ['places'];
 
@@ -191,7 +191,7 @@ const BookingDetails = () => {
   if (!isLoaded) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navbar user={adminUser} />
+        <Navbar />
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
             <Loader className="animate-spin h-12 w-12 text-blue-600 mx-auto mb-4" />
@@ -204,7 +204,7 @@ const BookingDetails = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar user={adminUser} />
+      <Navbar />
 
       <div className="max-w-6xl mx-auto px-6 py-8">
         <div className="flex items-center gap-4 mb-6">
