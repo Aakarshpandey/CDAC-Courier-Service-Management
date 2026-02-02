@@ -5,7 +5,7 @@ import { getShipments, getAllOrders } from '../../services/shipments';
 import { getSuspendedPartners, approvePartner, rejectPartner } from '../../services/PartnerService';
 import { getDashboardStats, getAllUsers, getAllPartners } from '../../services/adminService';
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('orders');
 
   const [tabData, setTabData] = useState({
     recentOrders: [],
@@ -225,10 +225,6 @@ const handleCustomerSearch = async () => {
               <Package className="w-5 h-5 text-blue-600" />
             </div>
             <div className="text-3xl font-bold mb-1">{stats.totalOrders.toLocaleString()}</div>
-            <div className="text-green-600 text-sm flex items-center gap-1">
-              <TrendingUp className="w-4 h-4" />
-              {stats.ordersChange} from last month
-            </div>
           </div>
 
           <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
@@ -257,17 +253,13 @@ const handleCustomerSearch = async () => {
               <DollarSign className="w-5 h-5 text-green-600" />
             </div>
             <div className="text-3xl font-bold mb-1">₹{stats.todayRevenue.toLocaleString()}</div>
-            <div className="text-green-600 text-sm flex items-center gap-1">
-              <TrendingUp className="w-4 h-4" />
-              {stats.revenueChange} from yesterday
-            </div>
           </div>
         </div>
 
         {/* Tabs */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
           <div className="flex border-b border-gray-200">
-            {['overview', 'orders', 'applications', 'customers'].map((tab) => (
+            {['orders', 'applications', 'customers'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -284,70 +276,12 @@ const handleCustomerSearch = async () => {
         </div>
 
         {/* Tab Content */}
-        {activeTab === 'overview' && (
-          
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-xl font-semibold mb-1">Recent Orders</h2>
-                <p className="text-gray-600 text-sm">Latest delivery requests and their status</p>
-              </div>
-              <button className="px-4 py-2 bg-black text-white rounded-lg text-sm hover:bg-gray-800">
-                View All
-              </button>
-            </div>
-            <div className="space-y-4">
-              {tabData.recentOrders.map((order) => (
-                <div key={order.shipmentId} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-gray-300">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
-                      <Package className="w-6 h-6 text-blue-600" />
-                    </div>
-                    <div>
-                      <div className="font-semibold">{order.shipmentId}</div>
-                      <div className="text-sm text-gray-600">{order.firstName + " " + order.lastName}</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-6">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
-                      {order.status}
-                    </span>
-                    <div className="text-right">
-                      <div className="font-semibold">₹{order.amount}</div>
-                      <div className="text-sm text-gray-600">{new Date(order.createdAt).toLocaleString()}</div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {activeTab === 'orders' && (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-xl font-semibold mb-1">All Orders</h2>
-                <p className="text-gray-600 text-sm">Manage and track all delivery orders</p>
-              </div>
-              <div className="flex gap-3">
-                <div className="relative">
-                  <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Search orders..."
-                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm"
-                  />
-                </div>
-                <button className="px-4 py-2 border border-gray-300 rounded-lg text-sm flex items-center gap-2 hover:bg-gray-50">
-                  <Filter className="w-4 h-4" />
-                  Filter
-                </button>
-                <button className="px-4 py-2 bg-black text-white rounded-lg text-sm flex items-center gap-2 hover:bg-gray-800">
-                  <Download className="w-4 h-4" />
-                  Export
-                </button>
-              </div>
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold mb-1">All Orders</h2>
+              <p className="text-gray-600 text-sm">Manage and track all delivery orders</p>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -359,7 +293,6 @@ const handleCustomerSearch = async () => {
                     <th className="pb-3 text-sm font-medium text-gray-600">Partner</th>
                     <th className="pb-3 text-sm font-medium text-gray-600">Status</th>
                     <th className="pb-3 text-sm font-medium text-gray-600">Amount</th>
-                    <th className="pb-3 text-sm font-medium text-gray-600">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -381,16 +314,6 @@ const handleCustomerSearch = async () => {
                         </span>
                       </td>
                       <td className="py-4 text-sm font-medium">₹{order.amount}</td>
-                      <td className="py-4">
-                        <div className="flex gap-2">
-                          <button className="p-1 hover:bg-gray-100 rounded">
-                            <Eye className="w-4 h-4" />
-                          </button>
-                          <button className="p-1 hover:bg-gray-100 rounded">
-                            <Edit className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
                     </tr>
                   ))}
                 </tbody>

@@ -43,6 +43,8 @@ public interface PartnerRepository extends JpaRepository<Partner, Long> {
 	
 	long countByStatus(PartnerStatus status);
 	
+	long countByIsOnline(boolean isOnline);
+	
 	
 	@Query("SELECT p FROM Partner p " +
 	           "JOIN FETCH p.userId " +

@@ -72,11 +72,11 @@ export default function CustomerOrders() {
 
   const getStatusBadge = (status) => {
     const statusConfig = {
-      PENDING: { bg: "bg-gray-100 dark:bg-gray-700", text: "text-gray-800 dark:text-gray-200", label: "Pending" },
-      ASSIGNED: { bg: "bg-blue-100 dark:bg-blue-900", text: "text-blue-800 dark:text-blue-200", label: "Assigned" },
-      IN_TRANSIT: { bg: "bg-yellow-100 dark:bg-yellow-900", text: "text-yellow-800 dark:text-yellow-200", label: "In Transit" },
-      DELIVERED: { bg: "bg-green-100 dark:bg-green-900", text: "text-green-800 dark:text-green-200", label: "Delivered" },
-      CANCELLED: { bg: "bg-red-100 dark:bg-red-900", text: "text-red-800 dark:text-red-200", label: "Cancelled" }
+      PENDING: { bg: "bg-gray-100", text: "text-gray-800", label: "Pending" },
+      ASSIGNED: { bg: "bg-blue-100", text: "text-blue-800", label: "Assigned" },
+      IN_TRANSIT: { bg: "bg-yellow-100", text: "text-yellow-800", label: "In Transit" },
+      DELIVERED: { bg: "bg-green-100", text: "text-green-800", label: "Delivered" },
+      CANCELLED: { bg: "bg-red-100", text: "text-red-800", label: "Cancelled" }
     };
 
     const config = statusConfig[status] || statusConfig.PENDING;
@@ -100,16 +100,16 @@ export default function CustomerOrders() {
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
   if (orders.length === 0) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 text-center">
+      <div className="bg-white rounded-lg border border-gray-200 p-6 text-center">
         <svg
-          className="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4"
+          className="w-16 h-16 text-gray-400 mx-auto mb-4"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -121,8 +121,8 @@ export default function CustomerOrders() {
             d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
           />
         </svg>
-        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">No Orders Yet</h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <h3 className="text-lg font-semibold text-gray-800 mb-2">No Orders Yet</h3>
+        <p className="text-sm text-gray-600">
           You haven't placed any orders yet.
         </p>
       </div>
@@ -135,20 +135,20 @@ export default function CustomerOrders() {
         {orders.map((order) => (
           <div
             key={order.shipmentId}
-            className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6"
+            className="bg-white rounded-lg border border-gray-200 p-6"
           >
             <div className="flex items-start justify-between mb-4">
               <div>
-                <p className="font-semibold text-gray-800 dark:text-gray-100">
+                <p className="font-semibold text-gray-800">
                   Order #{order.shipmentId}
                 </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-gray-500">
                   {formatDate(order.createdAt)}
                 </p>
               </div>
               <div className="text-right">
                 {getStatusBadge(order.status)}
-                <p className="text-lg font-bold text-gray-800 dark:text-gray-100 mt-2">
+                <p className="text-lg font-bold text-gray-800 mt-2">
                   ₹{order.calculatedPrice?.toFixed(0) || "0"}
                 </p>
               </div>
@@ -156,26 +156,26 @@ export default function CustomerOrders() {
 
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Pickup</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">{order.pickupAddress || "N/A"}</p>
+                <p className="text-sm font-medium text-gray-700">Pickup</p>
+                <p className="text-sm text-gray-600">{order.pickupAddress || "N/A"}</p>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Delivery</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">{order.deliveryAddress || "N/A"}</p>
+                <p className="text-sm font-medium text-gray-700">Delivery</p>
+                <p className="text-sm text-gray-600">{order.deliveryAddress || "N/A"}</p>
               </div>
             </div>
 
             {order.status === "DELIVERED" && !order.hasRating && (
               <button
                 onClick={() => handleRateOrder(order)}
-                className="w-full py-2 px-4 bg-blue-600 dark:bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
+                className="w-full py-2 px-4 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
               >
                 Rate Partner
               </button>
             )}
 
             {order.status === "DELIVERED" && order.hasRating && (
-              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
                 <svg className="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 20 20">
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
