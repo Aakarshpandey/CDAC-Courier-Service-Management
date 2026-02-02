@@ -6,12 +6,13 @@ import Logo from "../../components/Logo/Logo";
 import { login } from "../../services/users";
 import { setUser } from "../../store/userSlice";
 import { useDispatch } from "react-redux";
+import { useAuth } from "../../providers/AuthProvider";
 
 
 export default function Login() {
   const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState("user");
-
+  const { setAuthUser } = useAuth()
   // Auto-select partner tab if query parameter is present
   useEffect(() => {
     const tabParam = searchParams.get("tab");
@@ -26,6 +27,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -62,6 +64,11 @@ export default function Login() {
         // localStorage.setItem("userEmail", response.data.email);
         // localStorage.setItem("userRole", response.data.role);
         // localStorage.setItem("userName", `${response.data.firstName} ${response.data.lastName}`);
+
+         setAuthUser({
+          firstName : response.data.firstName,
+          lastName : response.data.lastName
+        })
 
          dispatch(setUser({
           name: `${response.data.firstName} ${response.data.lastName}`,
