@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import com.cms.CourierKaro.dto.UserProfileResponseDTO;
 import com.cms.CourierKaro.entity.User;
+import com.cms.CourierKaro.exception.ResourceNotFoundException;
 
 @Service
 @RequiredArgsConstructor
@@ -102,7 +103,7 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
     @Transactional
     public void updatePartnerApproval(Long partnerId, PartnerApprovalDTO approvalDto) {
         Partner partner = partnerRepository.findById(partnerId)
-                .orElseThrow(() -> new RuntimeException("Partner not found with id: " + partnerId));
+                .orElseThrow(() -> new ResourceNotFoundException("Partner not found with id: " + partnerId));
         partner.setApproved(approvalDto.isApproved());
         
         // If approved, you might want to set status to ACTIVE, 

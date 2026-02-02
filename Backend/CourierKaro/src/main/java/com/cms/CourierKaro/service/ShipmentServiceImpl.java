@@ -18,6 +18,7 @@ import com.cms.CourierKaro.entity.Shipment;
 import com.cms.CourierKaro.entity.Status;
 import com.cms.CourierKaro.entity.User;
 import com.cms.CourierKaro.entity.VehicleType;
+import com.cms.CourierKaro.exception.ResourceNotFoundException;
 import com.cms.CourierKaro.repository.LocationRepository;
 import com.cms.CourierKaro.repository.ShipmentRepository;
 import com.cms.CourierKaro.repository.UserRepository;
@@ -42,7 +43,7 @@ public class ShipmentServiceImpl implements ShipmentService {
     public ShipmentResponseDTO createShipment(ShipmentRequestDTO request, String userEmail) {
         // Get the user
         User customer = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("User not found with email: " + userEmail));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + userEmail));
 
         
         // Get vehicle type
@@ -140,7 +141,7 @@ public class ShipmentServiceImpl implements ShipmentService {
 
         if (shipments.isEmpty()) {
             userRepository.findByEmail(userEmail)
-                    .orElseThrow(() -> new RuntimeException("User not found with email: " + userEmail));
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + userEmail));
         }
 
         return shipments;
@@ -149,16 +150,16 @@ public class ShipmentServiceImpl implements ShipmentService {
     @Override
     public ShipmentResponseDTO getShipmentById(Long shipmentId) {
         return shipmentRepository.findShipmentDTOById(shipmentId)
-                .orElseThrow(() -> new RuntimeException("Shipment not found with id: " + shipmentId));
+                .orElseThrow(() -> new ResourceNotFoundException("Shipment not found with id: " + shipmentId));
     }
     
     @Override
     public ShipmentResponseDTO cancelShipment(Long shipmentId) {
         Shipment shipment = shipmentRepository.findById(shipmentId)
-                .orElseThrow(() -> new RuntimeException("Shipment not found with id: " + shipmentId));
+                .orElseThrow(() -> new ResourceNotFoundException("Shipment not found with id: " + shipmentId));
 
         if (shipment.getStatus() != Status.PENDING) {
-            throw new RuntimeException("Only pending orders can be cancelled");
+            throw new ResourceNotFoundException("Only pending orders can be cancelled");
         }
 
         shipment.setStatus(Status.CANCELLED);
