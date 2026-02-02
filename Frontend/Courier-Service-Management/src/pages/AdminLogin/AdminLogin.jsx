@@ -4,6 +4,9 @@ import { ArrowLeft, Shield } from "lucide-react";
 import toast from "react-hot-toast";
 import Logo from "../../components/Logo/Logo";
 import { adminLogin } from "../../services/users";
+import { setUser } from "../../store/userSlice";
+import { useDispatch } from "react-redux";
+
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
@@ -11,7 +14,7 @@ export default function AdminLogin() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
+  const dispatch = useDispatch();
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -42,12 +45,11 @@ export default function AdminLogin() {
 
       // Check if login was successful
       if (response.data.status === "SUCCESS") {
-        // Store the JWT token and admin info
-        localStorage.setItem("authToken", response.data.token);
-        localStorage.setItem("userEmail", response.data.email);
-        localStorage.setItem("userRole", response.data.role);
-        localStorage.setItem("userName", `${response.data.firstName} ${response.data.lastName}`);
-
+        dispatch(setUser({
+                  name: `${response.data.firstName} ${response.data.lastName}`,
+                  email: response.data.email,
+                  role: response.data.role,
+                }));
         toast.success(response.data.message || "Admin login successful");
 
         // Navigate to admin dashboard

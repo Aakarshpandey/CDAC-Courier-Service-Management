@@ -33,7 +33,7 @@ public class AuthController {
 	@PostMapping("/login")
 	public ResponseEntity<?> userLogin(@RequestBody UserLoginDTO userLoginDTO, HttpServletResponse httpResponse){
 		LoginResponse response = userService.login(userLoginDTO);
-		System.out.println(response);
+		System.out.println(userLoginDTO);
 
 		if ("SUCCESS".equals(response.getStatus()) && response.getToken() != null) {
 			Cookie cookie = new Cookie("jwt", response.getToken());

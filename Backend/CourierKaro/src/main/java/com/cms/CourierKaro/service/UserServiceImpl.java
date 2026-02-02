@@ -74,17 +74,17 @@ public class UserServiceImpl implements UserService {
 		if (user == null) {
 			return new LoginResponse(
 					null, null, null, null, null,
-					"Invalid credentials",
+					"Invalid Email or Password",
 					"FAILED");
 		}
 
-		// if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
-		// return new LoginResponse(
-		// null, null, null, null, null,
-		// "Invalid credentials",
-		// "FAILED"
-		// );
-		// }
+		 if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
+		 return new LoginResponse(
+		 null, null, null, null, null,
+		 "Invalid credentials",
+		 "FAILED"
+		 );
+		 }
 		
 		if(role == role.ROLE_PARTNER) {
 			Partner p = partnerRepository.findByUserId(user).orElse(null);
