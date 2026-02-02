@@ -57,7 +57,10 @@ public interface ShipmentRepository extends JpaRepository<Shipment, Long> {
            "COALESCE(pu.firstName, 'Unassigned'), " +
            "COALESCE(pu.lastName, ''), " +
            "CAST(s.status AS string), " +
-           "s.calculatedPrice) " +
+           "s.calculatedPrice, " +
+           "s.calculatedPrice, " +
+           "s.createdAt, " +
+           "CASE WHEN EXISTS (SELECT 1 FROM Rating r WHERE r.shipmentId.shipmentId = s.shipmentId) THEN true ELSE false END) " +
            "FROM Shipment s " +
            "JOIN s.custormerId c " +
            "LEFT JOIN s.partnerId p " +

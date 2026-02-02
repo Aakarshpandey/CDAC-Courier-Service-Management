@@ -26,6 +26,7 @@ import UserEditProfile from "./pages/UserEditProfile/UserEditProfile";
 import AppSetting from "./pages/AppSetting/AppSetting";
 import BookingDetails from "./pages/BookingDetails/BookingDetails";
 import OrderDetails from "./pages/OrderDetails/OrderDetails";
+import OrderHistory from "./pages/OrderHistory/OrderHistory";
 
 // ============================================================================
 // Partner Pages
@@ -73,6 +74,7 @@ function App() {
         <Route path="/app-setting" element={<AppSetting />} />
         <Route path="/booking-details" element={<BookingDetails />} />
         <Route path="/order/:id" element={<OrderDetails />} />
+        <Route path="/order-history" element={<OrderHistory />} />
 
         {/* ================================================================ */}
         {/* Partner Routes */}

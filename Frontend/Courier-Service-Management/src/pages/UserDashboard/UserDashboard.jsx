@@ -167,12 +167,12 @@ const UserDashboard = () => {
                       </div>
 
                       <div className="flex items-start gap-3">
-                        <div className="flex flex-col items-center">
+                        <div className="flex flex-col items-center flex-shrink-0">
                           <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                           <div className="w-0.5 h-8 bg-gray-300 my-1"></div>
                           <div className="w-2 h-2 bg-red-500 rounded-full"></div>
                         </div>
-                        <div className="flex-1 space-y-4">
+                        <div className="flex-1 min-w-0 space-y-4">
                           <div>
                             <p className="text-xs text-gray-500">From</p>
                             <p className="text-sm text-gray-900 truncate">{order.pickupAddress || 'N/A'}</p>
@@ -182,7 +182,7 @@ const UserDashboard = () => {
                             <p className="text-sm text-gray-900 truncate">{order.deliveryAddress || 'N/A'}</p>
                           </div>
                         </div>
-                        <div className="text-right">
+                        <div className="text-right flex-shrink-0">
                           <p className="font-bold text-gray-900">₹{order.calculatedPrice}</p>
                           <p className="text-xs text-gray-500">{order.vehicleType}</p>
                         </div>
@@ -193,44 +193,23 @@ const UserDashboard = () => {
               )}
             </div>
 
-            {/* Completed Orders */}
+            {/* Order History Button */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-gray-900">Recent Deliveries</h2>
-                <span className="text-sm text-gray-500">{completedOrders.length} completed</span>
+                <h2 className="text-xl font-semibold text-gray-900">Order History</h2>
               </div>
-
-              {completedOrders.length === 0 ? (
-                <p className="text-center text-gray-500 py-8">No completed deliveries yet</p>
-              ) : (
-                <div className="space-y-3">
-                  {completedOrders.slice(0, 5).map((order) => (
-                    <div
-                      key={order.shipmentId}
-                      onClick={() => navigate(`/order/${order.shipmentId}`)}
-                      className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition cursor-pointer"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                          order.status === 'DELIVERED' ? 'bg-green-100' : 'bg-red-100'
-                        }`}>
-                          <Package className={order.status === 'DELIVERED' ? 'text-green-600' : 'text-red-600'} size={20} />
-                        </div>
-                        <div>
-                          <p className="font-medium text-gray-900">Order #{order.shipmentId}</p>
-                          <p className="text-sm text-gray-500">{formatDate(order.createdAt)}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-semibold text-gray-900">₹{order.calculatedPrice}</p>
-                        <span className={`text-xs px-2 py-0.5 rounded ${getStatusColor(order.status)}`}>
-                          {order.status}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <p className="text-sm text-gray-600 mb-4">
+                View all your orders and rate completed deliveries
+              </p>
+              <button
+                onClick={() => navigate('/order-history')}
+                className="w-full py-3 px-4 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                View Order History
+              </button>
             </div>
           </div>
 

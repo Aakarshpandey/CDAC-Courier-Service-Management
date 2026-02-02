@@ -41,3 +41,22 @@ export async function getAllOrders() {
     }
 }
 
+export async function submitRating(shipmentId, rating, review) {
+    try {
+        const response = await axios.post("http://localhost:8080/api/ratings", {
+            shipmentId,
+            rating,
+            review
+        }, {
+            headers: {
+                "Authorization": `Bearer ${getAuthToken()}`,
+                "Content-Type": "application/json",
+            },
+        });
+        return response;
+    } catch (error) {
+        console.error("Error submitting rating:", error);
+        throw error;
+    }
+}
+

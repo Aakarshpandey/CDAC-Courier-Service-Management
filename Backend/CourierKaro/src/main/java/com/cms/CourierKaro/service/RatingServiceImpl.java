@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
@@ -32,8 +33,90 @@ public class RatingServiceImpl implements RatingService {
     @Override
     @Transactional
     public Map<String, Object> submitRating(RatingRequestDTO ratingRequest, String userEmail) {
-        // ... (previous implementation)
-        return new HashMap<>(); // Placeholder to keep compiler happy if you copy paste
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            // Validate rating value
+            if (ratingRequest.getRating() < 1 || ratingRequest.getRating() > 5) {
+                response.put("status", "FAILED");
+                response.put("message", "Rating must be between 1 and 5");
+                return response;
+            }
+            
+            // Get user
+            User user = userRepository.findByEmail(userEmail)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            
+            // Get shipment
+            Shipment shipment = shipmentRepository.findById(ratingRequest.getShipmentId())
+                    .orElseThrow(() -> new RuntimeException("Shipment not found"));
+            
+            // Verify shipment belongs to this customer
+            if (!shipment.getCustormerId().getId().equals(user.getId())) {
+                response.put("status", "FAILED");
+                response.put("message", "You can only rate your own orders");
+                return response;
+            }
+            
+            // Verify shipment is delivered
+            if (shipment.getStatus() != com.cms.CourierKaro.entity.Status.DELIVERED) {
+                response.put("status", "FAILED");
+                response.put("message", "You can only rate delivered orders");
+                return response;
+            }
+            
+            // Check if rating already exists for this shipment
+            Optional<Rating> existingRating = ratingRepository.findByShipmentId_ShipmentId(ratingRequest.getShipmentId());
+            if (existingRating.isPresent()) {
+                response.put("status", "FAILED");
+                response.put("message", "You have already rated this order");
+                return response;
+            }
+            
+            // Get partner
+            Partner partner = shipment.getPartnerId();
+            if (partner == null) {
+                response.put("status", "FAILED");
+                response.put("message", "No partner assigned to this order");
+                return response;
+            }
+            
+            // Create and save rating
+            Rating rating = new Rating();
+            rating.setShipmentId(shipment);
+            rating.setUserId(user);
+            rating.setPartnerId(partner);
+            rating.setRating(ratingRequest.getRating());
+            rating.setReview(ratingRequest.getReview());
+            rating.setCreatedAt(LocalDateTime.now());
+            
+            ratingRepository.save(rating);
+            
+            // Update partner's average rating
+            updatePartnerAverageRating(partner);
+            
+            response.put("status", "SUCCESS");
+            response.put("message", "Rating submitted successfully");
+            response.put("ratingId", rating.getRatingId());
+            
+        } catch (Exception e) {
+            response.put("status", "FAILED");
+            response.put("message", "Failed to submit rating: " + e.getMessage());
+        }
+        
+        return response;
+    }
+    
+    private void updatePartnerAverageRating(Partner partner) {
+        List<Rating> ratings = ratingRepository.findByPartnerId_PartnerId(partner.getPartnerId());
+        if (!ratings.isEmpty()) {
+            double average = ratings.stream()
+                    .mapToInt(Rating::getRating)
+                    .average()
+                    .orElse(0.0);
+            partner.setAvgRating(average);
+            partnerRepository.save(partner);
+        }
     }
     
     // ... (helper methods)

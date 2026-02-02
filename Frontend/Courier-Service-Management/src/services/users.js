@@ -299,3 +299,59 @@ export async function acceptOrder(shipmentId) {
         throw error;
     }
 }
+
+export async function getMyOrders() {
+    try {
+        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+        const token = localStorage.getItem("authToken");
+
+        if (!token) {
+            throw new Error("No authentication token found");
+        }
+
+        const response = await axios.get(`${API_URL}/api/partners/my-orders`, {
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        });
+        return response;
+    } catch (error) {
+        console.error("Error fetching my orders:", error);
+        if (error.response) {
+            console.error("Response data:", error.response.data);
+            console.error("Response status:", error.response.status);
+        }
+        throw error;
+    }
+}
+
+export async function submitRating(shipmentId, rating, review) {
+    try {
+        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+        const token = localStorage.getItem("authToken");
+
+        if (!token) {
+            throw new Error("No authentication token found");
+        }
+
+        const response = await axios.post(`${API_URL}/api/ratings`, {
+            shipmentId,
+            rating,
+            review
+        }, {
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        });
+        return response;
+    } catch (error) {
+        console.error("Error submitting rating:", error);
+        if (error.response) {
+            console.error("Response data:", error.response.data);
+            console.error("Response status:", error.response.status);
+        }
+        throw error;
+    }
+}

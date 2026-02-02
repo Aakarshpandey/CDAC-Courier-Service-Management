@@ -26,4 +26,7 @@ public class AllOrdersDTO {
     private String partnerLastName;
     private String status;
     private BigDecimal amount;
+    private BigDecimal calculatedPrice;
+    private LocalDateTime createdAt;
+    private boolean hasRating;
 }

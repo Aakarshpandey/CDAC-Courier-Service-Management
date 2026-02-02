@@ -19,6 +19,8 @@ import com.cms.CourierKaro.dto.PartnerRegisterDTO;
 import com.cms.CourierKaro.dto.PartnerEarningsDTO;
 import com.cms.CourierKaro.dto.ProfilePhotoResponseDTO;
 import com.cms.CourierKaro.dto.TransferEarningsRequestDTO;
+import com.cms.CourierKaro.dto.UpdateOrderStatusDTO;
+import com.cms.CourierKaro.dto.UpdateOrderStatusResponseDTO;
 import com.cms.CourierKaro.response.PartnerResp;
 
 public interface PartnerService {
@@ -71,4 +73,8 @@ public interface PartnerService {
 	PartnerEarningsDTO getPartnerEarnings(String userEmail, String period);
 
 	AcceptedOrderDTO acceptOrder(String userEmail, Long shipmentId);
+	
+	List<AcceptedOrderDTO> getMyOrders(String userEmail);
+	
+	UpdateOrderStatusResponseDTO updateOrderStatus(String userEmail, Long shipmentId, UpdateOrderStatusDTO dto);
 }
