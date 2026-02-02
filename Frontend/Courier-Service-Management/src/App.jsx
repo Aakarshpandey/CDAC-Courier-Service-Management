@@ -42,6 +42,8 @@ import PaymentSettings from "./pages/PaymentSettings/PaymentSettings";
 // Admin Pages
 // ============================================================================
 import AdminDashboard from "./pages/AdminDashboard/AdminDashboard";
+import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
+import AuthProvider from "./providers/AuthProvider";
 
 // ============================================================================
 // App Component
@@ -49,6 +51,7 @@ import AdminDashboard from "./pages/AdminDashboard/AdminDashboard";
 function App() {
   return (
     <BrowserRouter>
+    <AuthProvider>
       <Routes>
         {/* ================================================================ */}
         {/* Public Routes */}
@@ -69,29 +72,29 @@ function App() {
         {/* ================================================================ */}
         {/* User Routes */}
         {/* ================================================================ */}
-        <Route path="/user-dashboard" element={<UserDashboard />} />
-        <Route path="/user-edit-profile" element={<UserEditProfile />} />
-        <Route path="/app-setting" element={<AppSetting />} />
-        <Route path="/booking-details" element={<BookingDetails />} />
+        <Route path="/user-dashboard" element={<ProtectedRoute><UserDashboard /></ProtectedRoute>} />
+        <Route path="/user-edit-profile" element={<ProtectedRoute><UserEditProfile /></ProtectedRoute>} />
+        <Route path="/app-setting" element={<ProtectedRoute><AppSetting /></ProtectedRoute>} />
+        <Route path="/booking-details" element={<ProtectedRoute><BookingDetails /></ProtectedRoute>} />
         <Route path="/order/:id" element={<OrderDetails />} />
-        <Route path="/order-history" element={<OrderHistory />} />
+        <Route path="/order-history" element={<ProtectedRoute><OrderHistory /></ProtectedRoute>} />
 
         {/* ================================================================ */}
         {/* Partner Routes */}
         {/* ================================================================ */}
-        <Route path="/partner-dashboard" element={<PartnerDashboard />} />
-        <Route path="/partner-edit-profile" element={<PartnerEditProfile />} />
-        <Route path="/partner-app-setting" element={<PartnerAppSetting />} />
-        <Route path="/accept-order" element={<AcceptOrder />} />
-        <Route path="/detailed-earnings" element={<DetailedEarnings />} />
-        <Route path="/payment-settings" element={<PaymentSettings />} />
+        <Route path="/partner-dashboard" element={<ProtectedRoute><PartnerDashboard /></ProtectedRoute>} />
+        <Route path="/partner-edit-profile" element={<ProtectedRoute><PartnerEditProfile /></ProtectedRoute>} />
+        <Route path="/partner-app-setting" element={<ProtectedRoute><PartnerAppSetting /></ProtectedRoute>} />
+        <Route path="/accept-order" element={<ProtectedRoute><AcceptOrder /></ProtectedRoute>} />
+        <Route path="/detailed-earnings" element={<ProtectedRoute><DetailedEarnings /></ProtectedRoute>} />
+        <Route path="/payment-settings" element={<ProtectedRoute><PaymentSettings /></ProtectedRoute>} />
 
         {/* ================================================================ */}
         {/* Admin Routes */}
         {/* ================================================================ */}
-        <Route path="/admin-dashboard" element={<AdminDashboard />} />
+        <Route path="/admin-dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
       </Routes>
-
+    </AuthProvider>  
       {/* Toast Notifications */}
       <Toaster position="top-right" />
     </BrowserRouter>

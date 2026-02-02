@@ -13,6 +13,7 @@ import java.util.UUID;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.cms.CourierKaro.dto.DailyEarningDTO;
@@ -82,6 +83,7 @@ public class PartnerServiceImpl implements PartnerService {
 	private final ShipmentRepository shipmentRepository;
 	private final PartnerPayoutRepository partnerPayoutRepository;
 	private final ModelMapper modelMapper;
+	private final PasswordEncoder passwordEncoder;
 
 	@Override
 	public PartnerResp registerPartner(PartnerRegisterDTO dto) {
@@ -160,7 +162,7 @@ public class PartnerServiceImpl implements PartnerService {
 			}
 
 			User user = modelMapper.map(dto, User.class);
-			user.setPassword(dto.getPassword());
+			 user.setPassword(passwordEncoder.encode(dto.getPassword()));
 			user.setRole(Role.ROLE_PARTNER);
 
 			User savedUser = userRepository.save(user);

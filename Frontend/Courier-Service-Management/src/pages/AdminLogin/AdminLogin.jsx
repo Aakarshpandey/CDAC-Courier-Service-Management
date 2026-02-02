@@ -6,9 +6,11 @@ import Logo from "../../components/Logo/Logo";
 import { adminLogin } from "../../services/users";
 import { setUser } from "../../store/userSlice";
 import { useDispatch } from "react-redux";
+import { useAuth } from "../../providers/AuthProvider";
 
 
 export default function AdminLogin() {
+  const { setAuthUser } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -45,6 +47,10 @@ export default function AdminLogin() {
 
       // Check if login was successful
       if (response.data.status === "SUCCESS") {
+        setAuthUser({
+          firstName : response.data.firstName,
+          lastName : response.data.lastName
+        })
         dispatch(setUser({
                   name: `${response.data.firstName} ${response.data.lastName}`,
                   email: response.data.email,
