@@ -31,6 +31,8 @@ import com.cms.CourierKaro.dto.PartnerPayoutDTO;
 import com.cms.CourierKaro.dto.PartnerRegisterDTO;
 import com.cms.CourierKaro.dto.ProfilePhotoResponseDTO;
 import com.cms.CourierKaro.dto.TransferEarningsRequestDTO;
+import com.cms.CourierKaro.dto.UpdateOrderStatusDTO;
+import com.cms.CourierKaro.dto.UpdateOrderStatusResponseDTO;
 import com.cms.CourierKaro.entity.Location;
 import com.cms.CourierKaro.entity.Partner;
 import com.cms.CourierKaro.entity.PartnerPayout;
@@ -1027,6 +1029,150 @@ public class PartnerServiceImpl implements PartnerService {
 		} catch (Exception e) {
 			return AcceptedOrderDTO.builder()
 					.message("Failed to accept order: " + e.getMessage())
+					.build();
+		}
+	}
+
+	@Override
+	public List<AcceptedOrderDTO> getMyOrders(String userEmail) {
+		try {
+			User user = userRepository.findByEmail(userEmail).orElse(null);
+			if (user == null) {
+				return List.of();
+			}
+
+			Partner partner = partnerRepository.findByUserId(user).orElse(null);
+			if (partner == null) {
+				return List.of();
+			}
+
+			// Get all shipments assigned to this partner with status ASSIGNED or IN_TRANSIT
+			List<Shipment> myShipments = shipmentRepository.findByPartnerId(partner).stream()
+					.filter(s -> s.getStatus() == Status.ASSIGNED || s.getStatus() == Status.IN_TRANSIT)
+					.toList();
+
+			return myShipments.stream()
+					.map(s -> {
+						User customer = s.getCustormerId();
+						Location pickupLoc = s.getPickupLocationId();
+						Location deliveryLoc = s.getDeliveryLocationId();
+
+						return AcceptedOrderDTO.builder()
+								.shipmentId(s.getShipmentId())
+								.status(s.getStatus() != null ? s.getStatus().toString() : "ASSIGNED")
+								.pickupAddress(s.getPickupAddress())
+								.pickupContactName(s.getPickupContactName())
+								.pickupPhone(s.getPickupPhone())
+								.pickupPincode(pickupLoc != null ? pickupLoc.getPincode() : null)
+								.deliveryAddress(s.getDeliveryAddress())
+								.deliveryContactName(s.getDeliveryContactName())
+								.deliveryPhone(s.getDeliveryPhone())
+								.deliveryPincode(deliveryLoc != null ? deliveryLoc.getPincode() : null)
+								.packageType(s.getPackageType() != null ? s.getPackageType().toString() : null)
+								.weightKg(s.getWeightKg())
+								.vehicleTypeName(s.getVehicleTypeId() != null ? s.getVehicleTypeId().getTypeName() : null)
+								.distanceKm(s.getDistanceKm())
+								.calculatedPrice(s.getCalculatedPrice())
+								.customerName(customer != null ? (customer.getFirstName() + " " + (customer.getLastName() != null ? customer.getLastName() : "")).trim() : "Unknown")
+								.customerPhone(customer != null ? customer.getPhoneNumber() : null)
+								.createdAt(s.getCreatedAt())
+								.build();
+					})
+					.toList();
+		} catch (Exception e) {
+			return List.of();
+		}
+	}
+
+	@Override
+	public UpdateOrderStatusResponseDTO updateOrderStatus(String userEmail, Long shipmentId, UpdateOrderStatusDTO dto) {
+		try {
+			// Validate input
+			if (dto == null || dto.getStatus() == null || dto.getStatus().isBlank()) {
+				return UpdateOrderStatusResponseDTO.builder()
+						.message("Status is required")
+						.build();
+			}
+
+			// Get user and partner
+			User user = userRepository.findByEmail(userEmail).orElse(null);
+			if (user == null) {
+				return UpdateOrderStatusResponseDTO.builder()
+						.message("User not found")
+						.build();
+			}
+
+			Partner partner = partnerRepository.findByUserId(user).orElse(null);
+			if (partner == null) {
+				return UpdateOrderStatusResponseDTO.builder()
+						.message("Partner profile not found")
+						.build();
+			}
+
+			// Get shipment
+			Shipment shipment = shipmentRepository.findById(shipmentId).orElse(null);
+			if (shipment == null) {
+				return UpdateOrderStatusResponseDTO.builder()
+						.message("Shipment not found")
+						.build();
+			}
+
+			// Verify partner owns this shipment
+			if (shipment.getPartnerId() == null || !shipment.getPartnerId().getPartnerId().equals(partner.getPartnerId())) {
+				return UpdateOrderStatusResponseDTO.builder()
+						.message("You are not assigned to this order")
+						.build();
+			}
+
+			// Parse and validate status
+			String statusStr = dto.getStatus().trim().toUpperCase();
+			Status newStatus;
+			try {
+				newStatus = Status.valueOf(statusStr);
+			} catch (IllegalArgumentException e) {
+				return UpdateOrderStatusResponseDTO.builder()
+						.message("Invalid status: " + dto.getStatus())
+						.build();
+			}
+
+			// Validate status transitions
+			Status currentStatus = shipment.getStatus();
+			
+			if (newStatus == Status.IN_TRANSIT) {
+				if (currentStatus != Status.ASSIGNED) {
+					return UpdateOrderStatusResponseDTO.builder()
+							.message("Can only mark as IN_TRANSIT from ASSIGNED status")
+							.build();
+				}
+				shipment.setStatus(Status.IN_TRANSIT);
+				shipment.setPickedUpAt(LocalDateTime.now());
+			} else if (newStatus == Status.DELIVERED) {
+				if (currentStatus != Status.IN_TRANSIT) {
+					return UpdateOrderStatusResponseDTO.builder()
+							.message("Can only mark as DELIVERED from IN_TRANSIT status")
+							.build();
+				}
+				shipment.setStatus(Status.DELIVERED);
+				shipment.setDeliveredAt(LocalDateTime.now());
+			} else {
+				return UpdateOrderStatusResponseDTO.builder()
+						.message("Invalid status update. Only IN_TRANSIT and DELIVERED are allowed")
+						.build();
+			}
+
+			// Save shipment
+			shipment = shipmentRepository.save(shipment);
+
+			return UpdateOrderStatusResponseDTO.builder()
+					.shipmentId(shipment.getShipmentId())
+					.status(shipment.getStatus().toString())
+					.message("Order status updated successfully")
+					.pickedUpAt(shipment.getPickedUpAt())
+					.deliveredAt(shipment.getDeliveredAt())
+					.build();
+		} catch (Exception e) {
+			return UpdateOrderStatusResponseDTO.builder()
+					.message("Failed to update order status: " + e.getMessage())
 					.build();
 		}
 	}

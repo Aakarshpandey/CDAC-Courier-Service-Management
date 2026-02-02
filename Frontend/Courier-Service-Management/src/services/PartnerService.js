@@ -72,3 +72,28 @@ export async function rejectPartner(partnerId) {
         throw error;
     }
 }
+
+/**
+ * Update order status (IN_TRANSIT or DELIVERED)
+ * @param {number} shipmentId - The ID of the shipment to update
+ * @param {string} status - The new status ("IN_TRANSIT" or "DELIVERED")
+ */
+export async function updateOrderStatus(shipmentId, status) {
+    try {
+        const response = await axios.put(
+            `${API_BASE_URL}/api/partners/orders/${shipmentId}/status`,
+            { status },
+            {
+                headers: {
+                    "Authorization": `Bearer ${getAuthToken()}`,
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Error updating order status:", error);
+        throw error;
+    }
+}
+

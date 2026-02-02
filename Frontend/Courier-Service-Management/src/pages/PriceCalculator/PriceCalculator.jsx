@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Calculator, MapPin, Package, Truck, Car, Bike, Clock, Shield, CheckCircle, AlertCircle } from 'lucide-react';
+import toast from 'react-hot-toast';
 import Navbar from '../../components/NavBar/Navbar';
 import { useJsApiLoader, GoogleMap, Marker, Autocomplete, DirectionsRenderer } from '@react-google-maps/api'; 
 
@@ -136,13 +137,13 @@ export default function PriceCalculator() {
     const vehicle = vehicleTypes.find(v => v.id === formData.vehicleType);
     setDirectionsResponse(null);
     if (!vehicle) {
-      alert('Please select a vehicle type');
+      toast.error('Please select a vehicle type');
       return;
     }
     
     // Validate weight
     if (!formData.weight) {
-      alert('Please enter package weight');
+      toast.error('Please enter package weight');
       return;
     }
     
@@ -151,7 +152,7 @@ export default function PriceCalculator() {
     }
 
     if(originRef.current.value === '' || destinationRef.current.value === '') {
-      alert('Please enter both pickup and delivery addresses');
+      toast.error('Please enter both pickup and delivery addresses');
       return;
     }
 

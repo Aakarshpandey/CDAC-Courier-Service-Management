@@ -39,6 +39,8 @@ import com.cms.CourierKaro.dto.PartnerPayoutDTO;
 import com.cms.CourierKaro.dto.PartnerRegisterDTO;
 import com.cms.CourierKaro.dto.ProfilePhotoResponseDTO;
 import com.cms.CourierKaro.dto.TransferEarningsRequestDTO;
+import com.cms.CourierKaro.dto.UpdateOrderStatusDTO;
+import com.cms.CourierKaro.dto.UpdateOrderStatusResponseDTO;
 import com.cms.CourierKaro.response.PartnerResp;
 import com.cms.CourierKaro.service.PartnerService;
 import com.cms.CourierKaro.security.JwtTokenProvider;
@@ -231,6 +233,35 @@ public class PartnerController {
 							.build());
 		}
 		AcceptedOrderDTO response = partnerService.acceptOrder(userEmail, shipmentId);
+		return ResponseEntity.ok(response);
+	}
+
+	@GetMapping("/my-orders")
+	public ResponseEntity<?> getMyOrders(
+			Principal principal,
+			@RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
+		String userEmail = resolveEmail(principal, authorizationHeader);
+		if (userEmail == null) {
+			return ResponseEntity.badRequest().body(List.of());
+		}
+		List<AcceptedOrderDTO> orders = partnerService.getMyOrders(userEmail);
+		return ResponseEntity.ok(orders);
+	}
+
+	@PutMapping("/orders/{shipmentId}/status")
+	public ResponseEntity<?> updateOrderStatus(
+			Principal principal,
+			@RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+			@PathVariable Long shipmentId,
+			@RequestBody UpdateOrderStatusDTO dto) {
+		String userEmail = resolveEmail(principal, authorizationHeader);
+		if (userEmail == null) {
+			return ResponseEntity.badRequest().body(
+					UpdateOrderStatusResponseDTO.builder()
+							.message("Authentication required")
+							.build());
+		}
+		UpdateOrderStatusResponseDTO response = partnerService.updateOrderStatus(userEmail, shipmentId, dto);
 		return ResponseEntity.ok(response);
 	}
 

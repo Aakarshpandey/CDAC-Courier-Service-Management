@@ -4,6 +4,7 @@ import TabNavigation from "../../components/TabNavigation/TabNavigation";
 import Earning from "../../components/Earning/Earning";
 import Navbar from "../../components/NavBar/Navbar";
 import AvailableOrders from "../../components/AvailableOrder/AvailableOrder";
+import MyOrders from "../../components/MyOrders/MyOrders";
 import PartnerProfile from "../../components/PartnerProfile/PartnerProfile";
 import { getPartnerProfile, getPartnerDashboardStats, updatePartnerOnlineStatus } from "../../services/users";
 
@@ -100,6 +101,7 @@ export default function PageDashboard() {
       label: `Available Orders${dashboardStats?.todayOrders !== undefined ? ` (${dashboardStats.todayOrders})` : ''}`,
       disabled: !isOnline
     },
+    { id: "myorders", label: "My Orders" },
     { id: "earnings", label: "Earnings" },
     { id: "profile", label: "Profile" },
   ];
@@ -245,6 +247,9 @@ export default function PageDashboard() {
                 </button>
               </div>
             )
+          )}
+          {activeTab === "myorders" && (
+            <MyOrders />
           )}
           {activeTab === "earnings" && (
             <Earning dashboardStats={dashboardStats} />

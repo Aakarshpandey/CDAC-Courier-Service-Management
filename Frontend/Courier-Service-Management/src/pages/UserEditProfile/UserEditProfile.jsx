@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { User, MapPin, Bell, Lock, Camera, ArrowLeft, Save, X } from 'lucide-react';
+import toast from 'react-hot-toast';
 import Navbar from '../../components/NavBar/Navbar';
 
 const EditProfile = () => {
@@ -35,11 +36,11 @@ const EditProfile = () => {
   };
 
   const handleSave = () => {
-    alert('Profile updated successfully!');
+    toast.success('Profile updated successfully!');
   };
 
   const handleCancel = () => {
-    alert('Changes discarded');
+    toast.info('Changes discarded');
   };
 
   return (
