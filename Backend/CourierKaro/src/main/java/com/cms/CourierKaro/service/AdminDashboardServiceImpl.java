@@ -45,7 +45,7 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
         return AdminStatsDTO.builder()
                 .totalUsers(userRepository.count())
                 .totalPartners(partnerRepository.count())
-                .activePartners(partnerRepository.countByStatus(PartnerStatus.ACTIVE))
+                .activePartners(partnerRepository.countByIsOnline(true))
                 .totalShipments(shipmentRepository.count())
                 .pendingShipments(shipmentRepository.countByStatus(Status.PENDING))
                 .inTransitShipments(shipmentRepository.countByStatus(Status.IN_TRANSIT))
