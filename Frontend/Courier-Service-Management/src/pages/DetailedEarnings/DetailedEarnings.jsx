@@ -10,7 +10,7 @@ export default function DetailedEarnings() {
   const [earnings, setEarnings] = useState(null);
   const [error, setError] = useState(null);
 
-  const adminUser = { name: "Amit" };
+
 
   useEffect(() => {
     let mounted = true;
@@ -60,7 +60,7 @@ export default function DetailedEarnings() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar user={adminUser} />
+      <Navbar />
 
       <div className="max-w-7xl mx-auto px-6 py-6">
         {/* Header with Back Button */}

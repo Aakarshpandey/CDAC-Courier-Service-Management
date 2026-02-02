@@ -1,25 +1,28 @@
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { setUser } from '../../store/userSlice';
 
 function AuthCallback() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    const token = searchParams.get('token');
     const redirect = searchParams.get('redirect');
     const role = searchParams.get('role');
+    const name = searchParams.get('name');
+    const email = searchParams.get('email');
 
-    if (token) {
-      localStorage.setItem('token', token);
-      localStorage.setItem('role', role);
+    if (role) {
+      // JWT is already set as HttpOnly cookie by the backend redirect
+      dispatch(setUser({ name: name || null, email: email || null, role }));
       navigate(redirect || '/user-dashboard', { replace: true });
     } else {
       navigate('/login', { replace: true });
     }
-  }, [searchParams, navigate]);
+  }, [searchParams, navigate, dispatch]);
 
-  // Minimal spinner - users will barely see this
   return <div>...</div>;
 }
 

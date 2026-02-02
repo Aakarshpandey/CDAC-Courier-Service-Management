@@ -26,12 +26,12 @@ import java.util.Arrays;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-    //
-    // private final CustomOAuth2UserService customOAuth2UserService;
-    //
-    // private final OAuth2SuccessHandler oAuthSuccessHandler;
-    // @Autowired
-    // private JwtAuthenticationFilter jwtAuthenticationFilter;
+    
+     private final CustomOAuth2UserService customOAuth2UserService;
+    
+     private final OAuth2SuccessHandler oAuthSuccessHandler;
+     @Autowired
+     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
     AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
@@ -40,34 +40,37 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        // http
-        // .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-        // .csrf(csrf -> csrf.disable())
-        // .sessionManagement(session ->
-        // session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
-        // .authorizeHttpRequests(requests -> requests
-        // .requestMatchers("/login",
-        // "/register","/oauth2/**","/login/oauth2/**").permitAll()
-        // .anyRequest().authenticated())
-        // .oauth2Login(oauth->oauth
-        // .userInfoEndpoint(userInfo->userInfo
-        // .oidcUserService(customOAuth2UserService) )
-        // .successHandler(oAuthSuccessHandler))//redirects after successful login
-        // .httpBasic(httpBasic -> httpBasic.disable())
-        // .formLogin(formLogin -> formLogin.disable())
-        // .addFilterBefore(jwtAuthenticationFilter,
-        // UsernamePasswordAuthenticationFilter.class);
-        // return http.build();
-        http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(requests -> requests
-                        .anyRequest().permitAll())
-
-                .httpBasic(httpBasic -> httpBasic.disable())
-                .formLogin(formLogin -> formLogin.disable());
-
-        return http.build();
+    	 http
+         .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+         .csrf(csrf -> csrf.disable())
+         .sessionManagement(session ->
+         session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+         .authorizeHttpRequests(requests -> requests
+         .requestMatchers("/","/login",
+         "/register","/oauth2/**","/login/oauth2/**",
+         "/api/partners/register",
+         "/api/pricing/**","/api/vehicleTypes/**",
+         "/api/payments/**").permitAll()
+         .anyRequest().authenticated())
+         .oauth2Login(oauth->oauth
+         .userInfoEndpoint(userInfo->userInfo
+         .oidcUserService(customOAuth2UserService) )
+         .successHandler(oAuthSuccessHandler))//redirects after successful login
+         .httpBasic(httpBasic -> httpBasic.disable())
+         .formLogin(formLogin -> formLogin.disable())
+         .addFilterBefore(jwtAuthenticationFilter,
+         UsernamePasswordAuthenticationFilter.class);
+         return http.build();
+//        http
+//                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+//                .csrf(csrf -> csrf.disable())
+//                .authorizeHttpRequests(requests -> requests
+//                        .anyRequest().permitAll())
+//
+//                .httpBasic(httpBasic -> httpBasic.disable())
+//                .formLogin(formLogin -> formLogin.disable());
+//
+//        return http.build();
     }
 
     @Bean
@@ -78,7 +81,7 @@ public class SecurityConfig {
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
-        configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
+        configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type", "Set-Cookie"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

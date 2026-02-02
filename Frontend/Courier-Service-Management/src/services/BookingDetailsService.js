@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+import api from './api';
 
 // Constants
 export const packageTypes = [
@@ -117,7 +115,7 @@ export const buildShipmentRequest = (formData, pickupAddress, deliveryAddress, d
 
 // Create shipment API call
 export const createShipment = async (shipmentRequest) => {
-  const response = await axios.post(`${API_URL}/api/shipments/send`, shipmentRequest);
+  const response = await api.post("/api/shipments/send", shipmentRequest);
   return response.data;
 };
 

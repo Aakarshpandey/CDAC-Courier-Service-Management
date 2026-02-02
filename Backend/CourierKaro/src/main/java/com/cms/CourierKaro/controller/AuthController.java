@@ -12,6 +12,8 @@ import com.cms.CourierKaro.response.LoginResponse;
 import com.cms.CourierKaro.response.UserResp;
 import com.cms.CourierKaro.service.UserService;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @CrossOrigin
@@ -29,9 +31,18 @@ public class AuthController {
 	}
 	
 	@PostMapping("/login")
-	public ResponseEntity<?> userLogin(@RequestBody UserLoginDTO userLoginDTO){
+	public ResponseEntity<?> userLogin(@RequestBody UserLoginDTO userLoginDTO, HttpServletResponse httpResponse){
 		LoginResponse response = userService.login(userLoginDTO);
 		System.out.println(response);
+
+		if ("SUCCESS".equals(response.getStatus()) && response.getToken() != null) {
+			Cookie cookie = new Cookie("jwt", response.getToken());
+			cookie.setHttpOnly(true);
+			cookie.setPath("/");
+			cookie.setMaxAge(userLoginDTO.isRememberMe() ? 7 * 24 * 60 * 60 : 24 * 60 * 60);
+			httpResponse.addCookie(cookie);
+		}
+
 		return ResponseEntity.ok(response);
 	}
 }

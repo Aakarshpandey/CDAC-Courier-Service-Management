@@ -16,15 +16,10 @@ export default function PageDashboard() {
   const [onlineUpdating, setOnlineUpdating] = useState(false);
 
   const fetchPartnerData = async () => {
-      try {
-        setLoading(true);
-        const token = localStorage.getItem("authToken");
-        if (!token) {
-          console.error("No auth token found");
-          setLoading(false);
-          return;
-        }
+      
 
+        try {
+        setLoading(true);
         const [profileResponse, statsResponse] = await Promise.allSettled([
           getPartnerProfile(),
           getPartnerDashboardStats()
@@ -106,9 +101,7 @@ export default function PageDashboard() {
     { id: "profile", label: "Profile" },
   ];
 
-  const user = partnerProfile 
-    ? { name: welcomeName, email: partnerProfile.email, profilePhotoUrl: partnerProfile.profilePhotoUrl }
-    : { name: "Partner" };
+const profilePhotoUrl = partnerProfile?.profilePhotoUrl || null;
 
   // Calculate number of visible cards for responsive grid
   const visibleCardsCount = dashboardStats?.totalDistanceKm != null && dashboardStats.totalDistanceKm > 0 ? 5 : 4;
@@ -116,7 +109,7 @@ export default function PageDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Navbar user={user} />
+      <Navbar profileImage={profilePhotoUrl} />
 
       <div className="max-w-7xl mx-auto px-6 py-6">
         {/* Welcome Section */}

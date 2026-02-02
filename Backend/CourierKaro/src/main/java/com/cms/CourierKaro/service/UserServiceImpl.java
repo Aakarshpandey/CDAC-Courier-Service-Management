@@ -1,6 +1,7 @@
 package com.cms.CourierKaro.service;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.cms.CourierKaro.dto.UserLoginDTO;
@@ -27,7 +28,7 @@ public class UserServiceImpl implements UserService {
 	private final UserRepository userRepository;
 	private final PartnerRepository partnerRepository;
 	private final ModelMapper modelMapper;
-	// private final PasswordEncoder passwordEncoder;
+	 private final PasswordEncoder passwordEncoder;
 	private final JwtTokenProvider jwtTokenProvider;
 
 	@Override
@@ -45,8 +46,8 @@ public class UserServiceImpl implements UserService {
 		}
 
 		User user = modelMapper.map(dto, User.class);
-		// user.setPassword(passwordEncoder.encode(dto.getPassword()));
-		user.setPassword(dto.getPassword());
+		 user.setPassword(passwordEncoder.encode(dto.getPassword()));
+//		user.setPassword(dto.getPassword());
 		user.setRole(role);
 
 		userRepository.save(user);

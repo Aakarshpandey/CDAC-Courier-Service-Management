@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Package, MapPin, User, Phone, Clock, Truck, CreditCard, Loader, CheckCircle, Circle, XCircle } from 'lucide-react';
-import axios from 'axios';
+import api from '../../services/api';
 import toast from 'react-hot-toast';
 import Navbar from '../../components/NavBar/Navbar';
 
 const OrderDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const user = { name: "Rohan Sharma" };
+  
 
   const [shipment, setShipment] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -22,8 +22,8 @@ const OrderDetails = () => {
   const fetchShipmentDetails = async () => {
     setIsLoading(true);
     try {
-      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
-      const response = await axios.get(`${API_URL}/api/shipments/${id}`);
+      
+      const response = await api.get(`/api/shipments/${id}`);
       setShipment(response.data);
       setError(null);
     } catch (err) {
@@ -41,8 +41,7 @@ const OrderDetails = () => {
 
     setIsCancelling(true);
     try {
-      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
-      await axios.put(`${API_URL}/api/shipments/${id}`);
+      await api.put(`/api/shipments/${id}`);
       toast.success('Order cancelled successfully');
       fetchShipmentDetails();
     } catch (err) {
@@ -104,7 +103,7 @@ const OrderDetails = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navbar user={user} />
+        <Navbar />
         <div className="flex items-center justify-center py-32">
           <Loader className="animate-spin text-blue-600" size={48} />
         </div>
@@ -115,7 +114,7 @@ const OrderDetails = () => {
   if (error || !shipment) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navbar user={user} />
+        <Navbar />
         <div className="max-w-4xl mx-auto px-6 py-8">
           <div className="text-center py-16">
             <Package className="mx-auto text-gray-400 mb-4" size={64} />
@@ -137,7 +136,7 @@ const OrderDetails = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar user={user} />
+      <Navbar />
 
       <div className="max-w-4xl mx-auto px-6 py-8">
        
