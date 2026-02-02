@@ -5,7 +5,9 @@ COPY package*.json ./
 RUN npm install
 COPY . .
 # Accept build argument for API URL
-ARG VITE_API_URL=http://192.168.49.2:31966
+# For EKS with nginx proxy (ClusterIP backend): use /api
+# To revert to direct backend access: use http://backend-service-url:port
+ARG VITE_API_URL=/api
 ENV VITE_API_URL=${VITE_API_URL}
 RUN npm run build
 

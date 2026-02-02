@@ -10,6 +10,8 @@ import com.cms.CourierKaro.dto.UserRegisterDTO;
 import com.cms.CourierKaro.entity.Partner;
 import com.cms.CourierKaro.entity.Role;
 import com.cms.CourierKaro.entity.User;
+import com.cms.CourierKaro.exception.ConflictException;
+import com.cms.CourierKaro.exception.InternalServerException;
 import com.cms.CourierKaro.repository.PartnerRepository;
 import com.cms.CourierKaro.repository.UserRepository;
 import com.cms.CourierKaro.response.LoginResponse;
@@ -35,13 +37,13 @@ public class UserServiceImpl implements UserService {
 
 		System.out.println(dto);
 		if (!dto.getPassword().equals(dto.getConfirmPassword())) {
-			return new UserResp("Password does not match", "FAILED");
+			throw new  InternalServerException("Password does not match");
 		}
 
 		Role role = Role.ROLE_USER;
 
 		if (userRepository.existsByEmailAndRole(dto.getEmail(), role)) {
-			return new UserResp("Email already registered", "EMAIL_EXIST");
+			throw new ConflictException("Email","", dto.getEmail());
 		}
 
 		User user = modelMapper.map(dto, User.class);
