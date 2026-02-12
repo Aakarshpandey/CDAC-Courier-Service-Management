@@ -23,7 +23,7 @@ export async function getAllOrders() {
 
 export async function submitRating(shipmentId, rating, review) {
     try {
-        const response = await api.post("http://localhost:8080/api/ratings", {
+        const response = await api.post("/api/ratings", {
             shipmentId,
             rating,
             review
