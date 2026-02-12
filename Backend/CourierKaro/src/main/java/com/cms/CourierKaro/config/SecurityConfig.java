@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -47,11 +48,39 @@ public class SecurityConfig {
          session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
          .authorizeHttpRequests(requests -> requests
          .requestMatchers("/","/login",
-         "/register","/oauth2/**","/login/oauth2/**",
-         "/api/partners/register",
-         "/api/pricing/**","/api/vehicleTypes/**",
-         "/api/payments/**").permitAll()
+         "/register","/oauth2/**","/login/oauth2/**").permitAll()
+         .requestMatchers("/api/partners/register").permitAll()
+         .requestMatchers("/api/pricing/**", "/api/vehicleTypes/**",
+                         "/api/payments/**").permitAll()
+         .requestMatchers(HttpMethod.GET, "/api/partners/*/ratings").permitAll()
+
+         // Admin endpoints
+         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+         .requestMatchers("/api/partners/applications").hasRole("ADMIN")
+         .requestMatchers("/api/partners/approve/**").hasRole("ADMIN")
+         .requestMatchers("/api/partners/reject/**").hasRole("ADMIN")
+
+         // Partner endpoints
+         .requestMatchers("/api/partners/profile").hasRole("PARTNER")
+         .requestMatchers("/api/partners/dashboard/**").hasRole("PARTNER")
+         .requestMatchers("/api/partners/online-status").hasRole("PARTNER")
+         .requestMatchers("/api/partners/available-orders").hasRole("PARTNER")
+         .requestMatchers("/api/partners/payouts").hasRole("PARTNER")
+         .requestMatchers("/api/partners/transfer-earnings").hasRole("PARTNER")
+         .requestMatchers("/api/partners/earnings/**").hasRole("PARTNER")
+         .requestMatchers("/api/partners/accept-order/**").hasRole("PARTNER")
+         .requestMatchers("/api/partners/profile-photo").hasRole("PARTNER")
+
+         // User endpoints
+         .requestMatchers("/api/shipments/**").hasRole("USER")
+         .requestMatchers(HttpMethod.POST, "/api/ratings").hasRole("USER")
+
+         // User profile - accessible by any authenticated user
+         .requestMatchers("/api/users/**").authenticated()
+
+         //other requests require authentication
          .anyRequest().authenticated())
+         
          .oauth2Login(oauth->oauth
          .userInfoEndpoint(userInfo->userInfo
          .oidcUserService(customOAuth2UserService) )
@@ -61,16 +90,6 @@ public class SecurityConfig {
          .addFilterBefore(jwtAuthenticationFilter,
          UsernamePasswordAuthenticationFilter.class);
          return http.build();
-//        http
-//                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-//                .csrf(csrf -> csrf.disable())
-//                .authorizeHttpRequests(requests -> requests
-//                        .anyRequest().permitAll())
-//
-//                .httpBasic(httpBasic -> httpBasic.disable())
-//                .formLogin(formLogin -> formLogin.disable());
-//
-//        return http.build();
     }
 
     @Bean
