@@ -1,6 +1,6 @@
 # CDAC-Courier-Service-Management
 # 🚚 Courier Service Management  
-**A full-stack courier booking and tracking system (Development Phase)**
+**A full-stack courier booking and tracking system**
 
 ---
 
